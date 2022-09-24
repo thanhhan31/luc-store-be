@@ -1,0 +1,52 @@
+{"properties": [
+  {
+    "name": "com.lucistore.lucistorebe.security.jwt.secret",
+    "type": "java.lang.String",
+    "description": "Config JWT secret"
+  },
+  {
+    "name": "com.lucistore.lucistorebe.security.jwt.expiration-ms",
+    "type": "java.lang.String",
+    "description": "Config JWT expiration in milliseconds"
+  },
+  {
+    "name": "com.lucistore.lucistorebe.service.cloudinary.cloud-name",
+    "type": "java.lang.String",
+    "description": "Cloud name of Cloudinary service"
+  },
+  {
+    "name": "com.lucistore.lucistorebe.service.cloudinary.api-key",
+    "type": "java.lang.String",
+    "description": "API key of Cloudinary service"
+  },
+  {
+    "name": "com.lucistore.lucistorebe.service.cloudinary.api-secret",
+    "type": "java.lang.String",
+    "description": "API secret of Cloudinary service"
+  },
+  {
+    "name": "com.lucistore.lucistorebe.policy.default-page-size",
+    "type": "java.lang.String",
+    "description": "Set default page size for paging"
+  },
+  {
+    "name": "com.lucistore.lucistorebe.policy.min-allowed-product-image",
+    "type": "java.lang.String",
+    "description": "Set minimum allowed of product image"
+  },
+  {
+    "name": "com.lucistore.lucistorebe.policy.max-allowed-product-image",
+    "type": "java.lang.String",
+    "description": "Set maximum allowed of product image"
+  },
+  {
+    "name": "com.lucistore.lucistorebe.policy.min-allowed-product-variation",
+    "type": "java.lang.String",
+    "description": "Set minimum allowed of product variation"
+  },
+  {
+    "name": "com.lucistore.lucistorebe.policy.minimum-password-length",
+    "type": "java.lang.String",
+    "description": "Set minimum password length"
+  }
+]}

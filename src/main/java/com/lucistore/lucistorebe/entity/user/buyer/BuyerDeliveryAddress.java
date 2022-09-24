@@ -7,6 +7,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import com.lucistore.lucistorebe.entity.address.AddressWard;
@@ -22,7 +24,8 @@ public class BuyerDeliveryAddress {
 	@Column(name = "id_buyer")
 	private Long idBuyer;
 	
-	@Column(name = "id_address_ward")
+	@ManyToOne
+	@JoinColumn(name = "id_address_ward")
 	private AddressWard addressWard;
 	
 	@Column(name = "adress_detail")

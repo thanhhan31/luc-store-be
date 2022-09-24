@@ -10,28 +10,41 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 import com.lucistore.lucistorebe.utility.ERole;
+import com.lucistore.lucistorebe.utility.EUserStatus;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter @Setter
 @Entity
 @Table(name = "user")
-public class User {
+public class User implements UserInfo {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@Column(name = "email")
+	@Column(name = "email", unique = true)
 	private String email;
 	
 	@Column(name = "password")
 	private String password;
 	
+	@Column(name = "user_name", unique = true)
+	private String username;
 	
-	@Column(name = "user_name")
-	private String userName;
-	
-	@Column(name = "phone")
+	@Column(name = "phone", unique = true)
 	private String phone;
 	
 	@Column(name = "role")
 	@Enumerated(EnumType.ORDINAL)
 	private ERole role;
+	
+	@Column(name = "status")
+	@Enumerated(EnumType.ORDINAL)
+	private EUserStatus status;
+
+	@Override
+	public boolean isActive() {
+		return status == EUserStatus.ACTIVE;
+	}
 }

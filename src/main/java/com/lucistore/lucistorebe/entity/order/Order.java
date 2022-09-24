@@ -18,7 +18,7 @@ import com.lucistore.lucistorebe.entity.user.buyer.BuyerDeliveryAddress;
 import com.lucistore.lucistorebe.utility.EOrderStatus;
 
 @Entity
-@Table(name = "order")
+@Table(name = "order_")
 public class Order {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

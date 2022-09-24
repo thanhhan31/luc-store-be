@@ -7,9 +7,12 @@ import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
+import com.lucistore.lucistorebe.utility.ERole;
+import com.lucistore.lucistorebe.utility.EUserStatus;
+
 @Entity
 @Table(name = "sale_admin")
-public class SaleAdmin {
+public class SaleAdmin implements UserInfo {
 	@Id
 	@Column(name="id", updatable=false, unique=true)
 	private Long id;
@@ -20,4 +23,24 @@ public class SaleAdmin {
 	
 	@Column(name = "access_level_control")
 	private String accessLevelControl;
+
+	@Override
+	public String getUsername() {
+		return user.getUsername();
+	}
+
+	@Override
+	public String getPassword() {
+		return user.getPassword();
+	}
+	
+	@Override
+	public ERole getRole() {
+		return user.getRole();
+	}
+
+	@Override
+	public boolean isActive() {
+		return user.getStatus() == EUserStatus.ACTIVE;
+	}
 }
