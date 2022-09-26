@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"path": "D:/Code/Front-end/html/shopee"
+		},
+		{
+			"path": "../../../../../../../../code/Reactjs/tiktok"
+		},
+		{
+			"path": "../../../../../../../../code/Reactjs/todolist"
+		},
+		{
+			"path": "../../../../../../.."
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "Reactjs"
+	}
+}

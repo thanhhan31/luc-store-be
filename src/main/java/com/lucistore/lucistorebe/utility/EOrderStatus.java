@@ -1,7 +1,10 @@
 package com.lucistore.lucistorebe.utility;
 
 public enum EOrderStatus {
-	ADMIN,
-	SALE_ADMIN,
-	BUYER
+	WAITFOR_PAYMENT,
+	WAITFOR_CONFIRM,
+	WAITFOR_SEND,
+	WAITFOR_DELIVERY,
+	DELIVERED,
+	CANCELLED,
 }
