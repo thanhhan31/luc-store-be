@@ -7,5 +7,9 @@ import com.lucistore.lucistorebe.entity.user.buyer.Buyer;
 
 @Repository
 public interface BuyerRepo extends JpaRepository<Buyer, Long> {
+	Boolean existsByUser_Username(String username);
+
+	Boolean existsByUser_Email(String email);
 	
+	Boolean existsByUser_Phone(String phone);
 }

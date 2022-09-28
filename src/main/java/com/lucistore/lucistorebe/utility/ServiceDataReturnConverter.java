@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.lucistore.lucistorebe.controller.payload.response.DataResponse;
+import com.lucistore.lucistorebe.controller.payload.response.ListResponse;
 import com.lucistore.lucistorebe.controller.payload.response.ListWithPagingResponse;
 
 @Service
@@ -17,6 +18,10 @@ public class ServiceDataReturnConverter {
 	
 	public <T, V> DataResponse<V> convertToDataResponse(T src, Class<V> cls) {
 		return new DataResponse<>(mapper.map(src, cls));
+	}
+	
+	public <T, V> ListResponse<V> convertToListResponse(List<T> src, Class<V> cls) {
+		return new ListResponse<>(src.stream().map(p -> mapper.map(p, cls)).collect(Collectors.toList()));
 	}
 	
 	public <T, V> ListWithPagingResponse<V> convertToListResponse(List<T> src, Class<V> cls, Page page) {

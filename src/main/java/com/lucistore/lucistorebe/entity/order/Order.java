@@ -1,6 +1,7 @@
 package com.lucistore.lucistorebe.entity.order;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,10 +14,18 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.lucistore.lucistorebe.entity.product.ProductCategory;
+import com.lucistore.lucistorebe.entity.product.ProductVariation;
 import com.lucistore.lucistorebe.entity.user.buyer.Buyer;
 import com.lucistore.lucistorebe.entity.user.buyer.BuyerDeliveryAddress;
 import com.lucistore.lucistorebe.utility.EOrderStatus;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter @Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "order_")
 public class Order {

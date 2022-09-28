@@ -13,9 +13,11 @@ import com.lucistore.lucistorebe.utility.ERole;
 import com.lucistore.lucistorebe.utility.EUserStatus;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter @Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "user")
 public class User implements UserInfo {
@@ -28,6 +30,9 @@ public class User implements UserInfo {
 	
 	@Column(name = "password")
 	private String password;
+	
+	@Column(name = "full_name")
+	private String fullname;
 	
 	@Column(name = "user_name", unique = true)
 	private String username;
@@ -46,5 +51,14 @@ public class User implements UserInfo {
 	@Override
 	public boolean isActive() {
 		return status == EUserStatus.ACTIVE;
+	}
+	
+	public User(String email, String password, String username, String fullname, ERole role, EUserStatus status) {
+		this.email = email;
+		this.password = password;
+		this.username = username;
+		this.fullname = fullname;
+		this.role = role;
+		this.status = status;
 	}
 }

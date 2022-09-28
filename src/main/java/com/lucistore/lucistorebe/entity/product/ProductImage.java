@@ -11,6 +11,12 @@ import javax.persistence.Table;
 
 import com.lucistore.lucistorebe.entity.MediaResource;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter @Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "product_image")
 public class ProductImage {

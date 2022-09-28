@@ -10,6 +10,12 @@ import javax.persistence.Table;
 import com.lucistore.lucistorebe.utility.ERole;
 import com.lucistore.lucistorebe.utility.EUserStatus;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter @Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "sale_admin")
 public class SaleAdmin implements UserInfo {
@@ -18,7 +24,7 @@ public class SaleAdmin implements UserInfo {
 	private Long id;
 	
 	@OneToOne(optional = false)
-	@PrimaryKeyJoinColumn(name = "id")
+	@PrimaryKeyJoinColumn(name = "id", referencedColumnName = "id")
 	private User user;
 	
 	@Column(name = "access_level_control")

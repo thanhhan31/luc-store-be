@@ -1,6 +1,7 @@
 package com.lucistore.lucistorebe.entity.product;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,6 +14,12 @@ import javax.persistence.Table;
 
 import com.lucistore.lucistorebe.entity.user.User;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter @Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "product_inventory")
 public class ProductInventory {

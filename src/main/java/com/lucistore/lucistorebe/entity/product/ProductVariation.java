@@ -13,6 +13,12 @@ import javax.persistence.Table;
 
 import com.lucistore.lucistorebe.utility.EProductVariationStatus;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter @Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "product_variation")
 public class ProductVariation {
@@ -24,8 +30,8 @@ public class ProductVariation {
 	@JoinColumn(name = "id_product")
 	private Product product;
 	
-	@Column(name = "name")
-	private String name;
+	@Column(name = "variation_name")
+	private String variationName;
 	
 	@Column(name = "price")
 	private Long price;
@@ -39,4 +45,26 @@ public class ProductVariation {
 	@Column(name = "status")
 	@Enumerated(EnumType.ORDINAL)
 	private EProductVariationStatus status;
+	
+	public ProductVariation(Product product, String variationName, Long price, Long availableQuantity,
+			EProductVariationStatus status) {
+		super();
+		this.product = product;
+		this.variationName = variationName;
+		this.price = price;
+		this.availableQuantity = availableQuantity;
+		this.status = status;
+	}
+
+	public ProductVariation(Product product, String variationName, Long price, Long availableQuantity, Integer discount,
+			EProductVariationStatus status) {
+		this(product, variationName, price, availableQuantity, status);
+		
+		if (discount == null) {
+			this.discount = 0;
+		}
+		else {
+			this.discount = discount;
+		}
+	}
 }

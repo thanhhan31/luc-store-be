@@ -10,9 +10,11 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter @Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "media_resource")
 public class MediaResource {
