@@ -16,7 +16,7 @@ import com.lucistore.lucistorebe.service.ProductCategoryService;
 
 @RestController
 @RequestMapping("/api/admin/product-category")
-public class AdminProductCategoryController {
+public class AdminProductCategoryManageController {
 	@Autowired
 	ProductCategoryService productCategoryService;
 	

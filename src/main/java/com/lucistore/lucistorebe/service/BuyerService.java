@@ -15,7 +15,8 @@ import com.lucistore.lucistorebe.entity.user.User;
 import com.lucistore.lucistorebe.entity.user.buyer.Buyer;
 import com.lucistore.lucistorebe.repo.BuyerRepo;
 import com.lucistore.lucistorebe.repo.UserRepo;
-import com.lucistore.lucistorebe.utility.ERole;
+import com.lucistore.lucistorebe.repo.UserRoleRepo;
+import com.lucistore.lucistorebe.utility.EUserRole;
 import com.lucistore.lucistorebe.utility.EUserStatus;
 import com.lucistore.lucistorebe.utility.ServiceDataReturnConverter;
 
@@ -26,6 +27,9 @@ public class BuyerService {
 	
 	@Autowired
 	UserRepo userRepo;
+	
+	@Autowired
+	UserRoleRepo userRoleRepo;
 	
 	@Autowired
 	PasswordEncoder passwordEncoder;
@@ -43,7 +47,7 @@ public class BuyerService {
 	
 	public DataResponse<BuyerDTO> create(SignupUsernamePasswordRequest data) {
 		validateSignupData(data);
-		
+
 		Buyer buyer = new Buyer(
 				userRepo.save(
 					new User(
@@ -51,9 +55,10 @@ public class BuyerService {
 						passwordEncoder.encode(data.getPassword()), 
 						data.getUsername(), 
 						data.getFullname(), 
-						ERole.BUYER, 
-						EUserStatus.ACTIVE)
-					),
+						userRoleRepo.getReferenceById(EUserRole.BUYER.toString()),
+						EUserStatus.ACTIVE
+					)
+				),
 				data.getGender(),
 				false,
 				false,

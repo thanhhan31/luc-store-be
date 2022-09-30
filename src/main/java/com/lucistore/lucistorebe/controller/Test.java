@@ -5,12 +5,14 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lucistore.lucistorebe.entity.product.ProductCategory;
 import com.lucistore.lucistorebe.repo.ProductCategoryRepo;
+import com.lucistore.lucistorebe.utility.EAdministrativePermission;
 import com.lucistore.lucistorebe.utility.PlatformPolicyParameter;
 import com.lucistore.lucistorebe.utility.jwt.JwtUtil;
 
@@ -23,6 +25,7 @@ public class Test {
 	@Autowired
 	ProductCategoryRepo productCategoryRepo;
 	
+	@PreAuthorize("hasAuthority('ALL')")
 	@GetMapping
 	public String test() {
 		return String.format("%d %d %d %d", 

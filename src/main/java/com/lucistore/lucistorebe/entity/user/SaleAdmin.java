@@ -7,7 +7,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
-import com.lucistore.lucistorebe.utility.ERole;
 import com.lucistore.lucistorebe.utility.EUserStatus;
 
 import lombok.Getter;
@@ -26,9 +25,6 @@ public class SaleAdmin implements UserInfo {
 	@OneToOne(optional = false)
 	@PrimaryKeyJoinColumn(name = "id", referencedColumnName = "id")
 	private User user;
-	
-	@Column(name = "access_level_control")
-	private String accessLevelControl;
 
 	@Override
 	public String getUsername() {
@@ -41,7 +37,7 @@ public class SaleAdmin implements UserInfo {
 	}
 	
 	@Override
-	public ERole getRole() {
+	public UserRole getRole() {
 		return user.getRole();
 	}
 

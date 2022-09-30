@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.lucistore.lucistorebe.entity.user.SaleAdmin;
 import com.lucistore.lucistorebe.entity.user.User;
@@ -14,6 +15,7 @@ import com.lucistore.lucistorebe.entity.user.buyer.Buyer;
 import com.lucistore.lucistorebe.repo.BuyerRepo;
 import com.lucistore.lucistorebe.repo.SaleAdminRepo;
 import com.lucistore.lucistorebe.repo.UserRepo;
+import com.lucistore.lucistorebe.utility.EUserRole;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
@@ -30,6 +32,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	private static final Pattern EMAIL_PATTERN = Pattern.compile("^(.+)@(\\\\S+)$");
 	
 	@Override
+	@Transactional
 	public UserDetails loadUserByUsername(String loginKey) throws UsernameNotFoundException {
 		User user = null;
 		if (isPhoneNumber(loginKey)) {
@@ -44,7 +47,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		
 		if (user != null) {
 			Long uid = user.getId();
-			switch (user.getRole()) {
+			
+			switch (EUserRole.valueOf(user.getRole().getName())) {
 			case ADMIN: {
 				return UserDetailsImpl.build(user);
 			}

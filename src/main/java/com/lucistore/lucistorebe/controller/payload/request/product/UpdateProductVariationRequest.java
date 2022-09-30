@@ -8,7 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
-public class EditProductVariationRequest {	
+public class UpdateProductVariationRequest {	
 	
 	private String variationName;
 	

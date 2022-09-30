@@ -96,6 +96,12 @@
 			<artifactId>springdoc-openapi-security</artifactId>
 			<version>1.6.11</version>
 		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-jpamodelgen</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
 
 
 

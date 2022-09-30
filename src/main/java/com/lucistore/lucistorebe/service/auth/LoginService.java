@@ -20,7 +20,7 @@ import com.lucistore.lucistorebe.entity.user.buyer.Buyer;
 import com.lucistore.lucistorebe.repo.BuyerRepo;
 import com.lucistore.lucistorebe.repo.SaleAdminRepo;
 import com.lucistore.lucistorebe.repo.UserRepo;
-import com.lucistore.lucistorebe.utility.ERole;
+import com.lucistore.lucistorebe.utility.EUserRole;
 import com.lucistore.lucistorebe.utility.jwt.JwtUtil;
 
 @Service
@@ -43,31 +43,31 @@ public class LoginService {
 	@Autowired
 	SaleAdminRepo saleAdminRepo;
 	
-	public LoginResponse<?> authenticateWithUsernamePassword(String username, String password, ERole requestedRole) {
+	public LoginResponse<?> authenticateWithUsernamePassword(String username, String password, EUserRole requestedRole) {
 		Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
 		SecurityContextHolder.getContext().setAuthentication(auth);
 		
 		UserDetailsImpl userDetails = (UserDetailsImpl)auth.getPrincipal();
 		String token = jwtUtil.generateJwtToken(username);
 		
-		ERole r = userDetails.getUserInfo().getRole();
+		EUserRole r = EUserRole.valueOf(userDetails.getUserInfo().getRole().getName());
 		
 		if (!r.equals(requestedRole))
 			throw new LoginException("Username or password is invalid");
 		
-		if (r == ERole.ADMIN) {
+		if (r == EUserRole.ADMIN) {
 			return new LoginResponse<>(
 					token, 
 					mapper.map((User)userDetails.getUserInfo(), UserDTO.class)
 				);
 		}
-		else if (r == ERole.SALE_ADMIN) {
+		else if (r == EUserRole.SALE_ADMIN) {
 			return new LoginResponse<>(
 					token, 
 					mapper.map((SaleAdmin)userDetails.getUserInfo(), SaleAdminDTO.class)
 				);
 		}
-		else if (r == ERole.BUYER) {
+		else if (r == EUserRole.BUYER) {
 			return new LoginResponse<>(
 					token, 
 					mapper.map((Buyer)userDetails.getUserInfo(), BuyerDTO.class)

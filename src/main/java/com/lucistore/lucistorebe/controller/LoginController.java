@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.lucistore.lucistorebe.controller.payload.request.LoginKeyPasswordRequest;
 import com.lucistore.lucistorebe.controller.payload.response.LoginResponse;
 import com.lucistore.lucistorebe.service.auth.LoginService;
-import com.lucistore.lucistorebe.utility.ERole;
+import com.lucistore.lucistorebe.utility.EUserRole;
 
 @RestController
 @RequestMapping("/api")
@@ -20,20 +20,20 @@ public class LoginController {
 	
 	@PostMapping("/admin/login")
 	private ResponseEntity<?> admin(@RequestBody LoginKeyPasswordRequest body) {
-		return ResponseEntity.ok(login(body, ERole.ADMIN));
+		return ResponseEntity.ok(login(body, EUserRole.ADMIN));
 	}
 	
 	@PostMapping("/sale-admin/login")
 	private ResponseEntity<?> saleAdmin(@RequestBody LoginKeyPasswordRequest body) {
-		return ResponseEntity.ok(login(body, ERole.SALE_ADMIN));
+		return ResponseEntity.ok(login(body, EUserRole.SALE_ADMIN));
 	}
 	
 	@PostMapping("/buyer/login")
 	private ResponseEntity<?> buyer(@RequestBody LoginKeyPasswordRequest body) {
-		return ResponseEntity.ok(login(body, ERole.BUYER));
+		return ResponseEntity.ok(login(body, EUserRole.BUYER));
 	}
 	
-	private LoginResponse<?> login(LoginKeyPasswordRequest body, ERole r) {
+	private LoginResponse<?> login(LoginKeyPasswordRequest body, EUserRole r) {
 		return loginService.authenticateWithUsernamePassword(body.getLoginKey(), body.getPassword(), r);
 	}
 }

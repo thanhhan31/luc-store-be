@@ -9,6 +9,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.lucistore.lucistorebe.entity.user.UserInfo;
+import com.lucistore.lucistorebe.entity.user.UserRole;
+import com.lucistore.lucistorebe.utility.EAdministrativePermission;
+
 import lombok.Getter;
 
 @Getter
@@ -29,11 +32,18 @@ public class UserDetailsImpl implements UserDetails {
 	}
 	
 	public Collection<? extends GrantedAuthority> buildAuthority(UserInfo userInfo) {
+		UserRole role = userInfo.getRole();
 		List<GrantedAuthority> authorities = new ArrayList<>();
+		
 		authorities.add(new SimpleGrantedAuthority(
-				"ROLE_" + userInfo.getRole().toString()
-				)
-			);
+				"ROLE_" + role.getName()
+			)
+		);
+		
+		for (EAdministrativePermission permission : role.getPermissions()) {
+			authorities.add(new SimpleGrantedAuthority(permission.toString()));
+		}
+		
 		return authorities;
 	}
 

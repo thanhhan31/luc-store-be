@@ -1,6 +1,6 @@
 package com.lucistore.lucistorebe.utility;
 
-public enum ERole {
+public enum EUserRole {
 	ADMIN,
 	SALE_ADMIN,
 	BUYER

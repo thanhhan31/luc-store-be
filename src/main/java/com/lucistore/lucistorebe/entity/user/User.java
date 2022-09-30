@@ -7,9 +7,9 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import com.lucistore.lucistorebe.utility.ERole;
 import com.lucistore.lucistorebe.utility.EUserStatus;
 
 import lombok.Getter;
@@ -40,9 +40,8 @@ public class User implements UserInfo {
 	@Column(name = "phone", unique = true)
 	private String phone;
 	
-	@Column(name = "role")
-	@Enumerated(EnumType.ORDINAL)
-	private ERole role;
+	@ManyToOne(optional = false)
+	private UserRole role;
 	
 	@Column(name = "status")
 	@Enumerated(EnumType.ORDINAL)
@@ -53,7 +52,7 @@ public class User implements UserInfo {
 		return status == EUserStatus.ACTIVE;
 	}
 	
-	public User(String email, String password, String username, String fullname, ERole role, EUserStatus status) {
+	public User(String email, String password, String username, String fullname, UserRole role, EUserStatus status) {
 		this.email = email;
 		this.password = password;
 		this.username = username;

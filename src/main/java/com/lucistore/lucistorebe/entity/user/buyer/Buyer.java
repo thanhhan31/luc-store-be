@@ -9,24 +9,18 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.MapsId;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Parameter;
-
 import com.lucistore.lucistorebe.entity.MediaResource;
 import com.lucistore.lucistorebe.entity.user.User;
 import com.lucistore.lucistorebe.entity.user.UserInfo;
+import com.lucistore.lucistorebe.entity.user.UserRole;
 import com.lucistore.lucistorebe.utility.EGender;
-import com.lucistore.lucistorebe.utility.ERole;
 import com.lucistore.lucistorebe.utility.EUserStatus;
 
 import lombok.Getter;
@@ -83,7 +77,7 @@ public class Buyer implements UserInfo {
 	}
 
 	@Override
-	public ERole getRole() {
+	public UserRole getRole() {
 		return user.getRole();
 	}
 
