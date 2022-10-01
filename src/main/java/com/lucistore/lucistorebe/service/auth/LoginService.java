@@ -9,16 +9,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.lucistore.lucistorebe.config.login.UserDetailsImpl;
-import com.lucistore.lucistorebe.controller.advice.exception.LoginException;
 import com.lucistore.lucistorebe.controller.payload.dto.BuyerDTO;
-import com.lucistore.lucistorebe.controller.payload.dto.SaleAdminDTO;
 import com.lucistore.lucistorebe.controller.payload.dto.UserDTO;
 import com.lucistore.lucistorebe.controller.payload.response.LoginResponse;
-import com.lucistore.lucistorebe.entity.user.SaleAdmin;
 import com.lucistore.lucistorebe.entity.user.User;
 import com.lucistore.lucistorebe.entity.user.buyer.Buyer;
 import com.lucistore.lucistorebe.repo.BuyerRepo;
-import com.lucistore.lucistorebe.repo.SaleAdminRepo;
 import com.lucistore.lucistorebe.repo.UserRepo;
 import com.lucistore.lucistorebe.utility.EUserRole;
 import com.lucistore.lucistorebe.utility.jwt.JwtUtil;
@@ -40,40 +36,30 @@ public class LoginService {
 	@Autowired
 	BuyerRepo buyerRepo;
 	
-	@Autowired
-	SaleAdminRepo saleAdminRepo;
-	
 	public LoginResponse<?> authenticateWithUsernamePassword(String username, String password, EUserRole requestedRole) {
 		Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
 		SecurityContextHolder.getContext().setAuthentication(auth);
 		
+		@SuppressWarnings("rawtypes")
 		UserDetailsImpl userDetails = (UserDetailsImpl)auth.getPrincipal();
 		String token = jwtUtil.generateJwtToken(username);
 		
-		EUserRole r = EUserRole.valueOf(userDetails.getUserInfo().getRole().getName());
+		EUserRole r = EUserRole.valueOf(userDetails.getUser().getRole().getName());
 		
-		if (!r.equals(requestedRole))
-			throw new LoginException("Username or password is invalid");
-		
-		if (r == EUserRole.ADMIN) {
+		if (requestedRole.equals(EUserRole.BUYER) && requestedRole.equals(r)) { // buyer
 			return new LoginResponse<>(
 					token, 
-					mapper.map((User)userDetails.getUserInfo(), UserDTO.class)
+					mapper.map((Buyer)userDetails.getUser(), BuyerDTO.class)
 				);
 		}
-		else if (r == EUserRole.SALE_ADMIN) {
+		else if (requestedRole.equals(EUserRole.ADMIN) && !r.equals(EUserRole.BUYER)) {
 			return new LoginResponse<>(
 					token, 
-					mapper.map((SaleAdmin)userDetails.getUserInfo(), SaleAdminDTO.class)
+					mapper.map((User)userDetails.getUser(), UserDTO.class)
 				);
 		}
-		else if (r == EUserRole.BUYER) {
-			return new LoginResponse<>(
-					token, 
-					mapper.map((Buyer)userDetails.getUserInfo(), BuyerDTO.class)
-				);
+		else {
+			throw new IllegalArgumentException("Username or password is invalid");
 		}
-		else
-			throw new IllegalArgumentException("Unexpected role value: " + r);
 	}
 }

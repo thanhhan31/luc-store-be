@@ -16,9 +16,9 @@ import com.lucistore.lucistorebe.entity.product.Product;
 import com.lucistore.lucistorebe.entity.product.ProductVariation;
 import com.lucistore.lucistorebe.repo.ProductRepo;
 import com.lucistore.lucistorebe.repo.ProductVariationRepo;
+import com.lucistore.lucistorebe.service.util.ServiceUtils;
 import com.lucistore.lucistorebe.utility.EProductVariationStatus;
 import com.lucistore.lucistorebe.utility.PlatformPolicyParameter;
-import com.lucistore.lucistorebe.utility.ServiceDataReturnConverter;
 
 @Service
 public class ProductVariationService {
@@ -29,13 +29,13 @@ public class ProductVariationService {
 	ProductVariationRepo productVariationRepo;
 	
 	@Autowired
-	ServiceDataReturnConverter returnConverter;
+	ServiceUtils serviceUtils;
 	
 	public DataResponse<ProductVariationDTO> getById(Long id) {
 		ProductVariation variation = productVariationRepo.findById(id).orElseThrow(
 				() -> new InvalidInputDataException("No product category found with given id")
 			);
-		return returnConverter.convertToDataResponse(variation, ProductVariationDTO.class);
+		return serviceUtils.convertToDataResponse(variation, ProductVariationDTO.class);
 	}
 	
 	public DataResponse<ProductVariationDTO> create(Long idProduct, CreateProductVariationRequest data) {
@@ -51,7 +51,7 @@ public class ProductVariationService {
 				EProductVariationStatus.ENABLED
 			);
 		
-		return returnConverter.convertToDataResponse(productVariationRepo.save(variation), ProductVariationDTO.class);
+		return serviceUtils.convertToDataResponse(productVariationRepo.save(variation), ProductVariationDTO.class);
 	}
 	
 	public void create(Product p, List<CreateProductVariationRequest> data) {
@@ -107,6 +107,6 @@ public class ProductVariationService {
 			variation.setStatus(data.getStatus());
 		}
 		
-		return returnConverter.convertToDataResponse(productVariationRepo.save(variation), ProductVariationDTO.class);
+		return serviceUtils.convertToDataResponse(productVariationRepo.save(variation), ProductVariationDTO.class);
 	}
 }

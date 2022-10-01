@@ -10,28 +10,24 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.lucistore.lucistorebe.entity.user.UserInfo;
 import com.lucistore.lucistorebe.entity.user.UserRole;
-import com.lucistore.lucistorebe.utility.EAdministrativePermission;
+import com.lucistore.lucistorebe.utility.ERolePermission;
 
 import lombok.Getter;
 
 @Getter
-public class UserDetailsImpl implements UserDetails {
+public class UserDetailsImpl<T extends UserInfo> implements UserDetails {
 	private static final long serialVersionUID = -5162310979327931940L;
 	
-	private UserInfo userInfo;
+	private T user;
 	private Collection<? extends GrantedAuthority> authorities;
 
-	public UserDetailsImpl(UserInfo userInfo) {
+	public UserDetailsImpl(T userInfo) {
 		super();
-		this.userInfo = userInfo;
+		this.user = userInfo;
 		this.authorities = buildAuthority(userInfo);
 	}
 	
-	public static UserDetailsImpl build(UserInfo userInfo) {
-		return new UserDetailsImpl(userInfo);
-	}
-	
-	public Collection<? extends GrantedAuthority> buildAuthority(UserInfo userInfo) {
+	public Collection<? extends GrantedAuthority> buildAuthority(T userInfo) {
 		UserRole role = userInfo.getRole();
 		List<GrantedAuthority> authorities = new ArrayList<>();
 		
@@ -40,7 +36,7 @@ public class UserDetailsImpl implements UserDetails {
 			)
 		);
 		
-		for (EAdministrativePermission permission : role.getPermissions()) {
+		for (ERolePermission permission : role.getPermissions()) {
 			authorities.add(new SimpleGrantedAuthority(permission.toString()));
 		}
 		
@@ -49,12 +45,12 @@ public class UserDetailsImpl implements UserDetails {
 
 	@Override
 	public String getPassword() {
-		return userInfo.getPassword();
+		return user.getPassword();
 	}
 
 	@Override
 	public String getUsername() {
-		return userInfo.getUsername();
+		return user.getUsername();
 	}
 
 	@Override
@@ -64,7 +60,7 @@ public class UserDetailsImpl implements UserDetails {
 
 	@Override
 	public boolean isAccountNonLocked() {
-		return userInfo.isActive();
+		return user.isActive();
 	}
 
 	@Override
@@ -74,6 +70,6 @@ public class UserDetailsImpl implements UserDetails {
 
 	@Override
 	public boolean isEnabled() {
-		return userInfo.isActive();
+		return user.isActive();
 	}
 }

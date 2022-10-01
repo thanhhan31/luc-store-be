@@ -19,8 +19,8 @@ import com.lucistore.lucistorebe.entity.product.Product;
 import com.lucistore.lucistorebe.entity.product.ProductImage;
 import com.lucistore.lucistorebe.repo.ProductImageRepo;
 import com.lucistore.lucistorebe.repo.ProductRepo;
+import com.lucistore.lucistorebe.service.util.ServiceUtils;
 import com.lucistore.lucistorebe.utility.PlatformPolicyParameter;
-import com.lucistore.lucistorebe.utility.ServiceDataReturnConverter;
 
 @Service
 public class ProductImageService {
@@ -34,7 +34,7 @@ public class ProductImageService {
 	MediaResourceService mediaResourceService;
 	
 	@Autowired
-	ServiceDataReturnConverter returnConverter;
+	ServiceUtils serviceUtils;
 	
 	@Transactional
 	public ListResponse<ProductImageDTO> create(Long idProduct, List<MultipartFile> images) {
@@ -66,7 +66,7 @@ public class ProductImageService {
 			throw new CommonRuntimeException("Error occurred when trying to save product image");
 		}
 		
-		return returnConverter.convertToListResponse(pimgs, ProductImageDTO.class);
+		return serviceUtils.convertToListResponse(pimgs, ProductImageDTO.class);
 	}
 	
 	public void delete(Long idProduct, List<Long> idProductImages) {

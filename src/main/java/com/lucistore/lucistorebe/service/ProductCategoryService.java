@@ -12,8 +12,8 @@ import com.lucistore.lucistorebe.controller.payload.response.DataResponse;
 import com.lucistore.lucistorebe.controller.payload.response.ListResponse;
 import com.lucistore.lucistorebe.entity.product.ProductCategory;
 import com.lucistore.lucistorebe.repo.ProductCategoryRepo;
+import com.lucistore.lucistorebe.service.util.ServiceUtils;
 import com.lucistore.lucistorebe.utility.EProductCategoryStatus;
-import com.lucistore.lucistorebe.utility.ServiceDataReturnConverter;
 
 @Service
 public class ProductCategoryService {
@@ -21,19 +21,19 @@ public class ProductCategoryService {
 	ProductCategoryRepo productCategoryRepo;
 	
 	@Autowired
-	ServiceDataReturnConverter returnConverter;
+	ServiceUtils serviceUtils;
 	
 	public DataResponse<ProductCategoryDTO> get(Long id) {
 		ProductCategory category = productCategoryRepo.findById(id).orElseThrow(
 				() -> new InvalidInputDataException("No product category found with given id")
 			);
 		
-		return returnConverter.convertToDataResponse(category, ProductCategoryDTO.class);
+		return serviceUtils.convertToDataResponse(category, ProductCategoryDTO.class);
 		
 	}
 	
 	public ListResponse<ProductCategoryDTO> getAllRootCategories() {
-		return returnConverter.convertToListResponse(productCategoryRepo.findAllRootCategories(), ProductCategoryDTO.class);
+		return serviceUtils.convertToListResponse(productCategoryRepo.findAllRootCategories(), ProductCategoryDTO.class);
 	}
 	
 	public DataResponse<ProductCategoryDTO> create(CreateProductCategoryRequest data) {
@@ -53,7 +53,7 @@ public class ProductCategoryService {
 		
 		category.setStatus(EProductCategoryStatus.ACTIVE);
 		
-		return returnConverter.convertToDataResponse(productCategoryRepo.save(category), ProductCategoryDTO.class);
+		return serviceUtils.convertToDataResponse(productCategoryRepo.save(category), ProductCategoryDTO.class);
 	}
 	
 	public DataResponse<ProductCategoryDTO> update(Long id, UpdateProductCategoryRequest data) {
@@ -78,6 +78,6 @@ public class ProductCategoryService {
 			category.setStatus(data.getStatus());
 		}
 		
-		return returnConverter.convertToDataResponse(productCategoryRepo.save(category), ProductCategoryDTO.class);
+		return serviceUtils.convertToDataResponse(productCategoryRepo.save(category), ProductCategoryDTO.class);
 	}
 }

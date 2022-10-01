@@ -11,7 +11,7 @@ import com.lucistore.lucistorebe.utility.EProductStatus;
 import com.lucistore.lucistorebe.utility.ModelSorting;
 
 @RestController
-@RequestMapping("/api/admin/product-manage")
+@RequestMapping("/api/product")
 public class ProductController {
 	@Autowired
 	ProductService productService;

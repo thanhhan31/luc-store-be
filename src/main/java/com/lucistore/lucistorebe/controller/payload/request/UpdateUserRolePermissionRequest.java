@@ -4,7 +4,7 @@ import java.util.Set;
 
 import javax.validation.constraints.NotNull;
 
-import com.lucistore.lucistorebe.utility.EAdministrativePermission;
+import com.lucistore.lucistorebe.utility.ERolePermission;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,5 +14,5 @@ import lombok.Setter;
 @NoArgsConstructor
 public class UpdateUserRolePermissionRequest {
 	@NotNull
-	private Set<EAdministrativePermission> permissions;
+	private Set<ERolePermission> permissions;
 }

@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.lucistore.lucistorebe.entity.product.ProductCategory;
 import com.lucistore.lucistorebe.repo.ProductCategoryRepo;
-import com.lucistore.lucistorebe.utility.EAdministrativePermission;
+import com.lucistore.lucistorebe.utility.ERolePermission;
 import com.lucistore.lucistorebe.utility.PlatformPolicyParameter;
 import com.lucistore.lucistorebe.utility.jwt.JwtUtil;
 

@@ -11,7 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import com.lucistore.lucistorebe.utility.EAdministrativePermission;
+import com.lucistore.lucistorebe.utility.ERolePermission;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,8 +25,8 @@ public class UserRole {
 	@Id
 	private String name;
 	
-	@ElementCollection(targetClass = EAdministrativePermission.class)
+	@ElementCollection(targetClass = ERolePermission.class)
 	@CollectionTable(uniqueConstraints = @UniqueConstraint(columnNames = {"user_role_name", "permissions"} ))
 	@Enumerated(EnumType.STRING)
-	private Set<EAdministrativePermission> permissions;
+	private Set<ERolePermission> permissions;
 }

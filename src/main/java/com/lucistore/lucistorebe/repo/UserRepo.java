@@ -5,9 +5,10 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 
 import com.lucistore.lucistorebe.entity.user.User;
+import com.lucistore.lucistorebe.repo.custom.UserRepoCustom;
 
 @Repository
-public interface UserRepo extends JpaRepository<User, Long> {
+public interface UserRepo extends JpaRepository<User, Long>, UserRepoCustom {
 	@Nullable
 	User findByUsername(String username);
 	

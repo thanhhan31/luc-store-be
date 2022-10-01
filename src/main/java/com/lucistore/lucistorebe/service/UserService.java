@@ -1,19 +1,19 @@
 package com.lucistore.lucistorebe.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.lucistore.lucistorebe.controller.advice.exception.CommonRestException;
-import com.lucistore.lucistorebe.controller.payload.dto.BuyerDTO;
-import com.lucistore.lucistorebe.controller.payload.dto.UserListDTO;
-import com.lucistore.lucistorebe.controller.payload.response.DataResponse;
+import com.lucistore.lucistorebe.controller.payload.dto.UserDTO;
+import com.lucistore.lucistorebe.controller.payload.response.ListWithPagingResponse;
 import com.lucistore.lucistorebe.repo.BuyerRepo;
 import com.lucistore.lucistorebe.repo.UserRepo;
 import com.lucistore.lucistorebe.repo.UserRoleRepo;
+import com.lucistore.lucistorebe.service.util.ServiceUtils;
 import com.lucistore.lucistorebe.utility.EUserRole;
 import com.lucistore.lucistorebe.utility.EUserStatus;
-import com.lucistore.lucistorebe.utility.ServiceDataReturnConverter;
+import com.lucistore.lucistorebe.utility.Page;
 
 @Service
 public class UserService {
@@ -30,15 +30,18 @@ public class UserService {
 	PasswordEncoder passwordEncoder;
 	
 	@Autowired
-	ServiceDataReturnConverter dataReturnConverter;
+	ServiceUtils serviceUtils;
 	
-	public DataResponse<UserListDTO> getById(String searchFullname, String searchUsername, String searchEmail,
-			String searchPhone, EUserRole role, EUserStatus status) {
+	public ListWithPagingResponse<UserDTO> searchAdmin(String searchFullname, String searchUsername, String searchEmail,
+			String searchPhone, EUserRole role, EUserStatus status, Integer currentPage, Integer size, Sort sort) {
 		
-		return dataReturnConverter.convertToDataResponse(
-			buyerRepo.findById(id).orElseThrow(
-					() -> new CommonRestException("No user found with given id")
-				),
-			BuyerDTO.class);
+		int count = userRepo.searchAdminCount(searchFullname, searchUsername, searchEmail, searchPhone, role, status).intValue();
+		Page page = new Page(currentPage, size, count, sort);
+		
+		return serviceUtils.convertToListResponse(
+				userRepo.searchAdmin(searchFullname, searchUsername, searchEmail, searchPhone, role, status, page),
+				UserDTO.class, 
+				page
+			);
 	}
 }

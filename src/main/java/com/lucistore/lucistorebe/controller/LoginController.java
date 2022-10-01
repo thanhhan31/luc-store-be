@@ -23,11 +23,6 @@ public class LoginController {
 		return ResponseEntity.ok(login(body, EUserRole.ADMIN));
 	}
 	
-	@PostMapping("/sale-admin/login")
-	private ResponseEntity<?> saleAdmin(@RequestBody LoginKeyPasswordRequest body) {
-		return ResponseEntity.ok(login(body, EUserRole.SALE_ADMIN));
-	}
-	
 	@PostMapping("/buyer/login")
 	private ResponseEntity<?> buyer(@RequestBody LoginKeyPasswordRequest body) {
 		return ResponseEntity.ok(login(body, EUserRole.BUYER));

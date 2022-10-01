@@ -23,6 +23,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.lucistore.lucistorebe.entity.MediaResource;
+import com.lucistore.lucistorebe.entity.UpdatableAvatar;
 import com.lucistore.lucistorebe.utility.EProductStatus;
 
 import lombok.Getter;
@@ -34,7 +35,7 @@ import lombok.Setter;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "product")
-public class Product {
+public class Product implements UpdatableAvatar {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;

@@ -37,4 +37,6 @@ public class BuyerUpdateProfileRequest {
 	@Schema(type = "string", format = "date")
 	@JsonFormat(pattern = "yyyy-MM-dd")
 	private Date dob;
+	
+	private String otp;
 }
