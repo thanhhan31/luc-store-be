@@ -12,6 +12,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
@@ -52,11 +53,18 @@ public class Buyer implements UserInfo, UpdatableAvatar {
 	@JoinColumn(name = "id_avatar")
 	private MediaResource avatar;
 	
+	@ManyToOne
+	@JoinColumn(name = "id_rank"/*, nullable = false*/)
+	private BuyerRank rank;
+	
 	@OneToMany(mappedBy = "buyer", fetch = FetchType.LAZY)
 	private List<BuyerCartDetail> cart;
 	
 	@OneToMany(mappedBy = "buyer", fetch = FetchType.LAZY)
 	private List<BuyerFavouriteProduct> favouriteProducts;
+	
+	@OneToMany(mappedBy = "buyer", fetch = FetchType.LAZY)
+	private List<BuyerDeliveryAddress> deliveryAddresses;
 	
 	@Column(name = "dob")
 	private Date dob;

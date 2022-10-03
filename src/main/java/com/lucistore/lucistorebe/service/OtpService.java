@@ -4,12 +4,14 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.lucistore.lucistorebe.utility.RandomString;
 
+@Service
 public class OtpService {
 	LoadingCache<String, String> loader;
 	

@@ -10,7 +10,7 @@ public class PlatformPolicyParameter {
 	public static int MAX_ALLOWED_PRODUCT_IMAGE;
 	public static int MIN_ALLOWED_PRODUCT_VARIATION;
 	
-	public static int MINIMUM_PASSWORD_LENGTH;
+	//public static int MINIMUM_PASSWORD_LENGTH;
 
     @Value("${com.lucistore.lucistorebe.policy.default-page-size}")
     public void setDefaultPageSize(int value) {
@@ -32,8 +32,8 @@ public class PlatformPolicyParameter {
     	PlatformPolicyParameter.MIN_ALLOWED_PRODUCT_VARIATION = value;
     }
     
-    @Value("${com.lucistore.lucistorebe.policy.minimum-password-length}")
+   /* @Value("${com.lucistore.lucistorebe.policy.minimum-password-length}")
     public void setMinimumPasswordLength(int value) {
     	PlatformPolicyParameter.MINIMUM_PASSWORD_LENGTH = value;
-    }
+    }*/
 }

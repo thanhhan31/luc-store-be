@@ -4,6 +4,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -21,8 +22,9 @@ public class BuyerDeliveryAddress {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@Column(name = "id_buyer")
-	private Long idBuyer;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "id_buyer")
+	private Buyer buyer;
 	
 	@ManyToOne
 	@JoinColumn(name = "id_address_ward")
