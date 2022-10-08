@@ -16,11 +16,12 @@ import org.springframework.data.jpa.repository.query.QueryUtils;
 import org.springframework.stereotype.Repository;
 
 import com.lucistore.lucistorebe.entity.user.User;
+import com.lucistore.lucistorebe.entity.user.UserRole_;
 import com.lucistore.lucistorebe.entity.user.User_;
 import com.lucistore.lucistorebe.repo.custom.UserRepoCustom;
 import com.lucistore.lucistorebe.utility.EUserRole;
 import com.lucistore.lucistorebe.utility.EUserStatus;
-import com.lucistore.lucistorebe.utility.Page;
+import com.lucistore.lucistorebe.utility.PageWithJpaSort;
 
 @Repository
 public class UserRepoCustomImpl implements UserRepoCustom {
@@ -29,7 +30,7 @@ public class UserRepoCustomImpl implements UserRepoCustom {
 	
 	@Override
 	public List<User> searchAdmin(String searchFullname, String searchUsername, String searchEmail,
-			String searchPhone, EUserRole role, EUserStatus status, Page page) {
+			String searchPhone, EUserRole role, EUserStatus status, PageWithJpaSort page) {
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 		CriteriaQuery<User> cq = cb.createQuery(User.class);
 		Root<User> root = cq.from(User.class);
@@ -50,14 +51,14 @@ public class UserRepoCustomImpl implements UserRepoCustom {
 		}
 		
 		if (role != null) {
-			filters.add(cb.equal(root.get(User_.role), role));
+			filters.add(cb.equal(root.get(User_.role).get(UserRole_.name), role.toString()));
 		}
 		else {
 			
 			filters.add(
 					cb.or(
-						cb.equal(root.get(User_.role), EUserRole.ADMIN), 
-						cb.equal(root.get(User_.role), EUserRole.SALE_ADMIN)
+						cb.equal(root.get(User_.role).get(UserRole_.name), EUserRole.ADMIN.toString()), 
+						cb.equal(root.get(User_.role).get(UserRole_.name), EUserRole.SALE_ADMIN.toString())
 					)
 				);
 		}
@@ -104,14 +105,14 @@ public class UserRepoCustomImpl implements UserRepoCustom {
 		}
 
 		if (role != null) {
-			filters.add(cb.equal(root.get(User_.role), role));
+			filters.add(cb.equal(root.get(User_.role).get(UserRole_.name), role.toString()));
 		}
 		else {
 			
 			filters.add(
 					cb.or(
-						cb.equal(root.get(User_.role), EUserRole.ADMIN), 
-						cb.equal(root.get(User_.role), EUserRole.SALE_ADMIN)
+						cb.equal(root.get(User_.role).get(UserRole_.name), EUserRole.ADMIN.toString()), 
+						cb.equal(root.get(User_.role).get(UserRole_.name), EUserRole.SALE_ADMIN.toString())
 					)
 				);
 		}

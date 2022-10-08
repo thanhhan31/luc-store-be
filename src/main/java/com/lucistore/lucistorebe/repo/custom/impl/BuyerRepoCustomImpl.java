@@ -9,13 +9,15 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.jpa.repository.query.QueryUtils;
 import org.springframework.stereotype.Repository;
 
+import com.lucistore.lucistorebe.controller.advice.exception.InvalidInputDataException;
+import com.lucistore.lucistorebe.entity.user.UserRole_;
 import com.lucistore.lucistorebe.entity.user.User_;
 import com.lucistore.lucistorebe.entity.user.buyer.Buyer;
 import com.lucistore.lucistorebe.entity.user.buyer.Buyer_;
@@ -52,9 +54,9 @@ public class BuyerRepoCustomImpl implements BuyerRepoCustom {
 		if (StringUtils.isNotEmpty(searchPhone)) {
 			filters.add(cb.like(root.get(Buyer_.user).get(User_.phone), "%" + searchPhone + "%"));
 		}
-		if (StringUtils.isNotEmpty(lastModifiedBy)) {
-			filters.add(cb.like(root.get(Buyer_.lastModifiedBy), "%" + lastModifiedBy + "%"));
-		}
+		/*if (StringUtils.isNotEmpty(lastModifiedBy)) {
+			filters.add(cb.like(root.get(Buyer_.user).get(User_.), "%" + lastModifiedBy + "%"));
+		}*/
 		
 		if (status != null) {
 			filters.add(cb.equal(root.get(Buyer_.user).get(User_.status), status));
@@ -76,10 +78,10 @@ public class BuyerRepoCustomImpl implements BuyerRepoCustom {
 			filters.add(cb.equal(root.get(Buyer_.createdDate), createdDate));
 		}
 		
-		filters.add(cb.equal(root.get(Buyer_.user).get(User_.role), EUserRole.BUYER));
+		filters.add(cb.equal(root.get(Buyer_.user).get(User_.role).get(UserRole_.name), EUserRole.BUYER.toString()));
 
-		if (page != null) {
-			cq.orderBy(QueryUtils.toOrders(page.getSort(), root, cb));
+		if (page.getSortBy() != null) {
+			cq.orderBy(createSort(cb, root, page.getSortBy(), page.getSortDescending()));
 		}
 
 		Predicate filter = cb.and(filters.toArray(new Predicate[0]));
@@ -116,7 +118,8 @@ public class BuyerRepoCustomImpl implements BuyerRepoCustom {
 			filters.add(cb.like(root.get(Buyer_.user).get(User_.phone), "%" + searchPhone + "%"));
 		}
 		if (StringUtils.isNotEmpty(lastModifiedBy)) {
-			filters.add(cb.like(root.get(Buyer_.lastModifiedBy), "%" + lastModifiedBy + "%"));
+			throw new InvalidInputDataException("Not implement yet");
+			//filters.add(cb.like(root.get(Buyer_.lastModifiedBy), "%" + lastModifiedBy + "%"));
 		}
 		
 		if (status != null) {
@@ -139,10 +142,62 @@ public class BuyerRepoCustomImpl implements BuyerRepoCustom {
 			filters.add(cb.equal(root.get(Buyer_.createdDate), createdDate));
 		}
 		
-		filters.add(cb.equal(root.get(Buyer_.user).get(User_.role), EUserRole.BUYER));
+		filters.add(cb.equal(root.get(Buyer_.user).get(User_.role).get(UserRole_.name), EUserRole.BUYER.toString()));
 
 		Predicate filter = cb.and(filters.toArray(new Predicate[0]));
 		cq.select(cb.count(root)).where(filter);
 		return em.createQuery(cq).getSingleResult();
+	}
+	
+	private List<Order> createSort(CriteriaBuilder cb, Root<Buyer> root, Integer sortBy, Boolean sortDescending) {
+		List<Order> orders = new ArrayList<>();
+		
+		if (sortBy != null) {
+			if (sortDescending == null || sortDescending.booleanValue() == false) { //ASC
+				if (sortBy >= 16) {
+					orders.add(cb.asc(root.get(Buyer_.createdDate)));
+					sortBy -= 16;
+				}
+				if (sortBy >= 8) {
+					orders.add(cb.asc(root.get(Buyer_.user).get(User_.phone)));
+					sortBy -= 8;
+				}
+				if (sortBy >= 4) {
+					orders.add(cb.asc(root.get(Buyer_.user).get(User_.email)));
+					sortBy -= 4;
+				}
+				if (sortBy >= 2) {
+					orders.add(cb.asc(root.get(Buyer_.user).get(User_.username)));
+					sortBy -= 2;
+				}
+				if (sortBy >= 1) {
+					orders.add(cb.asc(root.get(Buyer_.user).get(User_.fullname)));
+					sortBy -= 1;
+				}
+			}
+			else {	//DESC
+				if (sortBy >= 16) {
+					orders.add(cb.desc(root.get(Buyer_.createdDate)));
+					sortBy -= 16;
+				}
+				if (sortBy >= 8) {
+					orders.add(cb.desc(root.get(Buyer_.user).get(User_.phone)));
+					sortBy -= 8;
+				}
+				if (sortBy >= 4) {
+					orders.add(cb.desc(root.get(Buyer_.user).get(User_.email)));
+					sortBy -= 4;
+				}
+				if (sortBy >= 2) {
+					orders.add(cb.desc(root.get(Buyer_.user).get(User_.username)));
+					sortBy -= 2;
+				}
+				if (sortBy >= 1) {
+					orders.add(cb.desc(root.get(Buyer_.user).get(User_.fullname)));
+					sortBy -= 1;
+				}
+			}
+		}
+		return orders;
 	}
 }

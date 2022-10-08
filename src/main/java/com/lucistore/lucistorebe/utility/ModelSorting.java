@@ -23,17 +23,19 @@ public final class ModelSorting {
 	 * &nbsp;&nbsp;&nbsp;&nbsp; 2: by nvisit
 	 * <br>
 	 * &nbsp;&nbsp;&nbsp;&nbsp; 4: by nsold
+	 * * <br>
+	 * &nbsp;&nbsp;&nbsp;&nbsp; 8: by createdDate
 	 * <br>
-	 * &nbsp;&nbsp;&nbsp;&nbsp; 8: by lastModifiedDate
+	 * &nbsp;&nbsp;&nbsp;&nbsp; 16: by lastModifiedDate
 	 */
 	public static Sort getProductSort(Integer sortBy, Boolean sortDescending)  {		 
 		Sort sort = Sort.unsorted();
 		
 		if (sortBy != null) {
 			if (sortDescending == null || sortDescending.booleanValue() == false) { //ASC
-				if (sortBy >= 8) {
+				if (sortBy >= 16) {
 					sort = sort.and(JpaSort.of(Product_.lastModifiedDate).ascending());
-					sortBy -= 8;
+					sortBy -= 16;
 				}
 				if (sortBy >= 4) {
 					sort = sort.and(JpaSort.of(Product_.nsold).ascending());
@@ -49,8 +51,12 @@ public final class ModelSorting {
 				}
 			}
 			else {	//DESC
-				if (sortBy >= 8) {
+				if (sortBy >= 16) {
 					sort = sort.and(JpaSort.of(Product_.lastModifiedDate).descending());
+					sortBy -= 16;
+				}
+				if (sortBy >= 8) {
+					sort = sort.and(JpaSort.of(Product_.createdDate).descending());
 					sortBy -= 8;
 				}
 				if (sortBy >= 4) {

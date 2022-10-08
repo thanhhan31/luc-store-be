@@ -1,6 +1,8 @@
 package com.lucistore.lucistorebe.config;
 
 import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
@@ -9,10 +11,12 @@ import org.springframework.context.annotation.Configuration;
 
 import com.lucistore.lucistorebe.controller.payload.dto.BuyerDTO;
 import com.lucistore.lucistorebe.controller.payload.dto.ProductCategoryDTO;
-import com.lucistore.lucistorebe.controller.payload.dto.ProductDetailDTO;
+import com.lucistore.lucistorebe.controller.payload.dto.ProductCategoryGeneralDTO;
 import com.lucistore.lucistorebe.controller.payload.dto.ProductGeneralDetailDTO;
 import com.lucistore.lucistorebe.controller.payload.dto.ProductImageDTO;
 import com.lucistore.lucistorebe.controller.payload.dto.ProductVariationDTO;
+import com.lucistore.lucistorebe.controller.payload.dto.productdetail.ProductCategoryDetailDTO;
+import com.lucistore.lucistorebe.controller.payload.dto.productdetail.ProductDetailDTO;
 import com.lucistore.lucistorebe.entity.MediaResource;
 import com.lucistore.lucistorebe.entity.product.Product;
 import com.lucistore.lucistorebe.entity.product.ProductCategory;
@@ -34,12 +38,17 @@ public class ModelMapperConfig {
 				return c.getSource().getUrl();
 		};
 		
-		var lstChildProductCategoryCvt = generateListConverter(ProductCategory.class, ProductCategoryDTO.class, mapper);		
+		Converter<String, Boolean> emptyPasswordCvt = c -> {
+			return StringUtils.isBlank(c.getSource());
+		};
+		
+		var lstChildProductCategoryCvt = generateListConverter(ProductCategory.class, ProductCategoryDTO.class, mapper);			
 		var lstProductImageCvt = generateListConverter(ProductImage.class, ProductImageDTO.class, mapper);
 		var lstProductVariationCvt = generateListConverter(ProductVariation.class, ProductVariationDTO.class, mapper);
 		
 		mapper.createTypeMap(Buyer.class, BuyerDTO.class).addMappings(m -> {
 			m.using(mediaResourceCvt).map(Buyer::getAvatar, BuyerDTO::setAvatar);
+			m.using(emptyPasswordCvt).map(src -> src.getUser().getPassword(), BuyerDTO::setEmptyPassword);
 			m.map(src -> src.getUser().getUsername(), BuyerDTO::setUsername);
 			m.map(src -> src.getUser().getPhone(), BuyerDTO::setPhone);
 			m.map(src -> src.getUser().getEmail(), BuyerDTO::setEmail);
@@ -50,10 +59,16 @@ public class ModelMapperConfig {
 			m.map(src -> src.getParent().getId(), ProductCategoryDTO::setIdParent);
 		});
 		
+		mapper.createTypeMap(ProductCategory.class, ProductCategoryDetailDTO.class).addMappings(m -> {
+			m.map(src -> src.getParent().getId(), ProductCategoryDetailDTO::setIdParent);
+		});
+		
 		mapper.createTypeMap(Product.class, ProductDetailDTO.class).addMappings(m -> {
 			m.using(lstProductImageCvt).map(Product::getImages, ProductDetailDTO::setImages);
 			m.using(lstProductVariationCvt).map(Product::getVariations, ProductDetailDTO::setVariations);
 			m.using(mediaResourceCvt).map(Product::getAvatar, ProductDetailDTO::setAvatar);
+			
+			m.<List<ProductCategoryGeneralDTO>>map(Product::getParents, (dst, value) -> dst.getCategory().setParents(value));
 		});
 		
 		mapper.createTypeMap(Product.class, ProductGeneralDetailDTO.class).addMappings(m -> {

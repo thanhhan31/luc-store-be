@@ -39,7 +39,7 @@ public class ProductCategory {
 	@Column(name = "name")
 	private String name;
 	
-	@Column(name = "level", nullable = false)
+	@Column(name = "level")
 	private Integer level;
 	
 	@Column(name = "status")
@@ -49,11 +49,13 @@ public class ProductCategory {
 	public ProductCategory(String name) {
 		super();
 		this.name = name;
+		level = 0;
 	}
 	
 	public ProductCategory(ProductCategory parent, String name) {
 		super();
 		this.parent = parent;
 		this.name = name;
+		level = parent.level + 1;
 	}
 }

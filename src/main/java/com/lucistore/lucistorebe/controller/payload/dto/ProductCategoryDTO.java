@@ -10,5 +10,5 @@ public class ProductCategoryDTO {
 	private Long id;
 	private Long idParent;
 	private String name;
-	private List<ProductChildCategoryDTO> child;
+	private List<ProductCategoryGeneralDTO> child;
 }

@@ -16,6 +16,7 @@ import com.lucistore.lucistorebe.controller.payload.response.ListWithPagingRespo
 import com.lucistore.lucistorebe.entity.UpdatableAvatar;
 import com.lucistore.lucistorebe.service.MediaResourceService;
 import com.lucistore.lucistorebe.utility.Page;
+import com.lucistore.lucistorebe.utility.PageWithJpaSort;
 
 @Service
 public class ServiceUtils {
@@ -49,8 +50,13 @@ public class ServiceUtils {
 		return new ListResponse<>(src.stream().map(p -> mapper.map(p, cls)).collect(Collectors.toList()));
 	}
 	
+	public <T, V> ListWithPagingResponse<V> convertToListResponse(List<T> src, Class<V> cls, PageWithJpaSort page) {
+		return new ListWithPagingResponse<>(page.getPageNumber() + 1, page.getTotalPage(),
+				src.stream().map(p -> mapper.map(p, cls)).collect(Collectors.toList()));
+	}
+	
 	public <T, V> ListWithPagingResponse<V> convertToListResponse(List<T> src, Class<V> cls, Page page) {
-		return new ListWithPagingResponse<>(page.getPageNumber() + 1, page.getTotalPage() + 1,
+		return new ListWithPagingResponse<>(page.getPageNumber() + 1, page.getTotalPage(),
 				src.stream().map(p -> mapper.map(p, cls)).collect(Collectors.toList()));
 	}
 }

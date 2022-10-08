@@ -20,7 +20,7 @@ import com.lucistore.lucistorebe.entity.product.ProductCategory_;
 import com.lucistore.lucistorebe.entity.product.Product_;
 import com.lucistore.lucistorebe.repo.custom.ProductRepoCustom;
 import com.lucistore.lucistorebe.utility.EProductStatus;
-import com.lucistore.lucistorebe.utility.Page;
+import com.lucistore.lucistorebe.utility.PageWithJpaSort;
 
 @Repository
 public class ProductRepoCustomImpl implements ProductRepoCustom {
@@ -28,15 +28,15 @@ public class ProductRepoCustomImpl implements ProductRepoCustom {
 	private EntityManager em;
 	
 	@Override
-	public List<Product> search(Long idCategory, String searchName, String searchDescription, EProductStatus status,
-			Long minPrice, Long maxPrice, Page page) {
+	public List<Product> search(List<Long> idsCategory, String searchName, String searchDescription, EProductStatus status,
+			Long minPrice, Long maxPrice, PageWithJpaSort page) {
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 		CriteriaQuery<Product> cq = cb.createQuery(Product.class);
 		Root<Product> root = cq.from(Product.class);
 
 		List<Predicate> filters = new ArrayList<>();
-		if (idCategory != null) {
-			filters.add(cb.equal(root.get(Product_.category).get(ProductCategory_.id), idCategory));
+		if (!idsCategory.isEmpty()) {
+			filters.add(root.get(Product_.category).get(ProductCategory_.id).in(idsCategory));
 		}
 		if (searchName != null) {
 			filters.add(cb.like(root.get(Product_.name), "%" + searchName + "%"));
@@ -51,7 +51,7 @@ public class ProductRepoCustomImpl implements ProductRepoCustom {
 			filters.add(cb.greaterThanOrEqualTo(root.get(Product_.minPrice), minPrice));
 		}
 		if (maxPrice != null) {
-			filters.add(cb.greaterThanOrEqualTo(root.get(Product_.maxPrice), maxPrice));
+			filters.add(cb.lessThanOrEqualTo(root.get(Product_.maxPrice), maxPrice));
 		}
 
 		if (page != null) {
@@ -70,14 +70,14 @@ public class ProductRepoCustomImpl implements ProductRepoCustom {
 	}
 
 	@Override
-	public Long searchCount(Long idCategory, String searchName, String searchDescription, EProductStatus status, Long minPrice, Long maxPrice) {
+	public Long searchCount(List<Long> idsCategory, String searchName, String searchDescription, EProductStatus status, Long minPrice, Long maxPrice) {
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 		CriteriaQuery<Long> cq = cb.createQuery(Long.class);
 		Root<Product> root = cq.from(Product.class);
 		
 		List<Predicate> filters = new ArrayList<>();
-		if (idCategory != null) {
-			filters.add(cb.equal(root.get(Product_.category).get(ProductCategory_.id), idCategory));
+		if (!idsCategory.isEmpty()) {
+			filters.add(root.get(Product_.category).get(ProductCategory_.id).in(idsCategory));
 		}
 		if (searchName != null) {
 			filters.add(cb.like(root.get(Product_.name), "%" + searchName + "%"));
@@ -92,7 +92,7 @@ public class ProductRepoCustomImpl implements ProductRepoCustom {
 			filters.add(cb.greaterThanOrEqualTo(root.get(Product_.minPrice), minPrice));
 		}
 		if (maxPrice != null) {
-			filters.add(cb.greaterThanOrEqualTo(root.get(Product_.maxPrice), maxPrice));
+			filters.add(cb.lessThanOrEqualTo(root.get(Product_.maxPrice), maxPrice));
 		}
 
 		Predicate filter = cb.and(filters.toArray(new Predicate[0]));

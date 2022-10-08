@@ -20,19 +20,41 @@ import com.lucistore.lucistorebe.controller.payload.request.PasswordUpdateReques
 import com.lucistore.lucistorebe.entity.user.buyer.Buyer;
 import com.lucistore.lucistorebe.service.BuyerService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Encoding;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+
 @RestController
 @RequestMapping("/api/buyer/profile")
 public class BuyerProfileController {
 	@Autowired
 	BuyerService buyerService;
 	
+	@Operation(summary = "Get current logged in buyer's profile information")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200",
+					description = "Successful",
+					content = { @Content(mediaType = "application/json") })
+	})
 	@GetMapping
 	public ResponseEntity<?> getProfile(@AuthenticationPrincipal UserDetailsImpl<Buyer> buyer) {
 		Buyer cast = buyer.getUser();
 		return ResponseEntity.ok(buyerService.getById(cast.getId()));
 	}
 	
+	@Operation(summary = "Update buyer profile information", 
+			description = "When buyer register via OAuth (Google,...), buyer can change  username only one time."
+					+ "<br>When change username user is required to login again."
+					+ "<br><b><i>OTP is ony required when user want to change email or phone number.</i></b>")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200",
+					description = "Successful",
+					content = { @Content(mediaType = "application/json") })
+	})
 	@PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(encoding = @Encoding(name = "request", contentType = "application/json")))
 	public ResponseEntity<?> update(
 			@AuthenticationPrincipal UserDetailsImpl<Buyer> buyer,
 			@RequestPart(value = "info", required = false) @Valid BuyerUpdateProfileRequest request,
@@ -41,6 +63,13 @@ public class BuyerProfileController {
 		return ResponseEntity.ok(buyerService.update(buyer.getUser().getId(), request, avatar));
 	}
 	
+	@Operation(summary = "Update buyer password", 
+			description = "<b><i>If buyer doesn't have password yet (due to register via OAuth) then leave old password null.</i></b>")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200",
+					description = "Successful",
+					content = { @Content(mediaType = "application/json") })
+	})
 	@PutMapping("/password")
 	public ResponseEntity<?> updatePassword(
 			@AuthenticationPrincipal UserDetailsImpl<Buyer> buyer,

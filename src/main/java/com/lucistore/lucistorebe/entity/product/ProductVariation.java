@@ -2,6 +2,7 @@ package com.lucistore.lucistorebe.entity.product;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
@@ -11,6 +12,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.lucistore.lucistorebe.entity.listener.ProductVariationListener;
 import com.lucistore.lucistorebe.utility.EProductVariationStatus;
 
 import lombok.Getter;
@@ -20,6 +22,7 @@ import lombok.Setter;
 @Getter @Setter
 @NoArgsConstructor
 @Entity
+@EntityListeners(ProductVariationListener.class)
 @Table(name = "product_variation")
 public class ProductVariation {
 	@Id
@@ -33,13 +36,13 @@ public class ProductVariation {
 	@Column(name = "variation_name")
 	private String variationName;
 	
-	@Column(name = "price")
+	@Column(name = "price", nullable = false)
 	private Long price;
 	
 	@Column(name = "available_quantity")
 	private Long availableQuantity;
 	
-	@Column(name = "discount")
+	@Column(name = "discount", nullable = false)
 	private Integer discount;
 	
 	@Column(name = "status")
@@ -66,5 +69,9 @@ public class ProductVariation {
 		else {
 			this.discount = discount;
 		}
+	}
+	
+	public Long getPriceAfterDiscount() {
+		return Long.valueOf(Math.round(price * (1 - discount / 100.0f)));
 	}
 }

@@ -1,7 +1,11 @@
 package com.lucistore.lucistorebe.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,18 +16,21 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.lucistore.lucistorebe.controller.advice.exception.CommonRuntimeException;
 import com.lucistore.lucistorebe.controller.advice.exception.InvalidInputDataException;
-import com.lucistore.lucistorebe.controller.payload.dto.ProductDetailDTO;
 import com.lucistore.lucistorebe.controller.payload.dto.ProductGeneralDetailDTO;
+import com.lucistore.lucistorebe.controller.payload.dto.productdetail.ProductDetailDTO;
 import com.lucistore.lucistorebe.controller.payload.request.product.CreateProductRequest;
 import com.lucistore.lucistorebe.controller.payload.request.product.UpdateProductRequest;
 import com.lucistore.lucistorebe.controller.payload.response.DataResponse;
 import com.lucistore.lucistorebe.controller.payload.response.ListWithPagingResponse;
 import com.lucistore.lucistorebe.entity.product.Product;
+import com.lucistore.lucistorebe.entity.product.ProductCategory;
+import com.lucistore.lucistorebe.entity.product.ProductVariation;
 import com.lucistore.lucistorebe.repo.ProductCategoryRepo;
 import com.lucistore.lucistorebe.repo.ProductRepo;
 import com.lucistore.lucistorebe.service.util.ServiceUtils;
 import com.lucistore.lucistorebe.utility.EProductStatus;
-import com.lucistore.lucistorebe.utility.Page;
+import com.lucistore.lucistorebe.utility.EProductVariationStatus;
+import com.lucistore.lucistorebe.utility.PageWithJpaSort;
 import com.lucistore.lucistorebe.utility.PlatformPolicyParameter;
 
 @Service
@@ -49,20 +56,41 @@ public class ProductService {
 	public ListWithPagingResponse<ProductGeneralDetailDTO> search(Long idCategory, String searchName, String searchDescription, 
 			EProductStatus status, Long minPrice, Long maxPrice, Integer currentPage, Integer size, Sort sort) {
 		
-		int count = productRepo.searchCount(idCategory, searchName, searchDescription, status, minPrice, maxPrice).intValue();
-		Page page = new Page(currentPage, size, count, sort);
+		List<Long> idsCategory = new ArrayList<>();
+		
+		if (idCategory != null) {
+			var pc = productCategoryRepo.findById(idCategory).orElse(null);
+			if (pc != null) {
+				if (!pc.getChild().isEmpty())
+					idsCategory.addAll(pc.getChild().stream().map(ProductCategory::getId).toList());
+				idsCategory.add(idCategory);
+			}
+		}
+		
+		int count = productRepo.searchCount(idsCategory, searchName, searchDescription, status, minPrice, maxPrice).intValue();
+		PageWithJpaSort page = new PageWithJpaSort(currentPage, size, count, sort);
 		
 		return serviceUtils.convertToListResponse(
-				productRepo.search(idCategory, searchName, searchDescription, status, minPrice, maxPrice, page),
+				productRepo.search(idsCategory, searchName, searchDescription, status, minPrice, maxPrice, page),
 				ProductGeneralDetailDTO.class, 
 				page
 			);
 	}
 	
-	public DataResponse<ProductGeneralDetailDTO> getById(Long id) {
+	public DataResponse<ProductDetailDTO> getById(Long id, boolean isBuyer) {
+		Product p = productRepo.findById(id).orElseThrow(() -> new InvalidInputDataException("No product found with given id"));
+		p.setParents(productCategoryRepo.findAncestry(p.getCategory().getParent().getId()));
+		
+		if (isBuyer) { //buyers are not allow to view disabled product
+			if (p.getStatus().equals(EProductStatus.DISABLED))
+				throw new InvalidInputDataException("No product found with given id");
+			else
+				productRepo.updateVisitCount(id);
+		}
+		
 		return serviceUtils.convertToDataResponse(
-				productRepo.findById(id).orElseThrow(() -> new InvalidInputDataException("No product found with given id")),
-				ProductGeneralDetailDTO.class
+				p,
+				ProductDetailDTO.class
 			);
 	}
 	
@@ -86,7 +114,8 @@ public class ProductService {
 					productCategoryRepo.getReferenceById(data.getIdCategory()), 
 					data.getName(), 
 					data.getDescription(),
-					mediaResourceService.save(avatar.getBytes())
+					mediaResourceService.save(avatar.getBytes()),
+					EProductStatus.DISABLED
 				);
 		} catch (IOException e) {
 			throw new CommonRuntimeException("Error occurred when trying to save product avatar image");
@@ -96,6 +125,9 @@ public class ProductService {
 		productImageService.create(p, images);
 		productVariationService.create(p, data.getVariations());
 		productRepo.refresh(p);
+		updatePrice(p, p.getVariations());
+		
+		p.setParents(productCategoryRepo.findAncestry(p.getCategory().getParent().getId()));
 		
 		return serviceUtils.convertToDataResponse(p, ProductDetailDTO.class);
 	}
@@ -106,23 +138,71 @@ public class ProductService {
 				() -> new InvalidInputDataException("No product found with given id")
 			);
 		
-		if (StringUtils.isNotEmpty(data.getName()) && !p.getName().equals(data.getName()))
-			p.setName(data.getName());
-		
-		if (StringUtils.isNotEmpty(data.getDescription()) && !p.getDescription().equals(data.getDescription()))
-			p.setDescription(data.getDescription());
-		
-		if (data.getIdCategory() != null && !p.getCategory().getId().equals(data.getIdCategory())) {
-			if (!productCategoryRepo.existsById(data.getIdCategory()))
-				throw new InvalidInputDataException("No category found with given id");
-			p.setCategory(productCategoryRepo.getReferenceById(data.getIdCategory()));
+		if (data != null) {
+			if (StringUtils.isNotEmpty(data.getName()) && !p.getName().equals(data.getName()))
+				p.setName(data.getName());
+			
+			if (StringUtils.isNotEmpty(data.getDescription()) && !p.getDescription().equals(data.getDescription()))
+				p.setDescription(data.getDescription());
+			
+			if (data.getIdCategory() != null && !p.getCategory().getId().equals(data.getIdCategory())) {
+				if (!productCategoryRepo.existsById(data.getIdCategory()))
+					throw new InvalidInputDataException("No category found with given id");
+				p.setCategory(productCategoryRepo.getReferenceById(data.getIdCategory()));
+			}
+			
+			if (data.getStatus() != null && !p.getStatus().equals(data.getStatus()))
+				p.setStatus(data.getStatus());
 		}
 		
-		if (data.getStatus() != null && !p.getStatus().equals(data.getStatus()))
-			p.setStatus(data.getStatus());
+		if (avatar != null) {
+			serviceUtils.updateAvatar(p, avatar);
+		}
 		
-		serviceUtils.updateAvatar(p, avatar);
+		p = productRepo.save(p);
+		p.setParents(productCategoryRepo.findAncestry(p.getCategory().getParent().getId()));
 		
-		return serviceUtils.convertToDataResponse(productRepo.save(p), ProductDetailDTO.class);
+		return serviceUtils.convertToDataResponse(p, ProductDetailDTO.class);
+	}
+	
+	/***
+	 * For entity listener
+	 * @param pv
+	 */
+	public void updatePriceWhenVariationCreated(ProductVariation pv) {
+		Product p = pv.getProduct();
+		List<ProductVariation> pvs = new ArrayList<>(p.getVariations());
+		pvs.add(pv);
+		updatePrice(p, pvs);
+	}
+	
+	/***
+	 * For entity listener
+	 * @param pv
+	 */
+	public void updatePriceWhenVariationChange(ProductVariation pv) {
+		Product p = pv.getProduct();
+		List<ProductVariation> pvs = new ArrayList<>(p.getVariations());
+		updatePrice(p, pvs);
+	}
+	
+	private void updatePrice(Product p, List<ProductVariation> pvs) {
+		Supplier<Stream<ProductVariation>> streamSupplier = () -> pvs
+				.stream()
+				.filter(x -> x.getAvailableQuantity() > 0 && x.getStatus() == EProductVariationStatus.ENABLED);
+		
+		Optional<ProductVariation> minPv = streamSupplier.get().min(
+				(first, second) -> Long.compare(first.getPriceAfterDiscount(), second.getPriceAfterDiscount())
+			);
+		Optional<ProductVariation> maxPv = streamSupplier.get().max(
+				(first, second) -> Long.compare(first.getPriceAfterDiscount(), second.getPriceAfterDiscount())
+			);
+
+		if (minPv.isPresent())
+			p.setMinPrice(minPv.get().getPriceAfterDiscount());
+		if (maxPv.isPresent())
+			p.setMaxPrice(maxPv.get().getPriceAfterDiscount());
+		
+		productRepo.save(p);
 	}
 }

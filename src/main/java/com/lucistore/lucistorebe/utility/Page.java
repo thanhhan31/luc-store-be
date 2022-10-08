@@ -7,68 +7,23 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
-public class Page implements Pageable {
+public class Page extends PageWithJpaSort {
 	private int totalPage;
 	private PageRequest pageRequest;
+	private Integer sortBy;
+	private Boolean sortDescending;
+	
+	public Page(Integer page, Integer size, int itemCount, Integer sortBy, Boolean sortDescending) {
+		this(page, size, itemCount);
+		this.sortBy = sortBy;
+		
+		if (sortDescending == null)
+			this.sortDescending = false;
+		else
+			this.sortDescending = sortDescending;
+	}
 	
 	public Page(Integer page, Integer size, int itemCount) {
-		this(page, size, itemCount, Sort.unsorted());
-	}
-	
-	public Page(Integer page, Integer size, int itemCount, Sort sort) {
-		if (page == null) {
-			page = 1;
-		}
-		if (size == null) {
-			size = PlatformPolicyParameter.DEFAULT_PAGE_SIZE;
-		}
-		
-		pageRequest = PageRequest.of(page - 1, size, sort);
-		totalPage = (int)Math.ceil((double)itemCount/size);
-	}
-
-	@Override
-	public int getPageNumber() {
-		return pageRequest.getPageNumber();
-	}
-
-	@Override
-	public int getPageSize() {
-		return pageRequest.getPageSize();
-	}
-
-	@Override
-	public long getOffset() {
-		return pageRequest.getOffset();
-	}
-
-	@Override
-	public Sort getSort() {
-		return pageRequest.getSort();
-	}
-
-	@Override
-	public Pageable next() {
-		return pageRequest.next();
-	}
-
-	@Override
-	public Pageable previousOrFirst() {
-		return pageRequest.previousOrFirst();
-	}
-
-	@Override
-	public Pageable first() {
-		return pageRequest.first();
-	}
-
-	@Override
-	public Pageable withPage(int pageNumber) {
-		return pageRequest.withPage(pageNumber);
-	}
-
-	@Override
-	public boolean hasPrevious() {
-		return pageRequest.hasPrevious();
+		super(page, size, itemCount);
 	}
 }

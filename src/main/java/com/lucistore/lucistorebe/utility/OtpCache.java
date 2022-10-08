@@ -1,36 +1,28 @@
-package com.lucistore.lucistorebe.service;
+package com.lucistore.lucistorebe.utility;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.lucistore.lucistorebe.utility.RandomString;
 
-@Service
-public class OtpService {
+public class OtpCache {
+	
+	private int otpLength;
 	LoadingCache<String, String> loader;
 	
-	@Value("${com.lucistore.lucistorebe.security.otp.expired-after-mins}")
-	private long expiredAfterMins;
-	
-	@Value("${com.lucistore.lucistorebe.security.otp.code-length}")
-	private int otpLength;
-	
-	public OtpService() {
+	public OtpCache(long expiredAfterMins, int otpLength) {
 		loader = CacheBuilder
 			.newBuilder()
 			.expireAfterWrite(expiredAfterMins, TimeUnit.MINUTES)
 			.build(new CacheLoader<String, String>() {
 				@Override
 				public String load(String key) throws Exception {
-					return "";
+					return "not cache";
 				}
 		});
+		this.otpLength = otpLength;
 	}
 	
 	public String create(String username) {
@@ -43,7 +35,7 @@ public class OtpService {
 		try {
 			return loader.get(username);
 		} catch (ExecutionException e) {
-			return "";
+			return e.getMessage();
 		}
 	}
 	

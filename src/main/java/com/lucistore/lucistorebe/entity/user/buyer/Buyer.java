@@ -19,8 +19,6 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.lucistore.lucistorebe.entity.MediaResource;
@@ -82,23 +80,9 @@ public class Buyer implements UserInfo, UpdatableAvatar {
 	@Column(name = "phone_confirmed")
 	private Boolean phoneConfirmed;
 	
-	@Column(name = "otp", length = 6)
-	private String otp;
-	
-	@Column(name = "otp_expire_on")
-	private Date otpExpireOn;
-	
 	@Column(name = "created_date")
 	@CreatedDate
 	private Date createdDate;
-	
-	@Column(name = "last_modified_by")
-	@LastModifiedBy
-	private String lastModifiedBy;
-	
-	@Column(name = "last_modified_date")
-	@LastModifiedDate
-	private Date lastModifiedDate;
 
 	@Override
 	public String getUsername() {
@@ -117,16 +101,25 @@ public class Buyer implements UserInfo, UpdatableAvatar {
 
 	@Override
 	public boolean isActive() {
-		return user.getStatus() == EUserStatus.ACTIVE;
+		return user.getStatus().equals(EUserStatus.ACTIVE) || user.getStatus().equals(EUserStatus.WAIT_BANNED);
+	}
+	
+	@Override
+	public EUserStatus getStatus() {
+		return user.getStatus();
+	}
+	
+	public Buyer(User user, Boolean canChangeUsername, Boolean emailConfirmed, Boolean phoneConfirmed) {
+		this.id = user.getId();
+		this.user = user;
+		this.canChangeUsername = canChangeUsername;
+		this.emailConfirmed = emailConfirmed;
+		this.phoneConfirmed = phoneConfirmed;
 	}
 	
 	public Buyer(User user, EGender gender,
 			Boolean canChangeUsername, Boolean emailConfirmed, Boolean phoneConfirmed) {
-		this.id = user.getId();
-		this.user = user;
+		this(user, canChangeUsername, emailConfirmed, phoneConfirmed);
 		this.gender = gender;
-		this.canChangeUsername = canChangeUsername;
-		this.emailConfirmed = emailConfirmed;
-		this.phoneConfirmed = phoneConfirmed;
 	}
 }

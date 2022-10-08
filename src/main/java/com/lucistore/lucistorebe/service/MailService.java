@@ -13,9 +13,10 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
-import com.lucistore.lucistorebe.controller.advice.exception.CommonRestException;
 import com.lucistore.lucistorebe.controller.advice.exception.CommonRuntimeException;
+import com.lucistore.lucistorebe.controller.advice.exception.InvalidInputDataException;
 import com.lucistore.lucistorebe.entity.user.buyer.Buyer;
+import com.lucistore.lucistorebe.utility.OtpCache;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -26,8 +27,11 @@ public class MailService {
 	JavaMailSender mailSender;
 	
 	@Autowired
-	OtpService otpService;
+	OtpCache otpCache;
 	
+	@Autowired
+	BuyerService buyerService;
+		
 	@Value("${spring.mail.username}")
 	private String senderMail;
 	
@@ -37,10 +41,17 @@ public class MailService {
 	@Autowired
 	private Configuration freeMakerConfiguration;
 	
+	public void sendMailConfirmCode(String email) {
+		Buyer buyer = buyerService.getBuyerByEmail(email);
+		if (buyer == null)
+			throw new InvalidInputDataException("No user found is associated with this email address");
+		sendMailConfirmCode(buyer);
+	}
+	
 	public void sendMailConfirmCode(Buyer buyer) {
-		if (buyer.getEmailConfirmed().booleanValue())
-			throw new CommonRestException("Email has been already confirmed");
-		String otp = otpService.create(buyer.getUsername());
+		/*if (buyer.getEmailConfirmed().booleanValue())
+			throw new CommonRestException("Email has been already confirmed");*/
+		String otp = otpCache.create(buyer.getUsername());
 		
 		MimeMessage message = mailSender.createMimeMessage();
 		
@@ -58,7 +69,7 @@ public class MailService {
 
 			helper.setTo(buyer.getUser().getEmail());
 			helper.setText(html, true);
-			helper.setSubject("[TTFSOFT-SHOPEE] Email confirmation code");
+			helper.setSubject("[LUC Store] Email confirmation code");
 			helper.setFrom(senderMail);
 			
 			mailSender.send(message);

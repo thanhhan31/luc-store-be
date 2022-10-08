@@ -4,7 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
-public class ProductChildCategoryDTO {
+public class ProductCategoryGeneralDTO {
 	private Long id;	
 	private String name;
+	private Integer level;
 }
