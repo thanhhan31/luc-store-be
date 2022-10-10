@@ -5,13 +5,22 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapsId;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
+import com.lucistore.lucistorebe.controller.advice.exception.InvalidInputDataException;
 import com.lucistore.lucistorebe.entity.pk.BuyerCartDetailPK;
 import com.lucistore.lucistorebe.entity.product.ProductVariation;
+import com.lucistore.lucistorebe.utility.EProductVariationStatus;
 
-@Entity
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity @Getter @Setter @AllArgsConstructor @NoArgsConstructor
 @Table(name = "buyer_cart_detail")
 public class BuyerCartDetail {
 	@EmbeddedId
@@ -29,4 +38,16 @@ public class BuyerCartDetail {
 
 	@NotNull
 	private Long quantity = 0L;
+
+	@PrePersist
+	@PreUpdate
+	private void check(){
+		if (productVariation.getStatus() != EProductVariationStatus.ENABLED) {
+			throw new InvalidInputDataException("Product Variation is not enabled");
+		}
+
+		if (quantity > productVariation.getAvailableQuantity()) {
+			throw new InvalidInputDataException("Quantity cannot be greater than stock");
+		}
+	}
 }
