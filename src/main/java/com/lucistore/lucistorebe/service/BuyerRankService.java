@@ -59,7 +59,7 @@ public class BuyerRankService {
 			throw new InvalidInputDataException("Buyer already has the highest rank");
 		}
 
-		if (buyer.getPoint() < buyer.getRank().getThreshold()) {
+		if (buyer.getTotalSpent() < buyer.getRank().getThreshold()) {
 			throw new InvalidInputDataException("Buyer doesn't have enough point to rank up");
 		}
 

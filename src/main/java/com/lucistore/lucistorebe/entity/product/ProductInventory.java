@@ -3,6 +3,7 @@ package com.lucistore.lucistorebe.entity.product;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -27,7 +28,7 @@ public class ProductInventory {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@ManyToOne
+	@ManyToOne(cascade = {CascadeType.PERSIST})
 	@JoinColumn(name = "id_product_variation")
 	private ProductVariation variation;
 	
@@ -40,4 +41,12 @@ public class ProductInventory {
 	
 	@Column(name = "import_quantity")
 	private Long importQuantity;
+
+
+	public ProductInventory(ProductVariation variation, User importer, Long importQuantity) {
+		this.variation = variation;
+		this.importer = importer;
+		this.importQuantity = importQuantity;
+		this.importTime = new Date();
+	}
 }

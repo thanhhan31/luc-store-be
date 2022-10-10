@@ -80,8 +80,8 @@ public class Buyer implements UserInfo, UpdatableAvatar {
 	@Column(name = "phone_confirmed")
 	private Boolean phoneConfirmed;
 
-	@Column(name = "point")
-	private Long point;
+	@Column(name = "total_spent")
+	private Long totalSpent;
 	
 	@Column(name = "created_date")
 	@CreatedDate
