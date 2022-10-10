@@ -12,8 +12,6 @@ public class PasswordUpdateRequest {
 	@Size(min = 8, max = 30, message = "Password should have at least 8 characters")
 	private String newPassword;
 	
-	@NotEmpty
-	@Size(min = 8, max = 30, message = "Password should have at least 8 characters")
 	private String oldPassword;
 	
 	@NotEmpty

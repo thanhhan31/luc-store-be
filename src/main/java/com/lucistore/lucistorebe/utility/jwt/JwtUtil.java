@@ -6,6 +6,7 @@ import java.util.function.Function;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import io.jsonwebtoken.Claims;
@@ -15,6 +16,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
+@Component
 @ConfigurationProperties(prefix = "com.lucistore.lucistorebe.security.jwt")
 public class JwtUtil {
 	private String secret;

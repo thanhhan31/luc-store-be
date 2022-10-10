@@ -1,5 +1,6 @@
 package com.lucistore.lucistorebe.entity.product;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -15,6 +16,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -40,12 +42,15 @@ public class Product implements UpdatableAvatar {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
+	@Transient
+	private List<ProductCategory> parents;
+	
 	@ManyToOne
 	@JoinColumn(name = "id_category")
 	private ProductCategory category;
 	
 	@OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
-	private List<ProductVariation> variations;
+	private List<ProductVariation> variations = new ArrayList<>();
 	
 	@OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
 	private List<ProductImage> images;
@@ -91,12 +96,13 @@ public class Product implements UpdatableAvatar {
 	@LastModifiedDate
 	private Date lastModifiedDate;
 
-	public Product(ProductCategory category, String name, String description, MediaResource avatar) {
+	public Product(ProductCategory category, String name, String description, MediaResource avatar, EProductStatus status) {
 		super();
 		this.category = category;
 		this.name = name;
 		this.description = description;
 		this.avatar = avatar;
+		this.status = status;
 		
 		this.minPrice = 0L;
 		this.maxPrice = 0L;

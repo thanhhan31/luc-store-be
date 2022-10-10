@@ -7,6 +7,8 @@ import com.lucistore.lucistorebe.controller.payload.response.service.CloudinaryU
 import java.io.IOException;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
 
@@ -23,18 +25,21 @@ public class CloudinaryService {
     
     private Cloudinary cloudinary;
 
-    public CloudinaryService() {
+    @PostConstruct
+    private void init() {
     	cloudinary = new Cloudinary(ObjectUtils.asMap(
 				"cloud_name", cloudName,
 				"api_key", apiKey,
 				"api_secret", apiSecret,
 				"secure", true));
-    }    
+    }
     
     public CloudinaryUploadResponse upload(byte[] data) throws IOException {    	
     	Map response = cloudinary.uploader().upload(
     			data,
-    			ObjectUtils.asMap("resource_type", "auto")
+    			ObjectUtils.asMap(
+    					"resource_type", "auto",
+    					"folder", "luc-store")
     		);
     	
     	return new CloudinaryUploadResponse(

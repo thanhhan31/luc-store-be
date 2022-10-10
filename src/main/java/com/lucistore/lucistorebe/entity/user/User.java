@@ -46,10 +46,26 @@ public class User implements UserInfo {
 	@Column(name = "status")
 	@Enumerated(EnumType.ORDINAL)
 	private EUserStatus status;
+	
+	/*@Column(name = "last_modified_by")
+	@LastModifiedBy
+	private String lastModifiedBy;
+	
+	@Column(name = "last_modified_date")
+	@LastModifiedDate
+	private Date lastModifiedDate;*/
 
 	@Override
 	public boolean isActive() {
 		return status == EUserStatus.ACTIVE;
+	}
+	
+	public User(String email, String username, String fullname, UserRole role, EUserStatus status) {
+		this.email = email;
+		this.username = username;
+		this.fullname = fullname;
+		this.role = role;
+		this.status = status;
 	}
 	
 	public User(String email, String password, String username, String fullname, UserRole role, EUserStatus status) {

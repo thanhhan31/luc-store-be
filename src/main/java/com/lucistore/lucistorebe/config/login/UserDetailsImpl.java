@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import com.lucistore.lucistorebe.entity.user.UserInfo;
 import com.lucistore.lucistorebe.entity.user.UserRole;
 import com.lucistore.lucistorebe.utility.ERolePermission;
+import com.lucistore.lucistorebe.utility.EUserStatus;
 
 import lombok.Getter;
 
@@ -35,6 +36,10 @@ public class UserDetailsImpl<T extends UserInfo> implements UserDetails {
 				"ROLE_" + role.getName()
 			)
 		);
+		
+		if (userInfo.getStatus().equals(EUserStatus.WAIT_BANNED)) {
+			authorities.add(new SimpleGrantedAuthority(ERolePermission.BANNED_BUYER.toString()));
+		}
 		
 		for (ERolePermission permission : role.getPermissions()) {
 			authorities.add(new SimpleGrantedAuthority(permission.toString()));

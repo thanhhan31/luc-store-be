@@ -30,7 +30,7 @@ public class AdminProductVariationManageController {
 		return ResponseEntity.ok(productVariationService.create(idProduct, body));
 	}
 	
-	@PutMapping(name = "/{idVariation}", consumes = MediaType.APPLICATION_JSON_VALUE)
+	@PutMapping(path = "/{idVariation}", consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> update(
 			@PathVariable Long idProduct,
 			@PathVariable Long idVariation,

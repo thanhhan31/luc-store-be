@@ -24,7 +24,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	BuyerRepo buyerRepo;
 	
 	private static final Pattern PHONE_PATTERN = Pattern.compile("^0\\d{9}$");
-	private static final Pattern EMAIL_PATTERN = Pattern.compile("^(.+)@(\\\\S+)$");
+	private static final Pattern EMAIL_PATTERN = Pattern.compile("^\\w+([-+.']\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$");//^(.+)@(\\S+)$
 	
 	@Override
 	@Transactional
@@ -58,7 +58,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 			}
 		}
 		else
-			throw new UsernameNotFoundException("No user found with given username");
+			throw new UsernameNotFoundException("No user found with given login key");
 	}
 	
 	private boolean isPhoneNumber(String key) {

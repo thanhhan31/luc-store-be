@@ -40,12 +40,10 @@ public class ProductCategoryService {
 		ProductCategory category;
 		
 		if (data.getIdParent() != null) {
-			if (productCategoryRepo.existsById(data.getIdParent())) {
-				throw new InvalidInputDataException("invalid parent product category id");
-			}
-			else {
-				category = new ProductCategory(productCategoryRepo.getReferenceById(data.getIdParent()), data.getName());
-			}
+			ProductCategory parent = productCategoryRepo.findById(data.getIdParent()).orElseThrow(
+					() -> new InvalidInputDataException("Invalid parent product category id")
+				);
+			category = new ProductCategory(parent, data.getName());
 		}
 		else {
 			category = new ProductCategory(data.getName());

@@ -9,6 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.lucistore.lucistorebe.config.login.UserDetailsImpl;
+import com.lucistore.lucistorebe.controller.advice.exception.LoginException;
 import com.lucistore.lucistorebe.controller.payload.dto.BuyerDTO;
 import com.lucistore.lucistorebe.controller.payload.dto.UserDTO;
 import com.lucistore.lucistorebe.controller.payload.response.LoginResponse;
@@ -42,7 +43,7 @@ public class LoginService {
 		
 		@SuppressWarnings("rawtypes")
 		UserDetailsImpl userDetails = (UserDetailsImpl)auth.getPrincipal();
-		String token = jwtUtil.generateJwtToken(username);
+		String token = generateToken(username);
 		
 		EUserRole r = EUserRole.valueOf(userDetails.getUser().getRole().getName());
 		
@@ -59,7 +60,11 @@ public class LoginService {
 				);
 		}
 		else {
-			throw new IllegalArgumentException("Username or password is invalid");
+			throw new LoginException("Username or password is invalid");
 		}
+	}
+	
+	public String generateToken(String username) {
+		return jwtUtil.generateJwtToken(username);
 	}
 }
