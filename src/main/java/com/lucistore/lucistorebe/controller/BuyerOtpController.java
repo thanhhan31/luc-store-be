@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.lucistore.lucistorebe.config.login.UserDetailsImpl;
 import com.lucistore.lucistorebe.controller.payload.response.BaseResponse;
 import com.lucistore.lucistorebe.entity.user.buyer.Buyer;
-import com.lucistore.lucistorebe.service.MailService;
+import com.lucistore.lucistorebe.service.OtpService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -21,7 +21,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @RequestMapping("/api/buyer/otp")
 public class BuyerOtpController {
 	@Autowired
-	MailService mailService;
+	OtpService otpService;
 	
 	@Operation(summary = "Send OTP to the email of current logged in buyer")
 	@ApiResponses(value = {
@@ -31,7 +31,7 @@ public class BuyerOtpController {
 	})
 	@PostMapping("/email")
 	public ResponseEntity<?> sendViaEmail(@AuthenticationPrincipal UserDetailsImpl<Buyer> buyer) {
-		mailService.sendMailConfirmCode(buyer.getUser());
+		otpService.sendOtpViaEmail(buyer.getUser());
 		return ResponseEntity.ok(new BaseResponse());
 	}
 	
@@ -43,8 +43,7 @@ public class BuyerOtpController {
 	})
 	@PostMapping("/phone")
 	public ResponseEntity<?> sendViaPhone(@AuthenticationPrincipal UserDetailsImpl<Buyer> buyer) {
-		//mailService.sendMailConfirmCode(buyer.getUser());
-		//check empty phone number
-		return ResponseEntity.ok(new BaseResponse(false, "Not implement yet"));
+		otpService.sendOtpViaPhone(buyer.getUser());
+		return ResponseEntity.ok(new BaseResponse());
 	}
 }

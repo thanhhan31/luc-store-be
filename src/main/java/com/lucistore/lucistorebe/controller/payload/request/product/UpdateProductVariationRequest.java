@@ -18,7 +18,7 @@ public class UpdateProductVariationRequest {
 	@Range(min = 0)
 	private Long availableQuantity;
 	
-	@Range(min = 0, max = 100)
+	@Range(min = 0, max = 100, message = "Allowed discount value is from 0 to 100")
 	private Integer discount;
 	
 	private EProductVariationStatus status;

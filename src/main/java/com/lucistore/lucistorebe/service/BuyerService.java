@@ -105,6 +105,10 @@ public class BuyerService {
 		return buyerRepo.findByUser_Email(email);
 	}
 	
+	public Buyer getBuyerByPhoneNumber(String phoneNumber) {
+		return buyerRepo.findByUser_Phone(phoneNumber);
+	}
+	
 	public boolean existsByEmail(String email) {
 		return buyerRepo.existsByUser_Email(email);
 	}
