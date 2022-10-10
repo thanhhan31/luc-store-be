@@ -5,7 +5,9 @@ import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
-@Embeddable
+import lombok.AllArgsConstructor;
+
+@Embeddable @AllArgsConstructor
 public class BuyerCartDetailPK implements Serializable {
 	private static final long serialVersionUID = -4710107016894941014L;
 
@@ -14,4 +16,5 @@ public class BuyerCartDetailPK implements Serializable {
 	
 	@Column(name="id_product_variation")
 	private Long idProductVariation;
+	
 }
