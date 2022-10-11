@@ -1,7 +1,6 @@
 package com.lucistore.lucistorebe.service;
 
 import java.util.Date;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -50,52 +49,33 @@ public class ProductInventoryService {
         );
     }
 
-	public ListWithPagingResponse<ProductInventoryDTO> search(Long idProduct, Long idProductVariation, Long idImporter, Date importDate, Integer currentPage, Integer size, Sort sort) {
+	public ListWithPagingResponse<ProductInventoryDTO> search(Long idProduct, Long idProductVariation, Long idImporter, Date importDateFrom, Date importDateTo, Integer currentPage, Integer size, Sort sort) {
 		
-		// int count = productRepo.searchCount(idsCategory, searchName, searchDescription, status, minPrice, maxPrice).intValue();
-		// PageWithJpaSort page = new PageWithJpaSort(currentPage, size, count, sort);
+		int count = productInventoryRepo.searchCount(idProduct, idProductVariation, idImporter, importDateFrom, importDateTo).intValue();
+		PageWithJpaSort page = new PageWithJpaSort(currentPage, size, count, sort);
 		
-		// return serviceUtils.convertToListResponse(
-		// 		productRepo.search(idsCategory, searchName, searchDescription, status, minPrice, maxPrice, page),
-		// 		ProductInventoryDTO.class, 
-		// 		page
-		// 	);
-
-        return null;
+		return serviceUtils.convertToListResponse(
+            productInventoryRepo.search(idProduct, idProductVariation, idImporter, importDateFrom, importDateTo, page),
+				ProductInventoryDTO.class, 
+				page
+			);
 	}
 
-    public ListResponse<ProductInventoryDTO> getAllByIdImporter(Long id) {
-        // return serviceUtils.convertToListResponse(
-        //     productInventoryRepo.findAllByIdImporter(id), 
-        //     ProductInventoryDTO.class
-        // );
-        return null;
-    }
-
-    public ListResponse<ProductInventoryDTO> getAllByIdProduct(Long id) {
-        // return serviceUtils.convertToListResponse(
-        //     productInventoryRepo.findAllByIdProduct(id), 
-        //     ProductInventoryDTO.class
-        // );
-
-        return null;
-    }
-
-    public DataResponse<ProductInventoryDTO> create(CreateProductInventoryRequest data, Long idImporter) {
-        if(!productVariationRepo.existsById(data.getIdProductVariation())){
-            throw new InvalidInputDataException("No product variation found with given id: " + data.getIdProductVariation());
+    public DataResponse<ProductInventoryDTO> create(Long idProductVariation, Long idImporter, CreateProductInventoryRequest data) {
+        if(!productVariationRepo.existsById(idProductVariation)){
+            throw new InvalidInputDataException("No product variation found with given id: " + idProductVariation);
         }
 
-        ProductVariation productVariation = productVariationRepo.getReferenceById(data.getIdProductVariation());
+        ProductVariation productVariation = productVariationRepo.getReferenceById(idProductVariation);
 
-        productVariation.setAvailableQuantity(productVariation.getAvailableQuantity() + data.getImportQuantity());
+        productVariation.setAvailableQuantity(productVariation.getAvailableQuantity() + data.getQuantity());
         
         return serviceUtils.convertToDataResponse(
             productInventoryRepo.save(
                 new ProductInventory(
                     productVariation, 
                     userRepo.getReferenceById(idImporter), 
-                    data.getImportQuantity()
+                    data.getQuantity()
                 )),
                 ProductInventoryDTO.class
             );

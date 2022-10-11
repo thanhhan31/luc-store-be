@@ -11,5 +11,6 @@ public class ProductInventoryDTO {
     private Date importTime;
     private UserDTO importer;
     private Long importQuantity;
-    private ProductVariationDTO productVariation;
+
+    private ProductVariationDTO variation;
 }

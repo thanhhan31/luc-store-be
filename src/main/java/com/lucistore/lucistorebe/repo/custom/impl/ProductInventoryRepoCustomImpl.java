@@ -16,6 +16,10 @@ import org.springframework.data.jpa.repository.query.QueryUtils;
 import org.springframework.stereotype.Repository;
 
 import com.lucistore.lucistorebe.entity.product.ProductInventory;
+import com.lucistore.lucistorebe.entity.product.ProductInventory_;
+import com.lucistore.lucistorebe.entity.product.ProductVariation_;
+import com.lucistore.lucistorebe.entity.product.Product_;
+import com.lucistore.lucistorebe.entity.user.User_;
 import com.lucistore.lucistorebe.repo.custom.ProductInventoryRepoCustom;
 import com.lucistore.lucistorebe.utility.PageWithJpaSort;
 
@@ -25,28 +29,33 @@ public class ProductInventoryRepoCustomImpl implements ProductInventoryRepoCusto
 	private EntityManager em;
 	
 	@Override
-	public List<ProductInventory> search( Long idProduct, Long idProductVariation, Long idImporter, Date importDate,
+	public List<ProductInventory> search(Long idProduct, Long idProductVariation, Long idImporter, Date importTimeFrom , Date importTimeTo,
 	PageWithJpaSort page) {
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 		CriteriaQuery<ProductInventory> cq = cb.createQuery(ProductInventory.class);
 		Root<ProductInventory> root = cq.from(ProductInventory.class);
 
 		List<Predicate> filters = new ArrayList<>();
-		// if (searchName != null) {
-		// 	filters.add(cb.like(root.get(ProductInventory_.name), "%" + searchName + "%"));
-		// }
-		// if (searchDescription != null) {
-		// 	filters.add(cb.like(root.get(ProductInventory_.description), "%" + searchDescription + "%"));
-		// }
-		// if (status != null) {
-		// 	filters.add(cb.equal(root.get(ProductInventory_.status), status));
-		// }
-		// if (minPrice != null) {
-		// 	filters.add(cb.greaterThanOrEqualTo(root.get(ProductInventory_.minPrice), minPrice));
-		// }
-		// if (maxPrice != null) {
-		// 	filters.add(cb.lessThanOrEqualTo(root.get(ProductInventory_.maxPrice), maxPrice));
-		// }
+		if (idProduct != null) {
+			filters.add(cb.equal(
+					root.get(ProductInventory_.variation)
+							.get(ProductVariation_.product)
+							.get(Product_.id),
+					idProduct));
+		}
+
+		if (idProductVariation != null) {
+			filters.add(cb.equal(root.get(ProductInventory_.id), idProductVariation));
+		}
+		if (idImporter != null) {
+			filters.add(cb.equal(root.get(ProductInventory_.importer).get(User_.id), idImporter));
+		}
+		if (importTimeFrom != null) {
+			filters.add(cb.greaterThanOrEqualTo(root.get(ProductInventory_.importTime), importTimeFrom));
+		}
+		if (importTimeTo != null) {
+			filters.add(cb.lessThanOrEqualTo(root.get(ProductInventory_.importTime), importTimeTo));
+		}
 
 		if (page != null) {
 			cq.orderBy(QueryUtils.toOrders(page.getSort(), root, cb));
@@ -64,22 +73,33 @@ public class ProductInventoryRepoCustomImpl implements ProductInventoryRepoCusto
 	}
 
 	@Override
-	public Long searchCount(Long idProduct, Long idProductVariation, Long idImporter, Date importDate) {
+	public Long searchCount(Long idProduct, Long idProductVariation, Long idImporter, Date importTimeFrom, Date importTimeTo) {
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 		CriteriaQuery<Long> cq = cb.createQuery(Long.class);
 		Root<ProductInventory> root = cq.from(ProductInventory.class);
 		
 		List<Predicate> filters = new ArrayList<>();
 
-		// if (idProduct != null) {
-		// 	filters.add(cb.equal(root.get(ProductInventory_.variation).get(ProductVariation_.id), status));
-		// }
-		// if (minPrice != null) {
-		// 	filters.add(cb.greaterThanOrEqualTo(root.get(ProductInventory_.minPrice), minPrice));
-		// }
-		// if (maxPrice != null) {
-		// 	filters.add(cb.lessThanOrEqualTo(root.get(ProductInventory_.maxPrice), maxPrice));
-		// }
+		if (idProduct != null) {
+			filters.add(cb.equal(
+					root.get(ProductInventory_.variation)
+							.get(ProductVariation_.product)
+							.get(Product_.id),
+					idProduct));
+		}
+
+		if (idProductVariation != null) {
+			filters.add(cb.equal(root.get(ProductInventory_.id), idProductVariation));
+		}
+		if (idImporter != null) {
+			filters.add(cb.equal(root.get(ProductInventory_.importer).get(User_.id), idImporter));
+		}
+		if (importTimeFrom != null) {
+			filters.add(cb.greaterThanOrEqualTo(root.get(ProductInventory_.importTime), importTimeFrom));
+		}
+		if (importTimeTo != null) {
+			filters.add(cb.lessThanOrEqualTo(root.get(ProductInventory_.importTime), importTimeTo));
+		}
 
 		Predicate filter = cb.and(filters.toArray(new Predicate[0]));
 		cq.select(cb.count(root)).where(filter);

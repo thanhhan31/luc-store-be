@@ -9,6 +9,5 @@ import lombok.Getter;
 @Getter
 public class CreateProductInventoryRequest {
     @Range(min = 1, message = "Import quantity must be greater than 0")
-    private Long importQuantity;
-    private Long idProductVariation;
+    private Long quantity;
 }
