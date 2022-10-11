@@ -105,6 +105,10 @@ public class BuyerService {
 		return buyerRepo.findByUser_Email(email);
 	}
 	
+	public Buyer getBuyerByPhoneNumber(String phoneNumber) {
+		return buyerRepo.findByUser_Phone(phoneNumber);
+	}
+	
 	public boolean existsByEmail(String email) {
 		return buyerRepo.existsByUser_Email(email);
 	}
@@ -264,7 +268,7 @@ public class BuyerService {
 			throw new DataConflictException("Email is already exists");
 		
 		if (StringUtils.isNotEmpty(data.getPhone()) && 
-				!buyer.getUser().getPhone().equals(data.getPhone()) && 
+				!data.getPhone().equals(buyer.getUser().getPhone()) && 
 				buyerRepo.existsByUser_Phone(data.getPhone()).booleanValue())
 			throw new DataConflictException("Phone is already used");
 		

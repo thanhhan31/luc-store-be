@@ -43,7 +43,7 @@ public class Buyer implements UserInfo, UpdatableAvatar {
 	@Column(name="id", updatable=false, unique=true)
 	private Long id;
 	
-	@OneToOne(cascade = CascadeType.ALL,optional = false)
+	@OneToOne(cascade = CascadeType.ALL, optional = false)
 	@PrimaryKeyJoinColumn(name = "id", referencedColumnName = "id")
 	private User user;
 	

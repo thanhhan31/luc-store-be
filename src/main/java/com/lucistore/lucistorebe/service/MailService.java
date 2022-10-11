@@ -14,10 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import com.lucistore.lucistorebe.controller.advice.exception.CommonRuntimeException;
-import com.lucistore.lucistorebe.controller.advice.exception.InvalidInputDataException;
 import com.lucistore.lucistorebe.entity.user.buyer.Buyer;
-import com.lucistore.lucistorebe.utility.OtpCache;
-
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 
@@ -25,12 +22,6 @@ import freemarker.template.Template;
 public class MailService {
 	@Autowired
 	JavaMailSender mailSender;
-	
-	@Autowired
-	OtpCache otpCache;
-	
-	@Autowired
-	BuyerService buyerService;
 		
 	@Value("${spring.mail.username}")
 	private String senderMail;
@@ -41,18 +32,7 @@ public class MailService {
 	@Autowired
 	private Configuration freeMakerConfiguration;
 	
-	public void sendMailConfirmCode(String email) {
-		Buyer buyer = buyerService.getBuyerByEmail(email);
-		if (buyer == null)
-			throw new InvalidInputDataException("No user found is associated with this email address");
-		sendMailConfirmCode(buyer);
-	}
-	
-	public void sendMailConfirmCode(Buyer buyer) {
-		/*if (buyer.getEmailConfirmed().booleanValue())
-			throw new CommonRestException("Email has been already confirmed");*/
-		String otp = otpCache.create(buyer.getUsername());
-		
+	public void sendMailConfirmCode(Buyer buyer, String otp) {		
 		MimeMessage message = mailSender.createMimeMessage();
 		
 		try {

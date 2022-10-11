@@ -8,8 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lucistore.lucistorebe.controller.payload.request.BuyerEmailOtpRequest;
+import com.lucistore.lucistorebe.controller.payload.request.BuyerPhoneOtpRequest;
 import com.lucistore.lucistorebe.controller.payload.response.BaseResponse;
-import com.lucistore.lucistorebe.service.MailService;
+import com.lucistore.lucistorebe.service.OtpService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -20,7 +21,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @RequestMapping("/api/otp")
 public class OtpController {
 	@Autowired
-	MailService mailService;
+	OtpService otpService;
 	
 	@Operation(summary = "Send OTP to the provided email")
 	@ApiResponses(value = {
@@ -30,7 +31,7 @@ public class OtpController {
 	})
 	@PostMapping("/email")
 	public ResponseEntity<?> sendViaEmail(@RequestBody BuyerEmailOtpRequest body) {
-		mailService.sendMailConfirmCode(body.getEmail());
+		otpService.sendOtpViaEmail(body.getEmail());
 		return ResponseEntity.ok(new BaseResponse());
 	}
 	
@@ -41,8 +42,8 @@ public class OtpController {
 					content = { @Content(mediaType = "application/json") })
 	})
 	@PostMapping("/phone")
-	public ResponseEntity<?> sendViaPhone(@RequestBody BuyerEmailOtpRequest body) {
-		//mailService.sendMailConfirmCode(body.getEmail());
-		return ResponseEntity.ok(new BaseResponse(false, "Not implement yet"));
+	public ResponseEntity<?> sendViaPhone(@RequestBody BuyerPhoneOtpRequest body) {
+		otpService.sendOtpViaPhone(body.getPhoneNumber());
+		return ResponseEntity.ok(new BaseResponse());
 	}
 }
