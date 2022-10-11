@@ -1,6 +1,5 @@
 package com.lucistore.lucistorebe.controller.payload.dto;
 
-import com.lucistore.lucistorebe.entity.user.UserRole;
 import com.lucistore.lucistorebe.utility.EUserStatus;
 
 import lombok.Getter;
@@ -13,6 +12,6 @@ public class UserDTO {
 	private String username;
 	private String email;
 	private String phone;
-	private UserRole role;
+	private UserRoleDTO role;
 	private EUserStatus status;
 }
