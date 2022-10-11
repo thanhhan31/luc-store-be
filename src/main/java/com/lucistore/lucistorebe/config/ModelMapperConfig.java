@@ -9,6 +9,7 @@ import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.lucistore.lucistorebe.controller.payload.dto.BuyerCartDetailDTO;
 import com.lucistore.lucistorebe.controller.payload.dto.BuyerDTO;
 import com.lucistore.lucistorebe.controller.payload.dto.ProductCategoryDTO;
 import com.lucistore.lucistorebe.controller.payload.dto.ProductCategoryGeneralDTO;
@@ -23,6 +24,7 @@ import com.lucistore.lucistorebe.entity.product.ProductCategory;
 import com.lucistore.lucistorebe.entity.product.ProductImage;
 import com.lucistore.lucistorebe.entity.product.ProductVariation;
 import com.lucistore.lucistorebe.entity.user.buyer.Buyer;
+import com.lucistore.lucistorebe.entity.user.buyer.BuyerCartDetail;
 
 @Configuration
 public class ModelMapperConfig {
@@ -83,6 +85,11 @@ public class ModelMapperConfig {
 		
 		mapper.createTypeMap(ProductVariation.class, ProductVariationDTO.class).addMappings(m -> {
 			m.map(src -> src.getProduct().getId(), ProductVariationDTO::setIdProduct);
+		});
+
+		mapper.createTypeMap(BuyerCartDetail.class, BuyerCartDetailDTO.class).addMappings(m -> {
+			m.map(src -> src.getBuyer().getId(), BuyerCartDetailDTO::setIdBuyer);
+			m.map(src -> src.getProductVariation().getProduct(), BuyerCartDetailDTO::setProductDetail);
 		});
 		
 		return mapper;

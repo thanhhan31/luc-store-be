@@ -13,14 +13,14 @@ import javax.validation.constraints.NotNull;
 import com.lucistore.lucistorebe.controller.advice.exception.InvalidInputDataException;
 import com.lucistore.lucistorebe.entity.pk.BuyerCartDetailPK;
 import com.lucistore.lucistorebe.entity.product.ProductVariation;
+import com.lucistore.lucistorebe.utility.EProductStatus;
 import com.lucistore.lucistorebe.utility.EProductVariationStatus;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity @Getter @Setter @AllArgsConstructor @NoArgsConstructor
+@Entity @Getter @Setter @NoArgsConstructor
 @Table(name = "buyer_cart_detail")
 public class BuyerCartDetail {
 	@EmbeddedId
@@ -39,9 +39,10 @@ public class BuyerCartDetail {
 	@NotNull
 	private Long quantity = 0L;
 
-	public BuyerCartDetail(Buyer buyer, ProductVariation productVariation) {
+	public BuyerCartDetail(Buyer buyer, ProductVariation productVariation, Long quantity) {
 		this.buyer = buyer;
 		this.productVariation = productVariation;
+		this.quantity = quantity;
 		this.id = new BuyerCartDetailPK(buyer.getId(), productVariation.getId());
 	}
 
@@ -50,6 +51,10 @@ public class BuyerCartDetail {
 	private void check(){
 		if (productVariation.getStatus() != EProductVariationStatus.ENABLED) {
 			throw new InvalidInputDataException("Product Variation is not enabled");
+		}
+
+		if (productVariation.getProduct().getStatus() != EProductStatus.ENABLED) {
+			throw new InvalidInputDataException("Product is not enabled");
 		}
 
 		if (quantity > productVariation.getAvailableQuantity()) {
