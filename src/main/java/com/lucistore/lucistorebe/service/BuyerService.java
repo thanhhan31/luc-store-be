@@ -268,7 +268,7 @@ public class BuyerService {
 			throw new DataConflictException("Email is already exists");
 		
 		if (StringUtils.isNotEmpty(data.getPhone()) && 
-				!buyer.getUser().getPhone().equals(data.getPhone()) && 
+				!data.getPhone().equals(buyer.getUser().getPhone()) && 
 				buyerRepo.existsByUser_Phone(data.getPhone()).booleanValue())
 			throw new DataConflictException("Phone is already used");
 		

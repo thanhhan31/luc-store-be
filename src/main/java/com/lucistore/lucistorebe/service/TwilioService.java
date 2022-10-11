@@ -30,8 +30,9 @@ public class TwilioService {
     }
     
     public void sendSms(String phoneNumber, String otpCode) {
+    	
     	Message.creator(
-			new PhoneNumber(phoneNumber), 
+			new PhoneNumber("+84".concat(phoneNumber.substring(1))), 
 			new PhoneNumber(number), 
 			"Your OTP code is: " + otpCode)
     	.create();
