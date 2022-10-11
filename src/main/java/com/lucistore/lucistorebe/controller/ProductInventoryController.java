@@ -67,12 +67,14 @@ public class ProductInventoryController {
 			@Parameter(description = "Specify sort order. True for sort in descending order")
 			    Boolean sortDescending) {
 
-        return ResponseEntity.ok(
-            productInventoryService.search(
-                page, 
-                size, 
-                ModelSorting.getProductSort(sortBy, sortDescending)
-            )
-        );
+        // return ResponseEntity.ok(
+        //     productInventoryService.search(
+        //         page, 
+        //         size, 
+        //         ModelSorting.getProductSort(sortBy, sortDescending)
+        //     )
+        // );
+
+		return null;
     }
 }

@@ -39,6 +39,12 @@ public class BuyerCartDetail {
 	@NotNull
 	private Long quantity = 0L;
 
+	public BuyerCartDetail(Buyer buyer, ProductVariation productVariation) {
+		this.buyer = buyer;
+		this.productVariation = productVariation;
+		this.id = new BuyerCartDetailPK(buyer.getId(), productVariation.getId());
+	}
+
 	@PrePersist
 	@PreUpdate
 	private void check(){

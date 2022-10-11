@@ -15,6 +15,7 @@ import com.lucistore.lucistorebe.entity.pk.BuyerCartDetailPK;
 import com.lucistore.lucistorebe.entity.user.buyer.BuyerCartDetail;
 import com.lucistore.lucistorebe.repo.BuyerCartDetailRepo;
 import com.lucistore.lucistorebe.repo.BuyerRepo;
+import com.lucistore.lucistorebe.repo.ProductVariationRepo;
 import com.lucistore.lucistorebe.service.util.ServiceUtils;
 
 
@@ -25,6 +26,9 @@ public class CartDetailService {
 	
 	@Autowired 
 	BuyerRepo buyerRepo;
+
+	@Autowired
+	ProductVariationRepo productVariationRepo;
 	
 	@Autowired
 	ServiceUtils serviceUtils;
@@ -44,9 +48,10 @@ public class CartDetailService {
 	public DataResponse<BuyerCartDetailDTO> create(Long idBuyer, @Valid CreateBuyerCartDetailRequest data) {
 		// Buyer buyer = buyerRepo.getReferenceById(idBuyer);
 
-		BuyerCartDetail cartDetail = new BuyerCartDetail();
-		cartDetail.setId(new BuyerCartDetailPK(idBuyer, data.getIdProductVariation()));
-		cartDetail.setQuantity(data.getQuantity());
+		BuyerCartDetail cartDetail = new BuyerCartDetail(
+			buyerRepo.getReferenceById(idBuyer),
+			productVariationRepo.getReferenceById(data.getIdProductVariation())
+		);
 		
 		return serviceUtils.convertToDataResponse(buyerCartDetailRepo.save(cartDetail), BuyerCartDetailDTO.class);
 	}
