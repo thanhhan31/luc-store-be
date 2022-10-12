@@ -25,4 +25,10 @@ public class BuyerFavouriteProduct {
 	@ManyToOne
 	@JoinColumn(name = "id_product", insertable = false, updatable = false)
 	private Product product;
+
+	public BuyerFavouriteProduct( Buyer buyer, Product product) {
+		this.buyer = buyer;
+		this.product = product;
+		this.id = new BuyerFavouriteProductPK(buyer.getId(), product.getId());
+	}
 }

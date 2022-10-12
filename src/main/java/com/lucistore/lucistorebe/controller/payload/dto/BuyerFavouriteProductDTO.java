@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
-public class BuyerFavoriteProductDTO {
+public class BuyerFavouriteProductDTO {
 	private Long id;
 	private BuyerDTO buyer;
 	private ProductDetailDTO product;
