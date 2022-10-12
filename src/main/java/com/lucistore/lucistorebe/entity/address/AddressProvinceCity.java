@@ -9,9 +9,6 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import com.lucistore.lucistorebe.entity.product.ProductCategory;
-import com.lucistore.lucistorebe.entity.product.ProductVariation;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

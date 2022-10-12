@@ -15,7 +15,10 @@ import javax.persistence.Table;
 import com.lucistore.lucistorebe.entity.address.AddressWard;
 import com.lucistore.lucistorebe.utility.EBuyerDeliveryAddressStatus;
 
-@Entity
+import lombok.Getter;
+import lombok.Setter;
+
+@Entity @Getter @Setter
 @Table(name = "buyer_delivery_address")
 public class BuyerDeliveryAddress {
 	@Id
@@ -45,4 +48,16 @@ public class BuyerDeliveryAddress {
 	@Column(name = "status")
 	@Enumerated(EnumType.ORDINAL)
 	private EBuyerDeliveryAddressStatus status;
+
+	public BuyerDeliveryAddress( Buyer buyer, AddressWard addressWard, String addressDetail, String receiverName,
+			String receiverPhone, Boolean isDefault) {
+		super();
+		this.buyer = buyer;
+		this.addressWard = addressWard;
+		this.addressDetail = addressDetail;
+		this.receiverName = receiverName;
+		this.receiverPhone = receiverPhone;
+		this.isDefault = isDefault;
+		this.status = EBuyerDeliveryAddressStatus.ACTIVE;
+	}
 }
