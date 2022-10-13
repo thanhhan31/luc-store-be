@@ -16,6 +16,7 @@ import com.lucistore.lucistorebe.entity.user.User;
 import com.lucistore.lucistorebe.entity.user.buyer.Buyer;
 import com.lucistore.lucistorebe.entity.user.buyer.BuyerDeliveryAddress;
 import com.lucistore.lucistorebe.utility.EOrderStatus;
+import com.lucistore.lucistorebe.utility.EPaymentMethod;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -51,4 +52,8 @@ public class Order {
 	@Column(name = "status")
 	@Enumerated(EnumType.ORDINAL)
 	private EOrderStatus status;
+	
+	@Column(name = "payment_method")
+	@Enumerated(EnumType.STRING)
+	private EPaymentMethod paymentMethod;
 }

@@ -1,4 +1,4 @@
-package com.lucistore.lucistorebe.service;
+package com.lucistore.lucistorebe.service.thirdparty;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;

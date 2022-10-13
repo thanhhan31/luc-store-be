@@ -10,6 +10,7 @@ import com.lucistore.lucistorebe.controller.advice.exception.InvalidInputDataExc
 import com.lucistore.lucistorebe.controller.payload.response.service.CloudinaryUploadResponse;
 import com.lucistore.lucistorebe.entity.MediaResource;
 import com.lucistore.lucistorebe.repo.MediaResourceRepo;
+import com.lucistore.lucistorebe.service.thirdparty.CloudinaryService;
 
 @Service
 public class MediaResourceService {

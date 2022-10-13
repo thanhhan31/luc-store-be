@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
 import com.lucistore.lucistorebe.utility.OtpCache;
+import com.lucistore.lucistorebe.utility.PaypalOrderIdCache;
 
 
 @Configuration
@@ -23,6 +24,11 @@ public class AppConfig {
 	@Bean
 	public OtpCache otpCache() {
 		return new OtpCache(expiredAfterMins, otpLength);
+	}
+	
+	@Bean
+	public PaypalOrderIdCache paypalOrderIdCache() {
+		return new PaypalOrderIdCache();
 	}
 	
 	@Bean

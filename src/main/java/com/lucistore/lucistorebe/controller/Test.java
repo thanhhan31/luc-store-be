@@ -14,6 +14,8 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.lucistore.lucistorebe.repo.ProductCategoryRepo;
+import com.lucistore.lucistorebe.service.TransactionService;
+import com.lucistore.lucistorebe.service.thirdparty.PayPalService;
 import com.lucistore.lucistorebe.utility.OtpCache;
 import com.lucistore.lucistorebe.utility.PlatformPolicyParameter;
 import com.lucistore.lucistorebe.utility.jwt.JwtUtil;
@@ -43,34 +45,27 @@ public class Test {
 		return l.get(0).getLevel().toString();*/
 	}
 	
+	
+	@Autowired
+	TransactionService transactionService;
+	
 	@GetMapping("/otp")
 	public String testotp() {
-		System.out.println(otpCache.create("123123"));
-		
-		/*LoadingCache<String, String> loader;
-		loader = CacheBuilder
-				.newBuilder()
-				.expireAfterWrite(1, TimeUnit.MINUTES)
-				.build(new CacheLoader<String, String>() {
-					@Override
-					public String load(String key) throws Exception {
-						return "?null?";
-					}
-			});
-		
-		loader.put("asdasd", "123123aSASD");
-		try {
-			System.out.println(loader.get("asdasd"));
-		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
-		
-		return String.format("Your token is %s", otpCache.get("123123"));
+		palService.refund(1L);
+		return "hi";
+	}
+	
+	@Autowired
+	PayPalService palService;
+	
+	@GetMapping("/testpaypal")
+	public String testpaypal() {
+		return palService.test(1L);
 	}
 
 	@GetMapping("/login/oauth2")
 	public String testoauth(@RequestParam(name = "token") String token) {
+		palService.capture(token);
 		return String.format("Your token is %s", token);
 	}
 }
