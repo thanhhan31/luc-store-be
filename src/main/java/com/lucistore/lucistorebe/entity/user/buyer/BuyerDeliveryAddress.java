@@ -16,9 +16,10 @@ import com.lucistore.lucistorebe.entity.address.AddressWard;
 import com.lucistore.lucistorebe.utility.EBuyerDeliveryAddressStatus;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity @Getter @Setter
+@Entity @Getter @Setter @NoArgsConstructor
 @Table(name = "buyer_delivery_address")
 public class BuyerDeliveryAddress {
 	@Id
@@ -51,7 +52,6 @@ public class BuyerDeliveryAddress {
 
 	public BuyerDeliveryAddress( Buyer buyer, AddressWard addressWard, String addressDetail, String receiverName,
 			String receiverPhone, Boolean isDefault) {
-		super();
 		this.buyer = buyer;
 		this.addressWard = addressWard;
 		this.addressDetail = addressDetail;

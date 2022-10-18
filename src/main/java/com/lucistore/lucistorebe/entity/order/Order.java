@@ -1,6 +1,10 @@
 package com.lucistore.lucistorebe.entity.order;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -10,6 +14,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.lucistore.lucistorebe.entity.user.User;
@@ -38,6 +43,9 @@ public class Order {
 	@ManyToOne
 	@JoinColumn(name = "id_seller")
 	private User seller;
+
+	@OneToMany(mappedBy = "order", cascade = CascadeType.PERSIST)
+	private List<OrderDetail> orderDetails = new ArrayList<>(); 
 	
 	@ManyToOne
 	@JoinColumn(name = "id_buyer_delivery_address")
@@ -45,6 +53,12 @@ public class Order {
 	
 	@Column(name = "create_time")
 	private Date createTime;
+
+	@Column(name = "price")
+	private Long price = 0L;
+
+	@Column(name = "payPrice")
+	private Long payPrice = 0L;
 	
 	@Column(name = "note")
 	private String note;
@@ -56,4 +70,15 @@ public class Order {
 	@Column(name = "payment_method")
 	@Enumerated(EnumType.STRING)
 	private EPaymentMethod paymentMethod;
+
+	public Order(Buyer buyer, BuyerDeliveryAddress deliveryAddress, String note,
+			EOrderStatus status, EPaymentMethod paymentMethod) {
+		this.buyer = buyer;
+		this.deliveryAddress = deliveryAddress;
+		this.createTime = new Date();
+		this.note = note;
+		this.status = status;
+		this.paymentMethod = paymentMethod;
+	}
+
 }

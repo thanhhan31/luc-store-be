@@ -5,7 +5,9 @@ import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
-@Embeddable
+import lombok.AllArgsConstructor;
+
+@Embeddable @AllArgsConstructor
 public class OrderDetailPK implements Serializable {
 	private static final long serialVersionUID = 7703736379513092165L;
 
