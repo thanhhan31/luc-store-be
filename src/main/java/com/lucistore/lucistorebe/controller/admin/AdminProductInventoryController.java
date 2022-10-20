@@ -35,7 +35,6 @@ public class AdminProductInventoryController {
 
     @GetMapping
 	public ResponseEntity<?> get(
-			
 			@Parameter(description = "Search by product id")
 			@RequestParam(required = false) Long idProduct,
 

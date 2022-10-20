@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,7 @@ import com.lucistore.lucistorebe.repo.BuyerRepo;
 import com.lucistore.lucistorebe.repo.OrderRepo;
 import com.lucistore.lucistorebe.repo.ProductVariationRepo;
 import com.lucistore.lucistorebe.service.util.ServiceUtils;
+import com.lucistore.lucistorebe.utility.EBuyerDeliveryAddressStatus;
 import com.lucistore.lucistorebe.utility.EOrderStatus;
 import com.lucistore.lucistorebe.utility.EProductStatus;
 import com.lucistore.lucistorebe.utility.EProductVariationStatus;
@@ -71,6 +74,7 @@ public class OrderService {
 		return serviceUtils.convertToListResponse(orderRepo.findAllByBuyerId(idBuyer, Sort.by("productVariation.product")), OrderDTO.class);
 	}
 	
+	@Transactional
 	public DataResponse<OrderDTO> create(Long idBuyer, CreateBuyerOrderRequest data) {
 
 		BuyerDeliveryAddress address = buyerDeliveryAddressRepo.getReferenceById(data.getIdAddress());
@@ -81,7 +85,8 @@ public class OrderService {
 		}
 
 		if(!buyerDeliveryAddressRepo.existsById(data.getIdAddress())
-				|| !address.getBuyer().getId().equals(idBuyer)) {
+				|| !address.getBuyer().getId().equals(idBuyer)
+				|| !address.getStatus().equals(EBuyerDeliveryAddressStatus.ACTIVE)) {
 			throw new InvalidInputDataException("No Buyer Delivery Address found with given id " + data.getIdAddress());
 		}
 
@@ -139,6 +144,8 @@ public class OrderService {
 					throw new InvalidInputDataException("No Product Variation found with given id " + id);
 				}
 			});
+
+			buyerCartDetailRepo.deleteAllInBatch(cartDetails); // delete cart item from cart
 
 		} else if (data.getClass().equals(CreateBuyerOrderFromProductRequest.class)) {
 			idps.add(((CreateBuyerOrderFromProductRequest) data).getIdProductVariation());
