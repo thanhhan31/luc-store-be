@@ -49,23 +49,23 @@ public class Test {
 	@Autowired
 	TransactionService transactionService;
 	
-	@GetMapping("/otp")
-	public String testotp() {
-		palService.refund(1L);
-		return "hi";
-	}
+	// @GetMapping("/otp")
+	// public String testotp() {
+	// 	palService.refund(1L);
+	// 	return "hi";
+	// }
 	
 	@Autowired
 	PayPalService palService;
 	
-	@GetMapping("/testpaypal")
-	public String testpaypal() {
-		return palService.test(1L);
-	}
+	// @GetMapping("/testpaypal")
+	// public String testpaypal() {
+	// 	return palService.test(1L);
+	// }
 
-	@GetMapping("/login/oauth2")
-	public String testoauth(@RequestParam(name = "token") String token) {
-		palService.capture(token);
-		return String.format("Your token is %s", token);
-	}
+	// @GetMapping("/login/oauth2")
+	// public String testoauth(@RequestParam(name = "token") String token) {
+	// 	palService.capture(token);
+	// 	return String.format("Your token is %s", token);
+	// }
 }

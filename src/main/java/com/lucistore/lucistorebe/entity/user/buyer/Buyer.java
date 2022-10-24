@@ -51,6 +51,10 @@ public class Buyer implements UserInfo, UpdatableAvatar {
 	@JoinColumn(name = "id_avatar")
 	private MediaResource avatar;
 	
+	@OneToOne
+	@JoinColumn(name = "id_default_address")
+	private BuyerDeliveryAddress defaultAddress;
+	
 	@ManyToOne
 	@JoinColumn(name = "id_rank"/*, nullable = false*/)
 	private BuyerRank rank;
@@ -110,6 +114,11 @@ public class Buyer implements UserInfo, UpdatableAvatar {
 	@Override
 	public EUserStatus getStatus() {
 		return user.getStatus();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return obj != null && this.id.equals(((Buyer) obj).getId());
 	}
 	
 	public Buyer(User user, Boolean canChangeUsername, Boolean emailConfirmed, Boolean phoneConfirmed) {
