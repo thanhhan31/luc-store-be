@@ -14,4 +14,6 @@ public interface StatisticRepoCustom {
         Date importDateFrom,
         Date importDateTo
     );
+    
+    void test();
 }

@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -13,6 +14,7 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.ListJoin;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 
 import org.springframework.stereotype.Repository;
 
@@ -107,9 +109,9 @@ public class StatisticRepoCustomimpl implements StatisticRepoCustom{
 		if ( idAdmins != null) {
 			filters.add(root.get(Order_.seller).get(User_.id).in(idAdmins));
 		}
-		if ( importDateFrom != null) {
+		/*if ( importDateFrom != null) {
 			filters.add(cb.greaterThanOrEqualTo(root.get(Order_.createTime), importDateFrom));
-		}
+		}*/
 
 		Predicate filter = cb.and(filters.toArray(new Predicate[0]));
 
@@ -121,6 +123,41 @@ public class StatisticRepoCustomimpl implements StatisticRepoCustom{
 		
 		TypedQuery<OrderStatistic> query = em.createQuery(cq);
 		return query.getResultList();
+    }
+    
+    public void test() {
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+		/*CriteriaQuery<Tuple> sub = cb.createQuery(Tuple.class);
+		Root<Order> root = sub.from(Order.class);
+		ListJoin<Order, OrderDetail> joinOrderDetail = root.join(Order_.orderDetails, JoinType.LEFT);
+		
+		sub.multiselect(root.get(Order_.id), cb.sum(joinOrderDetail.get(OrderDetail_.quantity)));
+		sub.groupBy(root.get(Order_.id));*/
+		
+		/////////////////////
+		
+		CriteriaQuery<Tuple> main = cb.createQuery(Tuple.class);
+		Root<Order> rootMain = main.from(Order.class);
+		
+		
+		Subquery<Long> sub = main.subquery(Long.class);
+		Root<OrderDetail> subRoot = sub.from(OrderDetail.class);
+		//ListJoin<Order, OrderDetail> joinOrderDetail = subRoot.join(Order_.orderDetails, JoinType.LEFT);
+		//sub.groupBy(subRoot.get(Order_.id));
+		sub.where(cb.equal(subRoot.get(OrderDetail_.order).get(Order_.id), rootMain.get(Order_.id)));
+		sub.select(cb.sum(subRoot.get(OrderDetail_.quantity)));
+
+		
+		
+		main.multiselect(cb.function("MONTH", Integer.class, rootMain.get(Order_.createTime))
+				, cb.sum(sub)
+				, cb.countDistinct(rootMain.get(Order_.buyer).get(Buyer_.id)));
+		
+		main.groupBy(cb.function("MONTH", Integer.class, rootMain.get(Order_.createTime)));
+		
+		
+		var tmp = em.createQuery(main).getResultList();
+		
     }
 
 }
