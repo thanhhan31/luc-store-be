@@ -7,8 +7,9 @@ import lombok.Setter;
 
 @Getter @Setter @AllArgsConstructor @NoArgsConstructor
 public class StatisticDTO{
-	private Long nProduct = 0L;
-	private Long nBuyer = 0L;
-	private Long income = 0L;
-	private Long nOrder = 0L;
+	private Integer timeUnit;
+	private Long nProduct;
+	private Long nBuyer;
+	private Long income;
+	private Long nOrder;
 }

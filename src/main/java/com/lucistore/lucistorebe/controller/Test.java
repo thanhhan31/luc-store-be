@@ -14,6 +14,8 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.lucistore.lucistorebe.repo.ProductCategoryRepo;
+import com.lucistore.lucistorebe.repo.custom.StatisticRepoCustom;
+import com.lucistore.lucistorebe.repo.custom.impl.StatisticRepoCustomimpl;
 import com.lucistore.lucistorebe.service.TransactionService;
 import com.lucistore.lucistorebe.service.thirdparty.PayPalService;
 import com.lucistore.lucistorebe.utility.OtpCache;
@@ -47,11 +49,12 @@ public class Test {
 	
 	
 	@Autowired
-	TransactionService transactionService;
+	StatisticRepoCustomimpl statisticRepoCustom;
+
 	
 	// @GetMapping("/otp")
 	// public String testotp() {
-	// 	palService.refund(1L);
+	// 	statisticRepoCustom.statistic(null, null, null, null, 0);
 	// 	return "hi";
 	// }
 	
