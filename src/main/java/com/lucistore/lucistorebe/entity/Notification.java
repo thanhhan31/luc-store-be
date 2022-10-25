@@ -11,6 +11,7 @@ import javax.persistence.Table;
 
 import com.lucistore.lucistorebe.entity.user.User;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -31,4 +32,11 @@ public class Notification {
 	private String title;
 	private String content;
 	private Boolean seen;
+
+	public Notification(User user, String title, String content, Boolean seen) {
+		this.user = user;
+		this.title = title;
+		this.content = content;
+		this.seen = seen;
+	}
 }
