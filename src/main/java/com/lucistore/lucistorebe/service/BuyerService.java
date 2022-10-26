@@ -36,6 +36,9 @@ import com.lucistore.lucistorebe.utility.RandomString;
 @Service
 public class BuyerService {
 	@Autowired
+	LogService logService;
+	
+	@Autowired
 	BuyerRepo buyerRepo;
 	
 	@Autowired
@@ -160,8 +163,11 @@ public class BuyerService {
 		return username;
 	}
 	
-	public DataResponse<BuyerDTO> updateStatus(Long id, AdminUpdateUserStatusRequest data) {
+	public DataResponse<BuyerDTO> updateStatus(Long idUser, Long id, AdminUpdateUserStatusRequest data) {
 		userService.updateStatus(id, data);
+		
+		logService.logInfo(idUser, 
+				String.format("Change buyer account status with id %d to %s", id, data.getStatus().equals(EUserStatus.BANNED) ? "BANNED" : "ACTIVE"));
 		
 		return serviceUtils.convertToDataResponse(
 				buyerRepo.getReferenceById(id),

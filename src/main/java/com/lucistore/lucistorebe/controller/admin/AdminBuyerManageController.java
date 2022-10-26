@@ -8,6 +8,7 @@ import javax.validation.constraints.Min;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -16,7 +17,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.lucistore.lucistorebe.config.login.UserDetailsImpl;
 import com.lucistore.lucistorebe.controller.payload.request.AdminUpdateUserStatusRequest;
+import com.lucistore.lucistorebe.entity.user.User;
 import com.lucistore.lucistorebe.service.BuyerService;
 import com.lucistore.lucistorebe.service.UserService;
 import com.lucistore.lucistorebe.utility.EGender;
@@ -132,9 +135,10 @@ public class AdminBuyerManageController {
 	})
 	@PutMapping(path = "/{id}", produces = "application/json")
 	public ResponseEntity<?> updateBuyerAccountStatus(
+			@AuthenticationPrincipal UserDetailsImpl<User> user,
 			@PathVariable Long id,
 			@RequestBody @Valid AdminUpdateUserStatusRequest request) {
 		
-		return ResponseEntity.ok(buyerService.updateStatus(id, request));
+		return ResponseEntity.ok(buyerService.updateStatus(user.getUser().getId(), id, request));
 	}
 }

@@ -3,6 +3,7 @@ package com.lucistore.lucistorebe.utility;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.JpaSort;
 
+import com.lucistore.lucistorebe.entity.Log_;
 import com.lucistore.lucistorebe.entity.product.Product_;
 
 public final class ModelSorting {
@@ -74,5 +75,30 @@ public final class ModelSorting {
 			}
 		}
 		return sort;
+	}
+	
+	/**
+	 * Sort by combination of selected attribute
+	 * <br>
+	 * <i>Example: sortBy = (1+2+4) = 7 => sort by price, view and averageRating attribute
+	 * @param sortBy null for unsorted and possible value is 1, 2, 4, 8
+	 * @param sortDescending true if sort in descending order, otherwise ascending
+	 * @return Sort object
+	 * <br>
+	 * sortBy possible value
+	 * <br>
+	 * &nbsp;&nbsp;&nbsp;&nbsp; 1: by date
+	 * <br>
+	 * &nbsp;&nbsp;&nbsp;&nbsp; 2: by logType
+	 */
+	public static Sort getLogSort(Boolean sortByDateDescending)  {
+		if (sortByDateDescending != null) {
+			if (sortByDateDescending.booleanValue())
+				return JpaSort.of(Log_.date).descending();
+			else
+				return JpaSort.of(Log_.date).ascending();
+		}
+		else
+			return Sort.unsorted();
 	}
 }

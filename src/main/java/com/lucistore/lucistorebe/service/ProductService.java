@@ -36,6 +36,9 @@ import com.lucistore.lucistorebe.utility.PlatformPolicyParameter;
 @Service
 public class ProductService {
 	@Autowired
+	LogService logService;
+	
+	@Autowired
 	ProductRepo productRepo;
 	
 	@Autowired
@@ -95,7 +98,7 @@ public class ProductService {
 	}
 	
 	@Transactional
-	public DataResponse<ProductDetailDTO> create(CreateProductRequest data, MultipartFile avatar, List<MultipartFile> images) {
+	public DataResponse<ProductDetailDTO> create(Long idUser, CreateProductRequest data, MultipartFile avatar, List<MultipartFile> images) {
 		if (!productCategoryRepo.existsById(data.getIdCategory()))
 			throw new InvalidInputDataException("No category found with given id");
 		
@@ -129,11 +132,13 @@ public class ProductService {
 		
 		p.setParents(productCategoryRepo.findAncestry(p.getCategory().getParent().getId()));
 		
+		logService.logInfo(idUser, String.format("New product has been created with id %d", p.getId()));
+		
 		return serviceUtils.convertToDataResponse(p, ProductDetailDTO.class);
 	}
 	
 	@Transactional
-	public DataResponse<ProductDetailDTO> update(Long id, UpdateProductRequest data, MultipartFile avatar) {
+	public DataResponse<ProductDetailDTO> update(Long idUser, Long id, UpdateProductRequest data, MultipartFile avatar) {
 		Product p = productRepo.findById(id).orElseThrow(
 				() -> new InvalidInputDataException("No product found with given id")
 			);
@@ -161,6 +166,8 @@ public class ProductService {
 		
 		p = productRepo.save(p);
 		p.setParents(productCategoryRepo.findAncestry(p.getCategory().getParent().getId()));
+		
+		logService.logInfo(idUser, String.format("Product with id has been edited", p.getId()));
 		
 		return serviceUtils.convertToDataResponse(p, ProductDetailDTO.class);
 	}

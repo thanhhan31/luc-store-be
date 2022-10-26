@@ -24,6 +24,9 @@ import com.lucistore.lucistorebe.utility.PageWithJpaSort;
 @Service
 public class UserService {
 	@Autowired
+	LogService logService;
+	
+	@Autowired
 	BuyerRepo buyerRepo;
 	
 	@Autowired
@@ -49,6 +52,13 @@ public class UserService {
 				UserDTO.class, 
 				page
 			);
+	}
+	
+	public DataResponse<UserDTO> updateStatus(Long idUser, Long id, AdminUpdateUserStatusRequest data) {
+		var ret = updateStatus(id, data);
+		logService.logInfo(idUser, 
+				String.format("Change user account status with id %d to %s", id, data.getStatus().equals(EUserStatus.BANNED) ? "BANNED" : "ACTIVE"));
+		return ret;
 	}
 	
 	public DataResponse<UserDTO> updateStatus(Long id, AdminUpdateUserStatusRequest data) {

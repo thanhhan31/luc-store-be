@@ -14,9 +14,13 @@ import com.lucistore.lucistorebe.entity.product.ProductCategory;
 import com.lucistore.lucistorebe.repo.ProductCategoryRepo;
 import com.lucistore.lucistorebe.service.util.ServiceUtils;
 import com.lucistore.lucistorebe.utility.EProductCategoryStatus;
+import com.lucistore.lucistorebe.utility.EUserStatus;
 
 @Service
 public class ProductCategoryService {
+	@Autowired
+	LogService logService;
+	
 	@Autowired 
 	ProductCategoryRepo productCategoryRepo;
 	
@@ -36,7 +40,7 @@ public class ProductCategoryService {
 		return serviceUtils.convertToListResponse(productCategoryRepo.findAllRootCategories(), ProductCategoryDTO.class);
 	}
 	
-	public DataResponse<ProductCategoryDTO> create(CreateProductCategoryRequest data) {
+	public DataResponse<ProductCategoryDTO> create(Long idUser, CreateProductCategoryRequest data) {
 		ProductCategory category;
 		
 		if (data.getIdParent() != null) {
@@ -51,10 +55,15 @@ public class ProductCategoryService {
 		
 		category.setStatus(EProductCategoryStatus.ACTIVE);
 		
-		return serviceUtils.convertToDataResponse(productCategoryRepo.save(category), ProductCategoryDTO.class);
+		category = productCategoryRepo.saveAndFlush(category);
+		
+		logService.logInfo(idUser, 
+				String.format("New category has been created with id %d", category.getId()));
+		
+		return serviceUtils.convertToDataResponse(category, ProductCategoryDTO.class);
 	}
 	
-	public DataResponse<ProductCategoryDTO> update(Long id, UpdateProductCategoryRequest data) {
+	public DataResponse<ProductCategoryDTO> update(Long idUser, Long id, UpdateProductCategoryRequest data) {
 		ProductCategory category = productCategoryRepo.findById(id).orElseThrow(
 				() -> new InvalidInputDataException("No product category found with given id")
 			);
@@ -75,6 +84,9 @@ public class ProductCategoryService {
 		if (data.getStatus() != null && !category.getStatus().equals(data.getStatus())) {
 			category.setStatus(data.getStatus());
 		}
+		
+		logService.logInfo(idUser, 
+				String.format("Category with id %d has been edited", category.getId()));
 		
 		return serviceUtils.convertToDataResponse(productCategoryRepo.save(category), ProductCategoryDTO.class);
 	}

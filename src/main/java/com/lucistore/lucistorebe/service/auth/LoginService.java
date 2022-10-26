@@ -17,11 +17,15 @@ import com.lucistore.lucistorebe.entity.user.User;
 import com.lucistore.lucistorebe.entity.user.buyer.Buyer;
 import com.lucistore.lucistorebe.repo.BuyerRepo;
 import com.lucistore.lucistorebe.repo.UserRepo;
+import com.lucistore.lucistorebe.service.LogService;
 import com.lucistore.lucistorebe.utility.EUserRole;
 import com.lucistore.lucistorebe.utility.jwt.JwtUtil;
 
 @Service
 public class LoginService {
+	@Autowired
+	LogService logService;
+	
 	@Autowired
 	AuthenticationManager authenticationManager;
 	
@@ -54,13 +58,15 @@ public class LoginService {
 				);
 		}
 		else if (requestedRole.equals(EUserRole.ADMIN) && !r.equals(EUserRole.BUYER)) {
+			logService.logInfo(((User)userDetails.getUser()).getId(), "Logged into system");
 			return new LoginResponse<>(
 					token, 
 					mapper.map((User)userDetails.getUser(), UserDTO.class)
 				);
 		}
 		else {
-			throw new LoginException("Username or password is invalid");
+			logService.logWarning(((User)userDetails.getUser()).getId(), "Login into wrong system");
+			throw new LoginException("Username or password is invalid for this system");
 		}
 	}
 	
