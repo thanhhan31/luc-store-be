@@ -1,5 +1,6 @@
 package com.lucistore.lucistorebe.entity.user.buyer;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -16,16 +17,17 @@ import com.lucistore.lucistorebe.entity.address.AddressWard;
 import com.lucistore.lucistorebe.utility.EBuyerDeliveryAddressStatus;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity @Getter @Setter
+@Entity @Getter @Setter @NoArgsConstructor
 @Table(name = "buyer_delivery_address")
 public class BuyerDeliveryAddress {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
 	@JoinColumn(name = "id_buyer")
 	private Buyer buyer;
 	
@@ -42,22 +44,17 @@ public class BuyerDeliveryAddress {
 	@Column(name = "receiver_phone")
 	private String receiverPhone;
 	
-	@Column(name = "default_address")
-	private Boolean isDefault;
-	
 	@Column(name = "status")
 	@Enumerated(EnumType.ORDINAL)
 	private EBuyerDeliveryAddressStatus status;
 
 	public BuyerDeliveryAddress( Buyer buyer, AddressWard addressWard, String addressDetail, String receiverName,
-			String receiverPhone, Boolean isDefault) {
-		super();
+			String receiverPhone) {
 		this.buyer = buyer;
 		this.addressWard = addressWard;
 		this.addressDetail = addressDetail;
 		this.receiverName = receiverName;
 		this.receiverPhone = receiverPhone;
-		this.isDefault = isDefault;
 		this.status = EBuyerDeliveryAddressStatus.ACTIVE;
 	}
 }

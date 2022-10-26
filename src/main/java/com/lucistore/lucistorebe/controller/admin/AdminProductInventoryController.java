@@ -35,14 +35,19 @@ public class AdminProductInventoryController {
 
     @GetMapping
 	public ResponseEntity<?> get(
+			@Parameter(description = "Search by product id")
 			@RequestParam(required = false) Long idProduct,
 
+			@Parameter(description = "Search by product variation id")
 			@RequestParam(required = false) Long idProductVariation,
 
+			@Parameter(description = "Search by importer id")
 			@RequestParam(required = false) Long idImporter,
 
+			@Parameter(description = "Search by import time from")
 			@RequestParam(required = false) Date importDateFrom,
 
+			@Parameter(description = "Search by import time to")
 			@RequestParam(required = false) Date importDateTo,
 
 			@RequestParam(required = false) @Min(value = 1, message = "Page number must be greater than zero") @Parameter(description = "Specify page number") Integer page,
@@ -52,16 +57,16 @@ public class AdminProductInventoryController {
 			@RequestParam(required = false) @Min(1) @Max(31) @Parameter(description = "Specify sort by condition"
 					+ "<br>sortBy value:\r\n"
 					+ "<br>\r\n"
-					+ "&nbsp;&nbsp;&nbsp;&nbsp; 1: &nbsp;&nbsp;by price\r\n"
+					+ "&nbsp;&nbsp;&nbsp;&nbsp; 1: &nbsp;&nbsp;by id\r\n"
+					+ "&nbsp;&nbsp;&nbsp;&nbsp; 2: &nbsp;&nbsp;by variation\r\n"
 					+ "<br>\r\n"
-					+ "&nbsp;&nbsp;&nbsp;&nbsp; 2: &nbsp;&nbsp;by nvisit\r\n"
+					+ "&nbsp;&nbsp;&nbsp;&nbsp; 4: &nbsp;&nbsp;by importer\r\n"
 					+ "<br>\r\n"
-					+ "&nbsp;&nbsp;&nbsp;&nbsp; 4: &nbsp;&nbsp;by nsold\r\n"
+					+ "&nbsp;&nbsp;&nbsp;&nbsp; 8: &nbsp;&nbsp;by import time\r\n"
 					+ "<br>\r\n"
-					+ "&nbsp;&nbsp;&nbsp;&nbsp; 8: &nbsp;&nbsp;by createdDate\r\n"
+					+ "&nbsp;&nbsp;&nbsp;&nbsp; 16: &nbsp;&nbsp;by import quantity\r\n"
 					+ "<br>\r\n"
-					+ "&nbsp;&nbsp;&nbsp;&nbsp; 16: by lastModifiedDate"
-					+ "<br><i>Example: sortBy = (1+2+4) = 7 => sort by price, nvisit and nsold attribute</i>") Integer sortBy,
+					+ "<br><i>Example: sortBy = (1+2+4) = 7 => sort by id, variation and importer attribute</i>") Integer sortBy,
 
 			@RequestParam(required = false) @Parameter(description = "Specify sort order. True for sort in descending order") Boolean sortDescending) {
 
@@ -69,8 +74,7 @@ public class AdminProductInventoryController {
 				productInventoryService.search(
 						idProduct, idProductVariation, idImporter, importDateFrom, importDateTo,
 						page, size,
-						ModelSorting.getProductSort(sortBy, sortDescending)));
-
+						ModelSorting.getProductInventorySort(sortBy, sortDescending)));
 	}
 
 	@PostMapping("/{idProductVariation}")

@@ -19,6 +19,7 @@ import com.lucistore.lucistorebe.repo.AddressWardRepo;
 import com.lucistore.lucistorebe.repo.BuyerDeliveryAddressRepo;
 import com.lucistore.lucistorebe.repo.BuyerRepo;
 import com.lucistore.lucistorebe.service.util.ServiceUtils;
+import com.lucistore.lucistorebe.utility.EBuyerDeliveryAddressStatus;
 
 
 @Service
@@ -58,7 +59,8 @@ public class BuyerDeliveryAddressService {
 
         return serviceUtils.convertToListResponse(
                     buyerDeliveryAddressRepo.findAllByBuyer(buyer,
-                    Sort.by(BuyerDeliveryAddress_.RECEIVER_NAME)),
+                    Sort.by(BuyerDeliveryAddress_.RECEIVER_NAME)).stream().filter(
+                        (x) -> x.getStatus()!= EBuyerDeliveryAddressStatus.ACTIVE).toList(),
             BuyerDeliveryAddressDTO.class);
 	}
 	
@@ -82,9 +84,12 @@ public class BuyerDeliveryAddressService {
                 addressWardRepo.getReferenceById(data.getIdAddressWard()),
                 data.getAddressDetail(),
                 data.getReceiverName(),
-                data.getReceiverPhone(),
-                data.getIsDefault()
+                data.getReceiverPhone()
 		);
+
+        if(data.getIsDefault()) {
+            buyer.setDefaultAddress(deliveryAddress);
+        }
 		
 		return serviceUtils.convertToDataResponse(buyerDeliveryAddressRepo.save(deliveryAddress), BuyerDeliveryAddressDTO.class);
 	}
@@ -109,9 +114,34 @@ public class BuyerDeliveryAddressService {
         deliveryAddress.setAddressDetail(data.getAddressDetail());
         deliveryAddress.setReceiverName(data.getReceiverName());
         deliveryAddress.setReceiverPhone(data.getReceiverPhone());
-        deliveryAddress.setIsDefault(data.getIsDefault());
+        if(data.getIsDefault()) {
+            deliveryAddress.getBuyer().setDefaultAddress(deliveryAddress);
+        }
 
-		
 		return serviceUtils.convertToDataResponse(buyerDeliveryAddressRepo.save(deliveryAddress), BuyerDeliveryAddressDTO.class);
 	}
+
+    public DataResponse<BuyerDeliveryAddressDTO> delete(Long id, Long idBuyer) {
+        BuyerDeliveryAddress deliveryAddress = buyerDeliveryAddressRepo
+                .findById(id).orElseThrow(
+                        () -> new InvalidInputDataException("No Delivery Address found with given id " + id));
+
+        if (idBuyer != null) {
+            if (!deliveryAddress.getBuyer().getId().equals(idBuyer)) {
+                throw new InvalidInputDataException(
+                        MessageFormat.format("No Delivery Address found with given id {0} for buyer with id {1} ", id,
+                                idBuyer));
+            }
+
+            if (deliveryAddress.getBuyer().getDefaultAddress().getId().equals(id)) {
+                throw new InvalidInputDataException(MessageFormat.format(
+                        "Cannot delete the default delivery address. Buyer with id {0} must add another one as default delivery address.", idBuyer));
+            }
+        }
+
+        deliveryAddress.setStatus(EBuyerDeliveryAddressStatus.DELETED);
+
+        return serviceUtils.convertToDataResponse(buyerDeliveryAddressRepo.save(deliveryAddress),
+                BuyerDeliveryAddressDTO.class);
+    }
 }

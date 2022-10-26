@@ -37,4 +37,12 @@ public class OrderDetail {
 
 	@Column(name = "unit_price")
 	private Long unitPrice;
+
+	public OrderDetail(Order order, ProductVariation productVariation, Long quantity, Long unitPrice) {
+		this.order = order;
+		this.productVariation = productVariation;
+		this.quantity = quantity;
+		this.unitPrice = unitPrice;
+		this.id = new OrderDetailPK(order.getId(), productVariation.getId());
+	}
 }
