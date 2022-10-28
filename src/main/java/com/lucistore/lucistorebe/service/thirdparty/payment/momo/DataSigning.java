@@ -1,4 +1,4 @@
-package com.lucistore.lucistorebe.service.thirdparty.momo;
+package com.lucistore.lucistorebe.service.thirdparty.payment.momo;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;

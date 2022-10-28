@@ -3,6 +3,8 @@ package com.lucistore.lucistorebe.controller;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,11 +16,13 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.lucistore.lucistorebe.repo.ProductCategoryRepo;
+import com.lucistore.lucistorebe.service.PaymentService;
 import com.lucistore.lucistorebe.service.TransactionService;
-import com.lucistore.lucistorebe.service.thirdparty.PayPalService;
+import com.lucistore.lucistorebe.service.thirdparty.payment.PayPalService;
+import com.lucistore.lucistorebe.service.thirdparty.payment.momo.MomoService;
 import com.lucistore.lucistorebe.utility.OtpCache;
 import com.lucistore.lucistorebe.utility.PlatformPolicyParameter;
-import com.lucistore.lucistorebe.utility.jwt.JwtUtil;
+import com.lucistore.lucistorebe.utility.component.JwtUtil;
 
 @RestController
 @RequestMapping("/api")
@@ -47,21 +51,24 @@ public class Test {
 	
 	
 	@Autowired
-	TransactionService transactionService;
+	PaymentService paymentService;
 	
-	// @GetMapping("/otp")
-	// public String testotp() {
-	// 	palService.refund(1L);
-	// 	return "hi";
-	// }
+	@GetMapping("/otp")
+	public String testpay(HttpServletRequest req) {
+		return paymentService.createPayment(2L, 1L, req);
+	}
 	
-	@Autowired
-	PayPalService palService;
+	@GetMapping("/refund")
+	public String testrefund(HttpServletRequest req) {
+		paymentService.refundPayment(2L, 1L);
+		return "refund";
+	}
+
 	
-	// @GetMapping("/testpaypal")
-	// public String testpaypal() {
-	// 	return palService.test(1L);
-	// }
+	 @GetMapping("/payment-return")
+	 public String testpaypal(@RequestParam("success") Boolean success) {
+		 return String.format("payment-return result: %s", success.toString());
+	 }
 
 	// @GetMapping("/login/oauth2")
 	// public String testoauth(@RequestParam(name = "token") String token) {

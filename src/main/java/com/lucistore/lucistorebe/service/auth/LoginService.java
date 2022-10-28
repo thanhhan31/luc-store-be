@@ -19,7 +19,7 @@ import com.lucistore.lucistorebe.repo.BuyerRepo;
 import com.lucistore.lucistorebe.repo.UserRepo;
 import com.lucistore.lucistorebe.service.LogService;
 import com.lucistore.lucistorebe.utility.EUserRole;
-import com.lucistore.lucistorebe.utility.jwt.JwtUtil;
+import com.lucistore.lucistorebe.utility.component.JwtUtil;
 
 @Service
 public class LoginService {

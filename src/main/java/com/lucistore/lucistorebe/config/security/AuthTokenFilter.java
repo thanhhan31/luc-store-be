@@ -16,7 +16,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.lucistore.lucistorebe.config.login.UserDetailsServiceImpl;
-import com.lucistore.lucistorebe.utility.jwt.JwtUtil;
+import com.lucistore.lucistorebe.utility.component.JwtUtil;
 
 public class AuthTokenFilter extends OncePerRequestFilter {
 	@Autowired

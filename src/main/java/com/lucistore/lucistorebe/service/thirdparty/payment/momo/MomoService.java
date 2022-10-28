@@ -1,57 +1,91 @@
-package com.lucistore.lucistorebe.service.thirdparty.momo;
+package com.lucistore.lucistorebe.service.thirdparty.payment.momo;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lucistore.lucistorebe.controller.advice.exception.CommonRuntimeException;
 import com.lucistore.lucistorebe.service.TransactionService;
-import com.lucistore.lucistorebe.utility.ExecuteRequest;
+import com.lucistore.lucistorebe.service.configuration.MomoConfig;
+import com.lucistore.lucistorebe.service.thirdparty.payment.Payment;
+import com.lucistore.lucistorebe.service.thirdparty.payment.Utils;
 import com.lucistore.lucistorebe.utility.RandomString;
+import com.lucistore.lucistorebe.utility.component.ExecuteExternalRequest;
 
 @Service
-public class MomoService {
+public class MomoService implements Payment {
 	@Autowired
 	Environment environment;
 	
 	@Autowired
 	TransactionService transactionService;
 	
-	@Value("${com.lucistore.lucistorebe.service.payment.momo.secret-key}")
-	private String secretKey;
+	@Autowired
+	ExecuteExternalRequest executeExternalRequest;
 	
-	@Value("${com.lucistore.lucistorebe.service.payment.momo.access-key}")
-	private String accessKey;
+	@Autowired
+	MomoConfig momoConfig;
 	
-	@Value("${com.lucistore.lucistorebe.service.payment.momo.partner-code}")
-	private String partnerCode;
+	@Override
+	public String createPayment(Long idOrder, String amount, HttpServletRequest req) {
+		return createPayment(
+				String.format("%d-%s", idOrder, RandomString.get(6)), 
+				Utils.buildUrl(momoConfig.getUrl().getNotify(), req), 
+				Utils.buildUrl(momoConfig.getUrl().getCallback(), req),
+				amount
+			);
+	}
 	
-	@Value("${com.lucistore.lucistorebe.service.payment.momo.url.payment-create}")
-	private String paymentCreate;
-	
-	@Value("${com.lucistore.lucistorebe.service.payment.momo.url.payment-confirm}")
-	private String paymentConfirm;
-	
-	public String getOrderPayUrl(Long idOrder, String notifyUrl, String returnUrl, String amount) {
-		String encodedIdOrder = String.format("%d-%s", idOrder, RandomString.get(6));
-		return getPayUrl(encodedIdOrder, notifyUrl, returnUrl, amount);
+	@Override
+	public void refundPayment(Long idOrder) {
+		var transaction = transactionService.getByIdOrder(idOrder);
+		String transId = transaction.getData();
+		
+		String resp = "";
+		try {
+			resp = executeExternalRequest.postJson(
+					momoConfig.getUrl().getPaymentRefund(), 
+					new MomoPaymentRefund(
+							momoConfig.getAccessKey(),
+							momoConfig.getSecretKey(),
+							momoConfig.getPartnerCode(),
+							UUID.randomUUID().toString(),
+							UUID.randomUUID().toString(),
+							transId,
+							transaction.getOrder().getPayPrice().toString())
+					);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new CommonRuntimeException("Failed to call Momo refund API");
+		}
+		
+		try {
+			Map<String, Object> m = new ObjectMapper().readValue(resp, HashMap.class);
+			if ((int)m.get("resultCode") == 0) 
+				transactionService.setRefund(idOrder);
+			else
+				throw new CommonRuntimeException(String.format("Momo refund failed (%s)", resp));
+		} catch (Exception e) {
+			throw new CommonRuntimeException(String.format("Failed to parse response from Momo refund API (%s)", resp));
+		}
 	}
 	
 	public boolean confirmPayment(String orderId, String amount, String transId, Long idOrder, boolean isConfirm) {
 		String resp = "";
 		try {
-			resp = ExecuteRequest.execute(
-					paymentConfirm, 
+			resp = executeExternalRequest.postJson(
+					momoConfig.getUrl().getPaymentConfirm(), 
 					new MomoPaymentConfirm(
-							accessKey,
-							secretKey,
-							partnerCode,
+							momoConfig.getAccessKey(),
+							momoConfig.getSecretKey(),
+							momoConfig.getPartnerCode(),
 							UUID.randomUUID().toString(),
 							orderId,
 							amount,
@@ -63,45 +97,39 @@ public class MomoService {
 		}
 		
 		try {
-			System.err.println(resp);
 			Map<String, Object> m = new ObjectMapper().readValue(resp, HashMap.class);
 			if ((int)m.get("resultCode") == 0) {
 				if (isConfirm)
 					transactionService.assignTransaction(idOrder, transId);
 				return true;
 			}
-			else {
-				System.err.println(String.format("Confirm Momo bill failed (%s)", resp));
-			}
-		} catch (Exception e) {
-			System.err.println(String.format("Confirm Momo bill failed (%s)", resp));
-		}
+		} catch (Exception e) { }
+		
 		return false;
 	}
 	
-	private String getPayUrl(String idOrder, String ipnUrl, String redirectUrl, String amount) {
+	private String createPayment(String idOrder, String ipnUrl, String redirectUrl, String amount) {
 		String resp = "";
 		try {
-			resp = ExecuteRequest.execute(
-					paymentCreate, 
+			resp = executeExternalRequest.postJson(
+					momoConfig.getUrl().getPaymentCreate(), 
 					new MomoPaymentCreate(
 							ipnUrl,
 							redirectUrl, 
 							idOrder,
 							amount, 
-							"TTFSOFT-Shopee", 
+							momoConfig.getStoreName(), 
 							UUID.randomUUID().toString(),
-							secretKey,
-							accessKey,
-							partnerCode)
+							momoConfig.getSecretKey(),
+							momoConfig.getAccessKey(),
+							momoConfig.getPartnerCode())
 					);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return "";
+			throw new CommonRuntimeException("Failed to call Momo create API");
 		}
 		
 		try {
-			System.err.println(resp);
 			Map<String, Object> m = new ObjectMapper().readValue(resp, HashMap.class);
 			if ((int)m.get("resultCode") == 0) {
 				return (String)m.get("payUrl");
@@ -110,7 +138,7 @@ public class MomoService {
 				throw new CommonRuntimeException(String.format("Generate Momo bill failed (%s)", resp));
 			}
 		} catch (JsonProcessingException  e) {
-			throw new CommonRuntimeException(e.getMessage());
+			throw new CommonRuntimeException(String.format("Generate Momo bill failed (%s)", e.getMessage()));
 		}
 	}
 }
