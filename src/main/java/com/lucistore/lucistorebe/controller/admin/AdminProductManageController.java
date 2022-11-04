@@ -10,6 +10,7 @@ import javax.validation.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,8 +21,11 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.lucistore.lucistorebe.config.login.UserDetailsImpl;
 import com.lucistore.lucistorebe.controller.payload.request.product.CreateProductRequest;
 import com.lucistore.lucistorebe.controller.payload.request.product.UpdateProductRequest;
+import com.lucistore.lucistorebe.entity.user.User;
+import com.lucistore.lucistorebe.entity.user.buyer.Buyer;
 import com.lucistore.lucistorebe.service.ProductService;
 import com.lucistore.lucistorebe.utility.EProductStatus;
 import com.lucistore.lucistorebe.utility.ModelSorting;
@@ -125,10 +129,11 @@ public class AdminProductManageController {
 	})
 	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<?> create(
+			@AuthenticationPrincipal UserDetailsImpl<User> user,
 			@RequestPart("info") @Valid CreateProductRequest request,
 			@RequestPart("avatar") @Valid @NotEmpty MultipartFile avatar,
 			@RequestPart("images") @Valid @NotEmpty List<MultipartFile> images) {
-		return ResponseEntity.ok(productService.create(request, avatar, images));
+		return ResponseEntity.ok(productService.create(user.getUser().getId(), request, avatar, images));
 	}
 	
 	@Operation(summary = "Update product's information with given id and information")
@@ -139,9 +144,10 @@ public class AdminProductManageController {
 	})
 	@PutMapping(path = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<?> update(
+			@AuthenticationPrincipal UserDetailsImpl<User> user,
 			@PathVariable Long id,
 			@RequestPart(name = "info", required = false) @Valid UpdateProductRequest request,
 			@RequestPart(name = "avatar", required = false) MultipartFile avatar) {
-		return ResponseEntity.ok(productService.update(id, request, avatar));
+		return ResponseEntity.ok(productService.update(user.getUser().getId(), id, request, avatar));
 	}
 }

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lucistore.lucistorebe.service.PaymentService;
-import com.lucistore.lucistorebe.service.thirdparty.momo.MomoService;
+import com.lucistore.lucistorebe.service.thirdparty.payment.momo.MomoService;
 
 import io.swagger.v3.oas.annotations.Hidden;
 

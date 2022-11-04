@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.lucistore.lucistorebe.controller.advice.exception.CommonRuntimeException;
 import com.lucistore.lucistorebe.controller.advice.exception.InvalidInputDataException;
 import com.lucistore.lucistorebe.controller.payload.dto.OrderDTO;
 import com.lucistore.lucistorebe.controller.payload.request.buyerorder.CreateBuyerOrderFromCartRequest;
@@ -17,6 +18,7 @@ import com.lucistore.lucistorebe.controller.payload.request.buyerorder.CreateBuy
 import com.lucistore.lucistorebe.controller.payload.request.buyerorder.CreateBuyerOrderRequest;
 import com.lucistore.lucistorebe.controller.payload.response.DataResponse;
 import com.lucistore.lucistorebe.controller.payload.response.ListResponse;
+import com.lucistore.lucistorebe.controller.payload.response.ListWithPagingResponse;
 import com.lucistore.lucistorebe.entity.order.Order;
 import com.lucistore.lucistorebe.entity.order.OrderDetail;
 import com.lucistore.lucistorebe.entity.pk.BuyerCartDetailPK;
@@ -33,6 +35,7 @@ import com.lucistore.lucistorebe.utility.EBuyerDeliveryAddressStatus;
 import com.lucistore.lucistorebe.utility.EOrderStatus;
 import com.lucistore.lucistorebe.utility.EProductStatus;
 import com.lucistore.lucistorebe.utility.EProductVariationStatus;
+import com.lucistore.lucistorebe.utility.PageWithJpaSort;
 
 
 @Service
@@ -54,6 +57,18 @@ public class OrderService {
 	
 	@Autowired
 	ServiceUtils serviceUtils;
+
+	/** get all order */
+	public ListWithPagingResponse<OrderDTO> get(/*  some filter */int currentPage, int size) {
+		int count = orderRepo.searchCount().intValue();
+		PageWithJpaSort page = new PageWithJpaSort(currentPage, size, count);
+		
+		return serviceUtils.convertToListResponse(
+			orderRepo.search(page),
+				OrderDTO.class, 
+				page
+			);
+	}
 	
 	public DataResponse<OrderDTO> get(Long id, Long idBuyer) {
 		Order order = orderRepo.findById(id).orElseThrow(
@@ -79,6 +94,9 @@ public class OrderService {
 
 		BuyerDeliveryAddress address = buyerDeliveryAddressRepo.getReferenceById(data.getIdAddress());
 		Buyer buyer = buyerRepo.getReferenceById(idBuyer);
+
+		if(!buyer.getPhoneConfirmed())
+			throw new CommonRuntimeException("Please confirm your phone number before placing order!");
 
 		if(!buyerRepo.existsById(idBuyer)) {
 			throw new InvalidInputDataException("No Buyer found with given id " + idBuyer);

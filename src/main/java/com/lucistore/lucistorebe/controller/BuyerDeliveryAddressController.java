@@ -42,7 +42,7 @@ public class BuyerDeliveryAddressController {
 	}
 
 	@PostMapping
-	public ResponseEntity<?> create(@PathVariable Long id, @RequestBody @Valid CreateBuyerDeliveryAddressRequest body,
+	public ResponseEntity<?> create(@RequestBody @Valid CreateBuyerDeliveryAddressRequest body,
 			@AuthenticationPrincipal UserDetailsImpl<Buyer> buyer) {
 		return ResponseEntity.ok(buyerDeliveryAddressService.create(buyer.getUser().getId(), body));
 	}

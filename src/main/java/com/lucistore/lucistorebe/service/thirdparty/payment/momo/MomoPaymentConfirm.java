@@ -1,4 +1,4 @@
-package com.lucistore.lucistorebe.service.thirdparty.momo;
+package com.lucistore.lucistorebe.service.thirdparty.payment.momo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.lucistore.lucistorebe.controller.advice.exception.CommonRuntimeException;

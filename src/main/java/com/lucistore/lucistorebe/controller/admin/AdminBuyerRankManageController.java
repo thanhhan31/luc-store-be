@@ -14,7 +14,7 @@ import com.lucistore.lucistorebe.service.BuyerRankService;
 
 @RestController
 @RequestMapping("/api/admin/buyer-rank")
-public class AdminBuyerRankController {
+public class AdminBuyerRankManageController {
 	@Autowired
 	BuyerRankService buyerRankService;
 	

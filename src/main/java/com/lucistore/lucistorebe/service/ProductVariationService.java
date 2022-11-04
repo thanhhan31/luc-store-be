@@ -23,6 +23,9 @@ import com.lucistore.lucistorebe.utility.PlatformPolicyParameter;
 @Service
 public class ProductVariationService {
 	@Autowired
+	LogService logService;
+	
+	@Autowired
 	ProductRepo productRepo;
 	
 	@Autowired
@@ -38,7 +41,7 @@ public class ProductVariationService {
 		return serviceUtils.convertToDataResponse(variation, ProductVariationDTO.class);
 	}
 	
-	public DataResponse<ProductVariationDTO> create(Long idProduct, CreateProductVariationRequest data) {
+	public DataResponse<ProductVariationDTO> create(Long idUser, Long idProduct, CreateProductVariationRequest data) {
 		if (!productRepo.existsById(idProduct))
 			throw new InvalidInputDataException("No product found with given id");
 		
@@ -51,7 +54,12 @@ public class ProductVariationService {
 				EProductVariationStatus.ENABLED
 			);
 		
-		return serviceUtils.convertToDataResponse(productVariationRepo.save(variation), ProductVariationDTO.class);
+		variation = productVariationRepo.saveAndFlush(variation);
+		
+		logService.logInfo(idUser, 
+				String.format("New product variation for product (id: %d) has been created with id %d", idProduct, variation.getId()));
+		
+		return serviceUtils.convertToDataResponse(variation, ProductVariationDTO.class);
 	}
 	
 	public void create(Product p, List<CreateProductVariationRequest> data) {
@@ -69,7 +77,7 @@ public class ProductVariationService {
 		}
 	}
 	
-	public DataResponse<ProductVariationDTO> update(Long id, Long idProduct, UpdateProductVariationRequest data) {		
+	public DataResponse<ProductVariationDTO> update(Long idUser, Long id, Long idProduct, UpdateProductVariationRequest data) {		
 		ProductVariation variation = productVariationRepo.findById(id).orElseThrow(
 				() -> new InvalidInputDataException("No product variation found with given id")
 			);
@@ -106,6 +114,9 @@ public class ProductVariationService {
 			}
 			variation.setStatus(data.getStatus());
 		}
+		
+		logService.logInfo(idUser, 
+				String.format("Product variation with id %d for product (id: %d) has been edited", variation.getId(), idProduct));
 		
 		return serviceUtils.convertToDataResponse(productVariationRepo.save(variation), ProductVariationDTO.class);
 	}

@@ -1,20 +1,24 @@
-package com.lucistore.lucistorebe.service.thirdparty.momo;
+package com.lucistore.lucistorebe.service.thirdparty.payment.momo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import com.lucistore.lucistorebe.controller.advice.exception.CommonRuntimeException;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
+@JsonAppend()
 public class MomoPaymentCreate {
 	@JsonIgnore
 	private String secretKey;
 	
+	private final String requestType = "captureWallet";
+	private final String extraData = "";
+	private final boolean autoCapture = false;
+	
 	private String partnerCode;
-	private static final String requestType = "captureWallet";
-	private static final String extraData = "";
-	private static final boolean autoCapture = false;
 	private String ipnUrl;
 	private String redirectUrl;
 	private String orderId;

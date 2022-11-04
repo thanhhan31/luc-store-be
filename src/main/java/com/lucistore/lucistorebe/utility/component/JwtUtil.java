@@ -1,4 +1,4 @@
-package com.lucistore.lucistorebe.utility.jwt;
+package com.lucistore.lucistorebe.utility.component;
 
 import java.util.Date;
 import java.util.function.Function;

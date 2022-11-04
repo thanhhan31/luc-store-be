@@ -3,6 +3,7 @@ package com.lucistore.lucistorebe.utility;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.JpaSort;
 
+import com.lucistore.lucistorebe.entity.Log_;
 import com.lucistore.lucistorebe.entity.product.ProductInventory_;
 import com.lucistore.lucistorebe.entity.product.Product_;
 
@@ -77,6 +78,17 @@ public final class ModelSorting {
 		return sort;
 	}
 	
+	public static Sort getLogSort(Boolean sortByDateDescending)  {
+		if (sortByDateDescending != null) {
+			if (sortByDateDescending.booleanValue())
+				return JpaSort.of(Log_.date).descending();
+			else
+				return JpaSort.of(Log_.date).ascending();
+		}
+		else
+			return Sort.unsorted();
+	}
+	
 	/**
 	 * Sort by combination of selected attribute
 	 * <br>
@@ -149,5 +161,4 @@ public final class ModelSorting {
 		
 		return sort;
 	}
-
 }

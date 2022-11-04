@@ -1,18 +1,20 @@
-package com.lucistore.lucistorebe.service.thirdparty;
+package com.lucistore.lucistorebe.service.thirdparty.payment;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import com.lucistore.lucistorebe.controller.advice.exception.CommonRuntimeException;
 import com.lucistore.lucistorebe.service.PaymentService;
 import com.lucistore.lucistorebe.service.TransactionService;
+import com.lucistore.lucistorebe.service.configuration.PayPalConfig;
 import com.lucistore.lucistorebe.utility.PaypalOrderIdCache;
 import com.paypal.core.PayPalEnvironment;
 import com.paypal.core.PayPalHttpClient;
@@ -29,10 +31,8 @@ import com.paypal.payments.CapturesRefundRequest;
 import com.paypal.payments.Refund;
 
 @Service
-@ConfigurationProperties(prefix = "com.lucistore.lucistorebe.service.payment.paypal")
-public class PayPalService {
-	private String clientId;
-	private String clientSecret;
+public class PayPalService implements Payment {
+	
 	private PayPalHttpClient payPalHttpClient;
 	
 	@Autowired
@@ -42,22 +42,29 @@ public class PayPalService {
 	TransactionService transactionService;
 	
 	@Autowired
-	PaymentService paymentService;
+	PayPalConfig payPalConfig;
+	
+	private final PaymentService paymentService;
 
 	@PostConstruct
     public void init() {
-        payPalHttpClient = new PayPalHttpClient(new PayPalEnvironment.Sandbox(clientId, clientSecret));
+        payPalHttpClient = new PayPalHttpClient(new PayPalEnvironment.Sandbox(payPalConfig.getClientId(), payPalConfig.getClientSecret()));
     }
+	
+	public PayPalService(@Lazy PaymentService paymentService) {
+		this.paymentService = paymentService;
+	}
     
-	public String createOrder(Long idOrder, String amount, String returnUrl) {
-		OrderRequest orderRequest = buildOrderRequest(returnUrl); //"http://localhost:8080/api/login/oauth2"
+	@Override
+	public String createPayment(Long idOrder, String amount, HttpServletRequest req) {
+		OrderRequest orderRequest = buildOrderRequest(Utils.buildUrl(payPalConfig.getUrl().getCallback(), req));
 		
 		PurchaseUnitRequest purchaseUnitRequest = 
 			new PurchaseUnitRequest()
 	            .amountWithBreakdown(
             		new AmountWithBreakdown()
             		.currencyCode("USD")
-            		.value(amount)
+            		.value(toUsd(amount))
 	            );
 		
 	    orderRequest.purchaseUnits(Arrays.asList(purchaseUnitRequest));
@@ -81,7 +88,13 @@ public class PayPalService {
 	    throw new CommonRuntimeException("Error when create Paypal order");
 	}
 	
-	public void captureOrder(String orderId) {
+	@Override
+	public void refundPayment(Long idOrder) {
+		refundCapture(transactionService.getByIdOrder(idOrder).getData());
+		transactionService.setRefund(idOrder);
+	}
+	
+	public boolean captureOrder(String orderId) {
 		OrdersCaptureRequest ordersCaptureRequest = new OrdersCaptureRequest(orderId);
 		try {
 			HttpResponse<Order> httpResponse = payPalHttpClient.execute(ordersCaptureRequest);
@@ -90,6 +103,7 @@ public class PayPalService {
 				String captureId = httpResponse.result().purchaseUnits().get(0).payments().captures().get(0).id();
 				if (paymentService.confirm(idOrder)) {
 					transactionService.assignTransaction(idOrder, captureId);
+					return true;
 				}
 				else {
 					refundCapture(captureId);
@@ -98,14 +112,10 @@ public class PayPalService {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		return false;
 	}
 	
-	public void refundCapture(Long idOrder) {
-		refundCapture(transactionService.getByIdOrder(idOrder).getData());
-		transactionService.setRefund(idOrder);
-	}
-	
-	public void refundCapture(String captureId) {
+	private void refundCapture(String captureId) {
 		CapturesRefundRequest request = new CapturesRefundRequest(captureId);
 		try {
 			HttpResponse<Refund> response = payPalHttpClient.execute(request);
@@ -129,5 +139,9 @@ public class PayPalService {
 		return new OrderRequest()
 				.checkoutPaymentIntent("CAPTURE")
 				.applicationContext(new ApplicationContext().returnUrl(returnUrl));
+	}
+	
+	private String toUsd(String amount) {
+		return String.format("%.2f", Long.valueOf(amount).doubleValue() / 22400);
 	}
 }
