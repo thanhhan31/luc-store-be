@@ -105,7 +105,8 @@ public class AdminProductManageController {
 					maxPrice, 
 					page, 
 					size, 
-					ModelSorting.getProductSort(sortBy, sortDescending)
+					ModelSorting.getProductSort(sortBy, sortDescending),
+					false
 				)
 			);
 	}

@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.lucistore.lucistorebe.controller.TestRequest;
 import com.lucistore.lucistorebe.controller.advice.exception.InvalidInputDataException;
 import com.lucistore.lucistorebe.controller.payload.dto.ProductCategoryDTO;
 import com.lucistore.lucistorebe.controller.payload.request.productcategory.CreateProductCategoryRequest;
@@ -14,7 +15,6 @@ import com.lucistore.lucistorebe.entity.product.ProductCategory;
 import com.lucistore.lucistorebe.repo.ProductCategoryRepo;
 import com.lucistore.lucistorebe.service.util.ServiceUtils;
 import com.lucistore.lucistorebe.utility.EProductCategoryStatus;
-import com.lucistore.lucistorebe.utility.EUserStatus;
 
 @Service
 public class ProductCategoryService {
@@ -27,17 +27,23 @@ public class ProductCategoryService {
 	@Autowired
 	ServiceUtils serviceUtils;
 	
-	public DataResponse<ProductCategoryDTO> get(Long id) {
+	public DataResponse<ProductCategoryDTO> get(Long id, boolean isBuyer) {
 		ProductCategory category = productCategoryRepo.findById(id).orElseThrow(
 				() -> new InvalidInputDataException("No product category found with given id")
 			);
+		
+		if (isBuyer && serviceUtils.checkStatusProductCategory(category, EProductCategoryStatus.BANNED))
+			throw new InvalidInputDataException("Category has been banned");
 		
 		return serviceUtils.convertToDataResponse(category, ProductCategoryDTO.class);
 		
 	}
 	
-	public ListResponse<ProductCategoryDTO> getAllRootCategories() {
-		return serviceUtils.convertToListResponse(productCategoryRepo.findAllRootCategories(), ProductCategoryDTO.class);
+	public ListResponse<ProductCategoryDTO> getAllRootCategories(boolean isBuyer) {
+		if (isBuyer)
+			return serviceUtils.convertToListResponse(productCategoryRepo.buyerFindAllRootCategories(), ProductCategoryDTO.class);
+		else
+			return serviceUtils.convertToListResponse(productCategoryRepo.findAllRootCategories(), ProductCategoryDTO.class);
 	}
 	
 	public DataResponse<ProductCategoryDTO> create(Long idUser, CreateProductCategoryRequest data) {
@@ -52,8 +58,6 @@ public class ProductCategoryService {
 		else {
 			category = new ProductCategory(data.getName());
 		}
-		
-		category.setStatus(EProductCategoryStatus.ACTIVE);
 		
 		category = productCategoryRepo.saveAndFlush(category);
 		
@@ -89,5 +93,19 @@ public class ProductCategoryService {
 				String.format("Category with id %d has been edited", category.getId()));
 		
 		return serviceUtils.convertToDataResponse(productCategoryRepo.save(category), ProductCategoryDTO.class);
+	}
+	
+	/** For data generation **/
+	public ProductCategory create(TestRequest request) {
+		ProductCategory prev = null;
+		for (int i = 0; i < request.getCategoryNames().size(); i++) {
+			if (i == 0) {
+				prev = productCategoryRepo.save(new ProductCategory(request.getCategoryNames().get(i)));
+			}
+			else {
+				prev = productCategoryRepo.save(new ProductCategory(prev, request.getCategoryNames().get(i)));
+			}
+		}
+		return prev;
 	}
 }

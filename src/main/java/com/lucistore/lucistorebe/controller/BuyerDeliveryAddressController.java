@@ -4,6 +4,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,6 +22,7 @@ import com.lucistore.lucistorebe.service.BuyerDeliveryAddressService;
 
 @RestController
 @RequestMapping("/api/buyer/delivery-address")
+@PreAuthorize("hasAuthority('ACTIVE_BUYER')")
 public class BuyerDeliveryAddressController {
 	@Autowired
 	BuyerDeliveryAddressService buyerDeliveryAddressService;

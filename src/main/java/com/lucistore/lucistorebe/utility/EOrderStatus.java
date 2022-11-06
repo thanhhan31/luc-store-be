@@ -1,6 +1,6 @@
 package com.lucistore.lucistorebe.utility;
 
-public enum EOrderStatus {
+public enum EOrderStatus {// expiration time for each status
 	WAIT_FOR_PAYMENT, // can cancel
 	WAIT_FOR_CONFIRM, // can cancel - can refund
 	WAIT_FOR_SEND, // can cancel - can refund

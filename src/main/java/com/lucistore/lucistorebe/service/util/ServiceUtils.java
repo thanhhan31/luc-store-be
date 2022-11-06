@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,9 +15,12 @@ import com.lucistore.lucistorebe.controller.payload.response.DataResponse;
 import com.lucistore.lucistorebe.controller.payload.response.ListResponse;
 import com.lucistore.lucistorebe.controller.payload.response.ListWithPagingResponse;
 import com.lucistore.lucistorebe.entity.UpdatableAvatar;
+import com.lucistore.lucistorebe.entity.product.ProductCategory;
 import com.lucistore.lucistorebe.service.MediaResourceService;
+import com.lucistore.lucistorebe.utility.EProductCategoryStatus;
 import com.lucistore.lucistorebe.utility.Page;
 import com.lucistore.lucistorebe.utility.PageWithJpaSort;
+import com.lucistore.lucistorebe.utility.PlatformPolicyParameter;
 
 @Service
 public class ServiceUtils {
@@ -47,16 +51,45 @@ public class ServiceUtils {
 	}
 	
 	public <T, V> ListResponse<V> convertToListResponse(List<T> src, Class<V> cls) {
-		return new ListResponse<>(src.stream().map(p -> mapper.map(p, cls)).collect(Collectors.toList()));
+		return new ListResponse<>(src.stream().map(p -> mapper.map(p, cls)).toList());
 	}
 	
 	public <T, V> ListWithPagingResponse<V> convertToListResponse(List<T> src, Class<V> cls, PageWithJpaSort page) {
 		return new ListWithPagingResponse<>(page.getPageNumber() + 1, page.getTotalPage(),
-				src.stream().map(p -> mapper.map(p, cls)).collect(Collectors.toList()));
+				src.stream().map(p -> mapper.map(p, cls)).toList());
 	}
 	
 	public <T, V> ListWithPagingResponse<V> convertToListResponse(List<T> src, Class<V> cls, Page page) {
 		return new ListWithPagingResponse<>(page.getPageNumber() + 1, page.getTotalPage(),
-				src.stream().map(p -> mapper.map(p, cls)).collect(Collectors.toList()));
+				src.stream().map(p -> mapper.map(p, cls)).toList());
+	}
+	
+	public <T, V> ListWithPagingResponse<V> convertToListResponse(org.springframework.data.domain.Page<T> src, Class<V> cls, int page) {
+		return new ListWithPagingResponse<>(page, src.getTotalPages(),
+				src.stream().map(p -> mapper.map(p, cls)).toList());
+	}
+	
+	public PageRequest getPageRequest(Integer page, Integer size) {
+		if (page == null)
+			page = 0;
+		else if (page > 0)
+			page -= 1;
+		
+		if (size == null) 
+			size = PlatformPolicyParameter.DEFAULT_PAGE_SIZE;
+		
+		return PageRequest.of(page, size);
+	}
+	
+	public boolean checkStatusProductCategory(ProductCategory pc, EProductCategoryStatus statusToCheck) { //check it and its parent
+		if (pc.getStatus() == statusToCheck)
+			return true;
+		
+		while (pc.getParent() != null) {
+			if (pc.getParent().getStatus() == statusToCheck)
+				return true;
+		}
+		
+		return false;
 	}
 }

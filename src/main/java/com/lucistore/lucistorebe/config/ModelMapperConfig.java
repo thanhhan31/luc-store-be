@@ -16,6 +16,8 @@ import com.lucistore.lucistorebe.controller.payload.dto.ProductCategoryDTO;
 import com.lucistore.lucistorebe.controller.payload.dto.ProductCategoryGeneralDTO;
 import com.lucistore.lucistorebe.controller.payload.dto.ProductGeneralDetailDTO;
 import com.lucistore.lucistorebe.controller.payload.dto.ProductImageDTO;
+import com.lucistore.lucistorebe.controller.payload.dto.ProductReviewDTO;
+import com.lucistore.lucistorebe.controller.payload.dto.ProductReviewImageDTO;
 import com.lucistore.lucistorebe.controller.payload.dto.ProductVariationDTO;
 import com.lucistore.lucistorebe.controller.payload.dto.productdetail.ProductCategoryDetailDTO;
 import com.lucistore.lucistorebe.controller.payload.dto.productdetail.ProductDetailDTO;
@@ -24,6 +26,8 @@ import com.lucistore.lucistorebe.entity.MediaResource;
 import com.lucistore.lucistorebe.entity.product.Product;
 import com.lucistore.lucistorebe.entity.product.ProductCategory;
 import com.lucistore.lucistorebe.entity.product.ProductImage;
+import com.lucistore.lucistorebe.entity.product.ProductReview;
+import com.lucistore.lucistorebe.entity.product.ProductReviewImage;
 import com.lucistore.lucistorebe.entity.product.ProductVariation;
 import com.lucistore.lucistorebe.entity.user.buyer.Buyer;
 import com.lucistore.lucistorebe.entity.user.buyer.BuyerCartDetail;
@@ -48,6 +52,7 @@ public class ModelMapperConfig {
 		
 		var lstChildProductCategoryCvt = generateListConverter(ProductCategory.class, ProductCategoryDTO.class, mapper);			
 		var lstProductImageCvt = generateListConverter(ProductImage.class, ProductImageDTO.class, mapper);
+		var lstProductReviewImageCvt = generateListConverter(ProductReviewImage.class, ProductReviewImageDTO.class, mapper);
 		var lstProductVariationCvt = generateListConverter(ProductVariation.class, ProductVariationDTO.class, mapper);
 		
 		mapper.createTypeMap(Buyer.class, BuyerDTO.class).addMappings(m -> {
@@ -83,6 +88,18 @@ public class ModelMapperConfig {
 			m.map(src -> src.getProduct().getId(), ProductImageDTO::setIdProduct);
 			m.map(src -> src.getMedia().getUrl(), ProductImageDTO::setUrl);
 			m.map(src -> src.getMedia().getResourceType(), ProductImageDTO::setResourceType);
+		});
+		
+		mapper.createTypeMap(ProductReview.class, ProductReviewDTO.class).addMappings(m -> {
+			m.map(src -> src.getBuyer().getId(), ProductReviewDTO::setIdBuyer);
+			m.map(src -> src.getBuyer().getUsername(), ProductReviewDTO::setBuyerUsername);
+			
+			m.using(lstProductReviewImageCvt).map(ProductReview::getImages, ProductReviewDTO::setImages);
+		});
+		
+		mapper.createTypeMap(ProductReviewImage.class, ProductReviewImageDTO.class).addMappings(m -> {
+			m.map(src -> src.getMedia().getUrl(), ProductReviewImageDTO::setUrl);
+			m.map(src -> src.getMedia().getResourceType(), ProductReviewImageDTO::setResourceType);
 		});
 		
 		mapper.createTypeMap(ProductVariation.class, ProductVariationDTO.class).addMappings(m -> {

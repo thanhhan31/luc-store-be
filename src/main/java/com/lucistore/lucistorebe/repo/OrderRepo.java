@@ -10,14 +10,15 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.lucistore.lucistorebe.entity.order.Order;
+import com.lucistore.lucistorebe.repo.custom.OrderRepoCustom;
 
 @Repository
-public interface OrderRepo extends JpaRepository<Order, Long> {
+public interface OrderRepo extends JpaRepository<Order, Long>, OrderRepoCustom {
 	@Transactional
 	@Modifying
 	@Query(value = "UPDATE Order o set o.status = com.lucistore.lucistorebe.utility.EOrderStatus.WAIT_FOR_CONFIRM "
 			+ "where o.id = ?1 and o.status = com.lucistore.lucistorebe.utility.EOrderStatus.WAIT_FOR_PAYMENT")
 	int confirmPayment(Long idOrder);
-
+	
 	List<Order> findAllByBuyerId(Long idBuyer, Sort sort);
 }

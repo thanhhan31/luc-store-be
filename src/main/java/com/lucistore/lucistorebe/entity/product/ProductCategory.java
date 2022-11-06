@@ -47,15 +47,14 @@ public class ProductCategory {
 	private EProductCategoryStatus status;
 
 	public ProductCategory(String name) {
-		super();
 		this.name = name;
 		level = 0;
 	}
 	
 	public ProductCategory(ProductCategory parent, String name) {
-		super();
 		this.parent = parent;
 		this.name = name;
+		this.status = EProductCategoryStatus.ACTIVE;
 		level = parent.level + 1;
 	}
 }
