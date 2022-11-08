@@ -100,10 +100,31 @@ public class ProductCategoryService {
 		ProductCategory prev = null;
 		for (int i = 0; i < request.getCategoryNames().size(); i++) {
 			if (i == 0) {
-				prev = productCategoryRepo.save(new ProductCategory(request.getCategoryNames().get(i)));
+				
+				while (true) {
+					try {
+						var pc = productCategoryRepo.findByNameAndLevel(request.getCategoryNames().get(i), i);
+						if (pc == null)
+							prev = productCategoryRepo.save(new ProductCategory(request.getCategoryNames().get(i)));
+						else
+							prev = pc;
+						break;
+					} catch (Exception e) { }
+				}
+				
 			}
 			else {
-				prev = productCategoryRepo.save(new ProductCategory(prev, request.getCategoryNames().get(i)));
+				
+				while (true) {
+					try {
+						var pc = productCategoryRepo.findByNameAndLevel(request.getCategoryNames().get(i), i);
+						if (pc == null)
+							prev = productCategoryRepo.save(new ProductCategory(prev, request.getCategoryNames().get(i)));
+						else
+							prev = pc;
+						break;
+					} catch (Exception e) { }
+				}
 			}
 		}
 		return prev;

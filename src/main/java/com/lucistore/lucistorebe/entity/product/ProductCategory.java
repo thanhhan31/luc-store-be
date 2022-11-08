@@ -13,6 +13,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import com.lucistore.lucistorebe.utility.EProductCategoryStatus;
 
@@ -23,7 +24,11 @@ import lombok.Setter;
 @Getter @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "product_category")
+@Table(name = "product_category", 
+	uniqueConstraints = {
+			@UniqueConstraint(columnNames = {"name", "level"})
+	}
+)
 public class ProductCategory {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -48,6 +53,7 @@ public class ProductCategory {
 
 	public ProductCategory(String name) {
 		this.name = name;
+		this.status = EProductCategoryStatus.ACTIVE;
 		level = 0;
 	}
 	

@@ -109,7 +109,8 @@ public class ProductService {
 			if (isBuyer)
 				productRepo.updateVisitCount(id);
 			
-			p.setParents(productCategoryRepo.findAncestry(p.getCategory().getParent().getId()));
+			if (p.getCategory().getParent() != null)
+				p.setParents(productCategoryRepo.findAncestry(p.getCategory().getParent().getId()));
 		}
 		
 		return serviceUtils.convertToDataResponse(
@@ -154,7 +155,9 @@ public class ProductService {
 		productRepo.refresh(p);
 		updatePrice(p, p.getVariations());
 		
-		p.setParents(productCategoryRepo.findAncestry(p.getCategory().getParent().getId()));
+		if (p.getCategory().getParent() != null) {
+			p.setParents(productCategoryRepo.findAncestry(p.getCategory().getParent().getId()));
+		}		
 		
 		logService.logInfo(idUser, String.format("New product has been created with id %d", p.getId()));
 		

@@ -25,6 +25,9 @@ public interface ProductCategoryRepo extends JpaRepository<ProductCategory, Long
 			nativeQuery = true)
 	List<ProductCategory> findAncestry(@Param("categoryId") Long categoryId);
 	
+	@Query(value = "SELECT pc FROM ProductCategory pc WHERE pc.name = ?1 AND pc.level = ?2") //select * from product_category where product_category.id_parent is null
+	ProductCategory findByNameAndLevel(String name, Integer level);
+	
 	@Query(value = "SELECT pc FROM ProductCategory pc WHERE pc.parent IS NULL") //select * from product_category where product_category.id_parent is null
 	List<ProductCategory> findAllRootCategories();
 	
