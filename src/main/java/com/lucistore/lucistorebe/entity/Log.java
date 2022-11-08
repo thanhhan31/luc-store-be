@@ -42,7 +42,7 @@ public class Log {
 	@CreatedDate
 	private Date date;
 	
-	@Column(name = "gender")
+	@Column(name = "log_type")
 	@Enumerated(EnumType.STRING)
 	private ELogType logType;
 	

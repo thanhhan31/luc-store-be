@@ -7,14 +7,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.lucistore.lucistorebe.controller.payload.dto.LogDTO;
-import com.lucistore.lucistorebe.controller.payload.dto.ProductGeneralDetailDTO;
 import com.lucistore.lucistorebe.controller.payload.response.ListWithPagingResponse;
 import com.lucistore.lucistorebe.entity.Log;
 import com.lucistore.lucistorebe.repo.LogRepo;
 import com.lucistore.lucistorebe.repo.UserRepo;
 import com.lucistore.lucistorebe.service.util.ServiceUtils;
 import com.lucistore.lucistorebe.utility.ELogType;
-import com.lucistore.lucistorebe.utility.EProductStatus;
 import com.lucistore.lucistorebe.utility.PageWithJpaSort;
 
 @Service

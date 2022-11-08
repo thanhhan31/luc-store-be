@@ -28,6 +28,7 @@ import com.lucistore.lucistorebe.utility.EUserStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
@@ -62,6 +63,7 @@ public class AdminBuyerManageController {
 				String searchPhone,
 			@RequestParam(required = false) 
 			@Parameter(description = "Buyer account status") 
+			@Schema(type = "string", allowableValues = { "ACTIVE", "BANNED" })
 				EUserStatus status,
 			@RequestParam(required = false) 
 			@Parameter(description = "Date of birth of buyer to search") 

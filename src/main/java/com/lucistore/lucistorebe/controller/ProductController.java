@@ -86,7 +86,8 @@ public class ProductController {
 					maxPrice, 
 					page, 
 					size, 
-					ModelSorting.getProductSort(sortBy, sortDescending)
+					ModelSorting.getProductSort(sortBy, sortDescending),
+					true
 				)
 			);
 	}

@@ -21,6 +21,7 @@ import com.lucistore.lucistorebe.utility.EUserRole;
 import com.lucistore.lucistorebe.utility.EUserStatus;
 import com.lucistore.lucistorebe.utility.ModelSorting;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -32,6 +33,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 public class AdminUserManageController {
 	@Autowired
 	UserService userService;
+	
+	@GetMapping("/{id}")
+	public ResponseEntity<?> getById(@PathVariable Long id) {
+		return ResponseEntity.ok(userService.getById(id));
+	}
 	
 	@GetMapping
 	public ResponseEntity<?> getAdmins(
@@ -60,6 +66,7 @@ public class AdminUserManageController {
 			);
 	}
 	
+	@Hidden
 	@Operation(summary = "Update user account status")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200",
