@@ -22,6 +22,7 @@ import com.lucistore.lucistorebe.controller.payload.response.DataResponse;
 import com.lucistore.lucistorebe.controller.payload.response.ListWithPagingResponse;
 import com.lucistore.lucistorebe.entity.user.User;
 import com.lucistore.lucistorebe.entity.user.buyer.Buyer;
+import com.lucistore.lucistorebe.repo.BuyerRankRepo;
 import com.lucistore.lucistorebe.repo.BuyerRepo;
 import com.lucistore.lucistorebe.repo.UserRepo;
 import com.lucistore.lucistorebe.repo.UserRoleRepo;
@@ -43,6 +44,9 @@ public class BuyerService {
 	
 	@Autowired
 	UserRepo userRepo;
+
+	@Autowired
+	BuyerRankRepo buyerRankRepo;
 	
 	@Autowired
 	UserRoleRepo userRoleRepo;
@@ -136,6 +140,8 @@ public class BuyerService {
 				false
 			);
 		// send otp code to email ?
+
+		buyer.setRank(buyerRankRepo.getReferenceById(1L));
 		
 		return serviceUtils.convertToDataResponse(
 			buyerRepo.save(buyer),
