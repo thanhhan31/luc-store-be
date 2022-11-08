@@ -28,6 +28,7 @@ import com.lucistore.lucistorebe.entity.product.ProductVariation;
 import com.lucistore.lucistorebe.repo.ProductCategoryRepo;
 import com.lucistore.lucistorebe.repo.ProductRepo;
 import com.lucistore.lucistorebe.service.util.ServiceUtils;
+import com.lucistore.lucistorebe.utility.EProductCategoryStatus;
 import com.lucistore.lucistorebe.utility.EProductStatus;
 import com.lucistore.lucistorebe.utility.EProductVariationStatus;
 import com.lucistore.lucistorebe.utility.PageWithJpaSort;
@@ -57,16 +58,34 @@ public class ProductService {
 	ServiceUtils serviceUtils;
 	
 	public ListWithPagingResponse<ProductGeneralDetailDTO> search(Long idCategory, String searchName, String searchDescription, 
-			EProductStatus status, Long minPrice, Long maxPrice, Integer currentPage, Integer size, Sort sort) {
+			EProductStatus status, Long minPrice, Long maxPrice, Integer currentPage, Integer size, Sort sort, boolean isBuyer) {
 		
 		List<Long> idsCategory = new ArrayList<>();
 		
 		if (idCategory != null) {
 			var pc = productCategoryRepo.findById(idCategory).orElse(null);
 			if (pc != null) {
-				if (!pc.getChild().isEmpty())
+				
+				if (isBuyer) {
+					if (serviceUtils.checkStatusProductCategory(pc, EProductCategoryStatus.BANNED))
+						throw new InvalidInputDataException("Given category id has been banned");
+					else {
+						if (!pc.getChild().isEmpty()) {
+							for (var c : pc.getChild()) {
+								if (c.getStatus() != EProductCategoryStatus.BANNED)
+									idsCategory.add(c.getId());
+							}
+						}
+					}
+				}
+				else {
 					idsCategory.addAll(pc.getChild().stream().map(ProductCategory::getId).toList());
+				}
+				
 				idsCategory.add(idCategory);
+			}
+			else {
+				throw new InvalidInputDataException("Given category id does not exists");
 			}
 		}
 		
@@ -82,13 +101,16 @@ public class ProductService {
 	
 	public DataResponse<ProductDetailDTO> getById(Long id, boolean isBuyer) {
 		Product p = productRepo.findById(id).orElseThrow(() -> new InvalidInputDataException("No product found with given id"));
-		p.setParents(productCategoryRepo.findAncestry(p.getCategory().getParent().getId()));
 		
-		if (isBuyer) { //buyers are not allow to view disabled product
-			if (p.getStatus().equals(EProductStatus.DISABLED))
-				throw new InvalidInputDataException("No product found with given id");
-			else
+		if (isBuyer && 
+				(p.getStatus() == EProductStatus.DISABLED || serviceUtils.checkStatusProductCategory(p.getCategory(), EProductCategoryStatus.BANNED)))
+			throw new InvalidInputDataException("No product found with given id");
+		else {
+			if (isBuyer)
 				productRepo.updateVisitCount(id);
+			
+			if (p.getCategory().getParent() != null)
+				p.setParents(productCategoryRepo.findAncestry(p.getCategory().getParent().getId()));
 		}
 		
 		return serviceUtils.convertToDataResponse(
@@ -99,8 +121,11 @@ public class ProductService {
 	
 	@Transactional
 	public DataResponse<ProductDetailDTO> create(Long idUser, CreateProductRequest data, MultipartFile avatar, List<MultipartFile> images) {
-		if (!productCategoryRepo.existsById(data.getIdCategory()))
-			throw new InvalidInputDataException("No category found with given id");
+		var productCategory = productCategoryRepo.findById(data.getIdCategory())
+				.orElseThrow(() -> new InvalidInputDataException("No category found with given id"));
+		
+		if (!serviceUtils.checkStatusProductCategory(productCategory, EProductCategoryStatus.ACTIVE))
+			throw new InvalidInputDataException("Can not create new product to this category or its parent category because it has been disabled");
 		
 		if (data.getVariations().size() < PlatformPolicyParameter.MIN_ALLOWED_PRODUCT_VARIATION) {
 			throw new InvalidInputDataException(
@@ -130,7 +155,9 @@ public class ProductService {
 		productRepo.refresh(p);
 		updatePrice(p, p.getVariations());
 		
-		p.setParents(productCategoryRepo.findAncestry(p.getCategory().getParent().getId()));
+		if (p.getCategory().getParent() != null) {
+			p.setParents(productCategoryRepo.findAncestry(p.getCategory().getParent().getId()));
+		}		
 		
 		logService.logInfo(idUser, String.format("New product has been created with id %d", p.getId()));
 		
@@ -167,7 +194,7 @@ public class ProductService {
 		p = productRepo.save(p);
 		p.setParents(productCategoryRepo.findAncestry(p.getCategory().getParent().getId()));
 		
-		logService.logInfo(idUser, String.format("Product with id has been edited", p.getId()));
+		logService.logInfo(idUser, String.format("Product with id %d has been edited", p.getId()));
 		
 		return serviceUtils.convertToDataResponse(p, ProductDetailDTO.class);
 	}

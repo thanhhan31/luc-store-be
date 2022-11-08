@@ -6,14 +6,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.lucistore.lucistorebe.controller.advice.exception.InvalidInputDataException;
-import com.lucistore.lucistorebe.controller.payload.dto.BuyerDTO;
 import com.lucistore.lucistorebe.controller.payload.dto.UserDTO;
 import com.lucistore.lucistorebe.controller.payload.request.AdminUpdateUserStatusRequest;
 import com.lucistore.lucistorebe.controller.payload.response.DataResponse;
 import com.lucistore.lucistorebe.controller.payload.response.ListWithPagingResponse;
 import com.lucistore.lucistorebe.entity.user.User;
-import com.lucistore.lucistorebe.entity.user.buyer.Buyer;
 import com.lucistore.lucistorebe.repo.BuyerRepo;
+import com.lucistore.lucistorebe.repo.OrderRepo;
 import com.lucistore.lucistorebe.repo.UserRepo;
 import com.lucistore.lucistorebe.repo.UserRoleRepo;
 import com.lucistore.lucistorebe.service.util.ServiceUtils;
@@ -33,6 +32,9 @@ public class UserService {
 	UserRepo userRepo;
 	
 	@Autowired
+	OrderRepo orderRepo;
+	
+	@Autowired
 	UserRoleRepo userRoleRepo;
 	
 	@Autowired
@@ -40,6 +42,13 @@ public class UserService {
 	
 	@Autowired
 	ServiceUtils serviceUtils;
+	
+	public DataResponse<UserDTO> getById(Long id) {
+		return serviceUtils.convertToDataResponse(
+				userRepo.getReferenceById(id),
+				UserDTO.class
+			);
+	}
 	
 	public ListWithPagingResponse<UserDTO> searchAdmin(String searchFullname, String searchUsername, String searchEmail,
 			String searchPhone, EUserRole role, EUserStatus status, Integer currentPage, Integer size, Sort sort) {
@@ -72,7 +81,7 @@ public class UserService {
 		
 		if (!data.getStatus().equals(user.getStatus())) {
 			if (data.getStatus() == EUserStatus.BANNED) {
-				if (true && user.getRole().equals(EUserRole.BUYER)) { //if is buyer and have active order (not complete)
+				if (user.getRole().getName().equals(EUserRole.BUYER.toString()) && orderRepo.isBuyerHavePendingOrder(id)) { //if is buyer and have active order (not complete)
 					user.setStatus(EUserStatus.WAIT_BANNED);
 				}
 				else 

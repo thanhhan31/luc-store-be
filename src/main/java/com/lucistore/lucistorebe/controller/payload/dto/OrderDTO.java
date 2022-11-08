@@ -25,4 +25,6 @@ public class OrderDTO {
 	private EOrderStatus status;
 	
 	private EPaymentMethod paymentMethod;
+	
+	private Boolean reviewed;
 }

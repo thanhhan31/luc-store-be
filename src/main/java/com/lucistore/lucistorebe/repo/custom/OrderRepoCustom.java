@@ -8,4 +8,5 @@ import com.lucistore.lucistorebe.utility.PageWithJpaSort;
 public interface OrderRepoCustom {
 	List<Order> search(PageWithJpaSort page);
 	Long searchCount();
+	boolean isBuyerHavePendingOrder(Long idBuyer);
 }

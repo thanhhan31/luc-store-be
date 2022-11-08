@@ -19,6 +19,6 @@ public interface OrderRepo extends JpaRepository<Order, Long>, OrderRepoCustom {
 	@Query(value = "UPDATE Order o set o.status = com.lucistore.lucistorebe.utility.EOrderStatus.WAIT_FOR_CONFIRM "
 			+ "where o.id = ?1 and o.status = com.lucistore.lucistorebe.utility.EOrderStatus.WAIT_FOR_PAYMENT")
 	int confirmPayment(Long idOrder);
-
+	
 	List<Order> findAllByBuyerId(Long idBuyer, Sort sort);
 }
