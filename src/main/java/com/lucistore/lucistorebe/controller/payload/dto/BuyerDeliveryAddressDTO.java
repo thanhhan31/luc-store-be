@@ -9,7 +9,6 @@ import lombok.Setter;
 @Getter @Setter
 public class BuyerDeliveryAddressDTO {
 	private Long id;
-	private BuyerDTO buyer;
 	private AddressWardDTO addressWard;
 	private String addressDetail;
 	private String receiverName;

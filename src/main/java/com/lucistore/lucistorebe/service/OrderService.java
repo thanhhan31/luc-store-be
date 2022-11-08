@@ -46,6 +46,9 @@ public class OrderService {
 	@Autowired 
 	BuyerRepo buyerRepo;
 
+	@Autowired 
+	PaymentService paymentService;
+
 	@Autowired
 	BuyerDeliveryAddressRepo buyerDeliveryAddressRepo;
 
@@ -127,6 +130,7 @@ public class OrderService {
 		return serviceUtils.convertToDataResponse(orderRepo.save(order), OrderDTO.class);
 	}
 
+	@Transactional
 	public DataResponse<OrderDTO> cancel(Long id, Long idBuyer) {
 		Order order = orderRepo
 				.findById(id).orElseThrow(
@@ -136,7 +140,19 @@ public class OrderService {
 			throw new InvalidInputDataException("No Order found with given id " + id);
 		}
 
-		order.setStatus(EOrderStatus.CANCELLED);
+		switch (order.getStatus()) {
+			case WAIT_FOR_CONFIRM:
+			case WAIT_FOR_SEND:
+				paymentService.refundPayment(id, idBuyer);
+				order.setStatus(EOrderStatus.CANCELLED);
+				break;
+			case WAIT_FOR_PAYMENT:
+				order.setStatus(EOrderStatus.CANCELLED);
+				break;
+		
+			default:
+				throw new CommonRuntimeException("Order cannot be cancelled!");
+		}
 		
 		return serviceUtils.convertToDataResponse(orderRepo.save(order), OrderDTO.class);
 	}
