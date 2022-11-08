@@ -37,4 +37,9 @@ public class MediaResource {
 		this.publicId = publicId;
 		this.resourceType = resourceType;
 	}
+
+	@Override
+	public String toString() {
+		return url;
+	}
 }
