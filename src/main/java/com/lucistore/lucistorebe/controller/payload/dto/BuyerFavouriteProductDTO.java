@@ -7,7 +7,6 @@ import lombok.Setter;
 
 @Getter @Setter
 public class BuyerFavouriteProductDTO {
-	private Long id;
 	private BuyerDTO buyer;
 	private ProductDetailDTO product;
 }

@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.lucistore.lucistorebe.controller.payload.dto.BuyerCartDetailDTO;
 import com.lucistore.lucistorebe.controller.payload.dto.BuyerDTO;
+import com.lucistore.lucistorebe.controller.payload.dto.BuyerFavouriteProductDTO;
 import com.lucistore.lucistorebe.controller.payload.dto.LogDTO;
 import com.lucistore.lucistorebe.controller.payload.dto.ProductCategoryDTO;
 import com.lucistore.lucistorebe.controller.payload.dto.ProductCategoryGeneralDTO;
@@ -31,6 +32,7 @@ import com.lucistore.lucistorebe.entity.product.ProductReviewImage;
 import com.lucistore.lucistorebe.entity.product.ProductVariation;
 import com.lucistore.lucistorebe.entity.user.buyer.Buyer;
 import com.lucistore.lucistorebe.entity.user.buyer.BuyerCartDetail;
+import com.lucistore.lucistorebe.entity.user.buyer.BuyerFavouriteProduct;
 
 @Configuration
 public class ModelMapperConfig {
@@ -109,6 +111,10 @@ public class ModelMapperConfig {
 		mapper.createTypeMap(BuyerCartDetail.class, BuyerCartDetailDTO.class).addMappings(m -> {
 			m.map(src -> src.getBuyer().getId(), BuyerCartDetailDTO::setIdBuyer);
 			m.map(src -> src.getProductVariation().getProduct(), BuyerCartDetailDTO::setProductDetail);
+		});
+
+		mapper.createTypeMap(BuyerFavouriteProduct.class, BuyerFavouriteProductDTO.class).addMappings(m -> {
+			m.map(src -> src.getBuyer(), BuyerFavouriteProductDTO::setBuyer);
 		});
 		
 		mapper.createTypeMap(Log.class, LogDTO.class).addMappings(m -> {

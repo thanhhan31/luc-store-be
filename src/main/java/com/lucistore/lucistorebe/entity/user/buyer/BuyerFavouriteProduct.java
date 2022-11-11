@@ -10,7 +10,12 @@ import javax.persistence.Table;
 import com.lucistore.lucistorebe.entity.pk.BuyerFavouriteProductPK;
 import com.lucistore.lucistorebe.entity.product.Product;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 @Entity
+@NoArgsConstructor 
+@Getter
 @Table(name = "buyer_favourite_product")
 public class BuyerFavouriteProduct {
 	@EmbeddedId
