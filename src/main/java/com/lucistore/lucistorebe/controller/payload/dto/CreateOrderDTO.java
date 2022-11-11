@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
-public class OrderDTO {
+public class CreateOrderDTO {
 	private Long id;
 	
 	private BuyerDTO buyer;
@@ -30,5 +30,5 @@ public class OrderDTO {
 	
 	private EPaymentMethod paymentMethod;
 	
-	private Boolean reviewed;
+	private String payUrl;
 }
