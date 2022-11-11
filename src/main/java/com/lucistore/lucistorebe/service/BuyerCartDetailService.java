@@ -8,6 +8,7 @@ import com.lucistore.lucistorebe.controller.advice.exception.InvalidInputDataExc
 import com.lucistore.lucistorebe.controller.payload.dto.BuyerCartDetailDTO;
 import com.lucistore.lucistorebe.controller.payload.request.buyercartdetail.CreateBuyerCartDetailRequest;
 import com.lucistore.lucistorebe.controller.payload.request.buyercartdetail.UpdateBuyerCartDetailRequest;
+import com.lucistore.lucistorebe.controller.payload.response.BaseResponse;
 import com.lucistore.lucistorebe.controller.payload.response.DataResponse;
 import com.lucistore.lucistorebe.controller.payload.response.ListResponse;
 import com.lucistore.lucistorebe.entity.pk.BuyerCartDetailPK;
@@ -73,5 +74,20 @@ public class BuyerCartDetailService {
 		cartDetail.setQuantity(data.getQuantity());
 		
 		return serviceUtils.convertToDataResponse(buyerCartDetailRepo.save(cartDetail), BuyerCartDetailDTO.class);
+	}
+
+	public BaseResponse delete(Long idProductVariation, Long idBuyer) {
+		var cartId = new BuyerCartDetailPK(idBuyer, idProductVariation);
+		if(!buyerCartDetailRepo.existsById(cartId)){
+			throw new InvalidInputDataException("No Cart Detail found with given id " + idProductVariation);
+		}
+
+		buyerCartDetailRepo.deleteById(cartId);
+
+		return new BaseResponse();
+	}
+
+	public DataResponse<Long> countItemByBuyer(Buyer buyer) {
+		return new DataResponse<Long>(buyerCartDetailRepo.countByBuyer(buyer));
 	}
 }

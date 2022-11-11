@@ -12,5 +12,7 @@ import com.lucistore.lucistorebe.entity.user.buyer.BuyerCartDetail;
 
 public interface BuyerCartDetailRepo extends JpaRepository<BuyerCartDetail, BuyerCartDetailPK> {
     List<BuyerCartDetail> findAllByBuyer(Buyer buyer, Sort sort);
+    @Query("SELECT sum(bcd.quantity) FROM BuyerCartDetail bcd WHERE bcd.buyer = ?1")
+    Long countByBuyer(Buyer buyer);
 }
     
