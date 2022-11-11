@@ -82,12 +82,10 @@ public class ServiceUtils {
 	}
 	
 	public boolean checkStatusProductCategory(ProductCategory pc, EProductCategoryStatus statusToCheck) { //check it and its parent
-		if (pc.getStatus() == statusToCheck)
-			return true;
-		
-		while (pc.getParent() != null) {
-			if (pc.getParent().getStatus() == statusToCheck)
+		while (pc != null) {
+			if (pc.getStatus() == statusToCheck)
 				return true;
+			pc = pc.getParent();
 		}
 		
 		return false;
