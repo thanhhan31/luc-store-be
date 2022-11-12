@@ -1,11 +1,12 @@
 package com.lucistore.lucistorebe.controller.admin;
 
 import java.util.Date;
+import java.util.Set;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-import javax.websocket.server.PathParam;
+import javax.validation.constraints.NotEmpty;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -86,8 +87,8 @@ public class AdminProductInventoryController {
 		);
 	}
 
-	@PostMapping("/{idProductVariation}")
-	public ResponseEntity<?> create(@PathParam("idProductVariation") Long idProductVariation, @AuthenticationPrincipal UserDetailsImpl<User> user, @RequestBody @Valid CreateProductInventoryRequest body) {
-		return ResponseEntity.ok(productInventoryService.create(idProductVariation, user.getUser().getId(), body));
+	@PostMapping
+	public ResponseEntity<?> create(@RequestBody @Valid @NotEmpty Set<CreateProductInventoryRequest> body, @AuthenticationPrincipal UserDetailsImpl<User> user) {
+		return ResponseEntity.ok(productInventoryService.create(user.getUser().getId(), body));
 	}
 }

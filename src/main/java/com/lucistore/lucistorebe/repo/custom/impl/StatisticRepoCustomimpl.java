@@ -22,6 +22,7 @@ import com.lucistore.lucistorebe.entity.order.Order_;
 import com.lucistore.lucistorebe.entity.user.User_;
 import com.lucistore.lucistorebe.entity.user.buyer.Buyer_;
 import com.lucistore.lucistorebe.repo.custom.StatisticRepoCustom;
+import com.lucistore.lucistorebe.utility.EStatisticType;
 
 @Repository
 public class StatisticRepoCustomimpl implements StatisticRepoCustom{
@@ -33,7 +34,9 @@ public class StatisticRepoCustomimpl implements StatisticRepoCustom{
             List<Long> idBuyers,
             List<Long> idAdmins,
 			Integer month,
-            Integer year) {
+			Integer quarter,
+            Integer year,
+			EStatisticType type) {
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
 		
@@ -55,9 +58,9 @@ public class StatisticRepoCustomimpl implements StatisticRepoCustom{
 		if ( month != null) {
 			filters.add(cb.equal(cb.function("MONTH", Integer.class, rootMain.get(Order_.createTime)), month));
 		}
-		// if ( quarter != null) {
-		// 	filters.add(cb.equal(cb.function("QUARTER", Integer.class, rootMain.get(Order_.createTime)), quarter));
-		// }
+		if ( quarter != null) {
+			filters.add(cb.equal(cb.function("QUARTER", Integer.class, rootMain.get(Order_.createTime)), quarter));
+		}
 	
 		Predicate filter = cb.and(filters.toArray(new Predicate[0]));
 		
@@ -68,14 +71,15 @@ public class StatisticRepoCustomimpl implements StatisticRepoCustom{
 		sub.select(cb.sum(subRoot.get(OrderDetail_.quantity)));
 		
 		Expression<Integer> timeUnit;
+		List<Expression<?>> timeGroup = new ArrayList<>();
 
-		if( month != null) {
+		if( month != null || quarter != null) {
 			timeUnit = cb.function("DAY", Integer.class, rootMain.get(Order_.createTime));
-		// } else if ( quarter != null) {
-		// 	timeUnit = cb.function("QUARTER", Integer.class, rootMain.get(Order_.createTime));
+			timeGroup.add(cb.function("MONTH", Integer.class, rootMain.get(Order_.createTime)));
 		} else {
-			timeUnit = cb.function("MONTH", Integer.class, rootMain.get(Order_.createTime));
+			timeUnit = cb.function(type.name(), Integer.class, rootMain.get(Order_.createTime));
 		}
+		timeGroup.add(timeUnit);
 		
 		main.multiselect(timeUnit
 				, cb.sum(sub) //quantity
@@ -83,8 +87,8 @@ public class StatisticRepoCustomimpl implements StatisticRepoCustom{
 				, cb.sum(rootMain.get(Order_.payPrice))
 				, cb.count(rootMain.get(Order_.id)));
 		
-		main.groupBy(timeUnit);
-		
+		main.groupBy(timeGroup);
+		main.where(filter);
 		
 		return em.createQuery(main).getResultList();
     }

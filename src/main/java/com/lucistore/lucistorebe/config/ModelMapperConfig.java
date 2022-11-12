@@ -73,6 +73,7 @@ public class ModelMapperConfig {
 			m.map(src -> src.getUser().getFullname(), BuyerDTO::setFullname);
 			m.map(src -> src.getUser().getPhone(), BuyerDTO::setPhone);
 			m.map(src -> src.getUser().getEmail(), BuyerDTO::setEmail);
+			m.map(src -> src.getUser().getFullname(), BuyerDTO::setFullname);
 		});
 		
 		mapper.createTypeMap(ProductCategory.class, ProductCategoryDTO.class).addMappings(m -> {

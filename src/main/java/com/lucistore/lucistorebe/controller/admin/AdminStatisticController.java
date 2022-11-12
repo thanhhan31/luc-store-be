@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.lucistore.lucistorebe.config.login.UserDetailsImpl;
 import com.lucistore.lucistorebe.entity.user.User;
 import com.lucistore.lucistorebe.service.StatisticService;
+import com.lucistore.lucistorebe.utility.EStatisticType;
 
 import io.swagger.v3.oas.annotations.Parameter;
 
@@ -33,13 +34,19 @@ public class AdminStatisticController {
 			@Parameter(description = "Month to statistic")
 			@RequestParam(required = false) Integer month,
 
+			@Parameter(description = "Quarter to statistic")
+			@RequestParam(required = false) Integer quarter,
+
 			@Parameter(description = "Year to statistic")
 			@RequestParam(required = false) Integer year,
+
+			@Parameter(description = "Type (month or quarter) if statistic by year")
+			@RequestParam(required = false) EStatisticType type,
 			
 			@AuthenticationPrincipal UserDetailsImpl<User> user
 			){
 
-		var r = statisticService.statistic(idBuyer, idAdmin, month, year, null);
+		var r = statisticService.statistic(idBuyer, idAdmin, month, quarter, year, type, user.getUser());
 		return ResponseEntity.ok(r);
 	}
 }
