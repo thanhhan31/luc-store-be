@@ -71,12 +71,15 @@ public class StatisticRepoCustomimpl implements StatisticRepoCustom{
 		sub.select(cb.sum(subRoot.get(OrderDetail_.quantity)));
 		
 		Expression<Integer> timeUnit;
+		List<Expression<?>> timeGroup = new ArrayList<>();
 
 		if( month != null || quarter != null) {
 			timeUnit = cb.function("DAY", Integer.class, rootMain.get(Order_.createTime));
+			timeGroup.add(cb.function("MONTH", Integer.class, rootMain.get(Order_.createTime)));
 		} else {
 			timeUnit = cb.function(type.name(), Integer.class, rootMain.get(Order_.createTime));
 		}
+		timeGroup.add(timeUnit);
 		
 		main.multiselect(timeUnit
 				, cb.sum(sub) //quantity
@@ -84,7 +87,8 @@ public class StatisticRepoCustomimpl implements StatisticRepoCustom{
 				, cb.sum(rootMain.get(Order_.payPrice))
 				, cb.count(rootMain.get(Order_.id)));
 		
-		main.groupBy(timeUnit);
+		main.groupBy(timeGroup);
+		main.where(filter);
 		
 		return em.createQuery(main).getResultList();
     }

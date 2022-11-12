@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.lucistore.lucistorebe.controller.advice.exception.InvalidInputDataException;
 import com.lucistore.lucistorebe.controller.payload.dto.statistic.StatisticDTO;
 import com.lucistore.lucistorebe.controller.payload.response.ListResponse;
 import com.lucistore.lucistorebe.entity.user.User;
@@ -44,7 +45,7 @@ public class StatisticService {
 		}
 
 		if(month == null && quarter == null && type == null){
-			throw new IllegalArgumentException("You must specify type of statistic if statistic by year");
+			throw new InvalidInputDataException("You must specify type of statistic if statistic by year");
 		}
 
 		List<StatisticDTO> os = statisticRepo.statistic(idBuyers, idAdmins, month, quarter, year, type);
