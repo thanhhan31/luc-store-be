@@ -22,6 +22,7 @@ import com.lucistore.lucistorebe.entity.order.Order_;
 import com.lucistore.lucistorebe.entity.user.User_;
 import com.lucistore.lucistorebe.entity.user.buyer.Buyer_;
 import com.lucistore.lucistorebe.repo.custom.StatisticRepoCustom;
+import com.lucistore.lucistorebe.utility.EStatisticType;
 
 @Repository
 public class StatisticRepoCustomimpl implements StatisticRepoCustom{
@@ -33,7 +34,9 @@ public class StatisticRepoCustomimpl implements StatisticRepoCustom{
             List<Long> idBuyers,
             List<Long> idAdmins,
 			Integer month,
-            Integer year) {
+			Integer quarter,
+            Integer year,
+			EStatisticType type) {
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
 		
@@ -55,9 +58,9 @@ public class StatisticRepoCustomimpl implements StatisticRepoCustom{
 		if ( month != null) {
 			filters.add(cb.equal(cb.function("MONTH", Integer.class, rootMain.get(Order_.createTime)), month));
 		}
-		// if ( quarter != null) {
-		// 	filters.add(cb.equal(cb.function("QUARTER", Integer.class, rootMain.get(Order_.createTime)), quarter));
-		// }
+		if ( quarter != null) {
+			filters.add(cb.equal(cb.function("QUARTER", Integer.class, rootMain.get(Order_.createTime)), quarter));
+		}
 	
 		Predicate filter = cb.and(filters.toArray(new Predicate[0]));
 		
@@ -69,12 +72,10 @@ public class StatisticRepoCustomimpl implements StatisticRepoCustom{
 		
 		Expression<Integer> timeUnit;
 
-		if( month != null) {
+		if( month != null || quarter != null) {
 			timeUnit = cb.function("DAY", Integer.class, rootMain.get(Order_.createTime));
-		// } else if ( quarter != null) {
-		// 	timeUnit = cb.function("QUARTER", Integer.class, rootMain.get(Order_.createTime));
 		} else {
-			timeUnit = cb.function("MONTH", Integer.class, rootMain.get(Order_.createTime));
+			timeUnit = cb.function(type.name(), Integer.class, rootMain.get(Order_.createTime));
 		}
 		
 		main.multiselect(timeUnit
@@ -84,7 +85,6 @@ public class StatisticRepoCustomimpl implements StatisticRepoCustom{
 				, cb.count(rootMain.get(Order_.id)));
 		
 		main.groupBy(timeUnit);
-		
 		
 		return em.createQuery(main).getResultList();
     }

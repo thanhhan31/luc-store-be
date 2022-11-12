@@ -1,6 +1,10 @@
 package com.lucistore.lucistorebe.service;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
+
+import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -61,23 +65,27 @@ public class ProductInventoryService {
 			);
 	}
 
-    public DataResponse<ProductInventoryDTO> create(Long idProductVariation, Long idImporter, CreateProductInventoryRequest data) {
-        if(!productVariationRepo.existsById(idProductVariation)){
-            throw new InvalidInputDataException("No product variation found with given id: " + idProductVariation);
-        }
+    @Transactional
+    public ListResponse<ProductInventoryDTO> create(Long idImporter, Set<CreateProductInventoryRequest> data) {
+        List<ProductInventory> pil = data.stream().map(item -> {
+            if(!productVariationRepo.existsById(item.getIdProductVariation())){
+                throw new InvalidInputDataException("No product variation found with given id");
+            }
 
-        ProductVariation productVariation = productVariationRepo.getReferenceById(idProductVariation);
+            ProductVariation productVariation = productVariationRepo.getReferenceById(item.getIdProductVariation());
+            productVariation.setAvailableQuantity(productVariation.getAvailableQuantity() + item.getQuantity());
 
-        productVariation.setAvailableQuantity(productVariation.getAvailableQuantity() + data.getQuantity());
-        
-        return serviceUtils.convertToDataResponse(
-            productInventoryRepo.save(
-                new ProductInventory(
-                    productVariation, 
-                    userRepo.getReferenceById(idImporter), 
-                    data.getQuantity()
-                )),
-                ProductInventoryDTO.class
+            return new ProductInventory(
+                productVariation, 
+                userRepo.getReferenceById(idImporter), 
+                item.getQuantity()
             );
+        }).toList();
+
+        
+        return serviceUtils.convertToListResponse(
+            productInventoryRepo.saveAll(pil),
+            ProductInventoryDTO.class
+        );
     }
 }
