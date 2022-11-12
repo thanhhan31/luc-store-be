@@ -11,7 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.lucistore.lucistorebe.service.LogService;
 import com.lucistore.lucistorebe.utility.ELogType;
-import com.lucistore.lucistorebe.utility.ModelSorting;
+import com.lucistore.lucistorebe.utility.filter.LogFilter;
+import com.lucistore.lucistorebe.utility.filter.PagingInfo;
 
 @RestController
 @RequestMapping("/api/admin/log")
@@ -41,14 +42,14 @@ public class LogController {
 		
 		return ResponseEntity.ok(
 			logService.search(
-					idUser, 
-					beginDate, 
-					endDate, 
-					logType, 
-					searchContent, 
-					page, 
-					size, 
-					ModelSorting.getLogSort(sortByDateDescending)
+					new LogFilter(
+						idUser,
+						beginDate,
+						endDate, 
+						logType, 
+						searchContent
+					),
+					new PagingInfo(page, size, null, sortByDateDescending)
 				)
 			);
 	}

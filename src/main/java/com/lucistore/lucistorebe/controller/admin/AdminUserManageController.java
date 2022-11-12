@@ -19,7 +19,8 @@ import com.lucistore.lucistorebe.entity.user.User;
 import com.lucistore.lucistorebe.service.UserService;
 import com.lucistore.lucistorebe.utility.EUserRole;
 import com.lucistore.lucistorebe.utility.EUserStatus;
-import com.lucistore.lucistorebe.utility.ModelSorting;
+import com.lucistore.lucistorebe.utility.filter.PagingInfo;
+import com.lucistore.lucistorebe.utility.filter.UserFilter;
 
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -53,17 +54,18 @@ public class AdminUserManageController {
 			@RequestParam(required = false) Boolean sortDescending) {
 		
 		return ResponseEntity.ok(
-				userService.searchAdmin(
+			userService.search(
+				new UserFilter(
 					searchFullname, 
 					searchUsername, 
 					searchEmail, 
 					searchPhone, 
-					role, status, 
-					page, 
-					size, 
-					ModelSorting.getProductSort(sortBy, sortDescending)
-				)
-			);
+					role, 
+					status
+				),
+				new PagingInfo(page, size, sortBy, sortDescending)
+			)
+		);
 	}
 	
 	@Hidden

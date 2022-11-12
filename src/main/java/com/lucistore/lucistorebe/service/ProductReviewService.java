@@ -16,11 +16,13 @@ import com.lucistore.lucistorebe.controller.payload.response.DataResponse;
 import com.lucistore.lucistorebe.controller.payload.response.ListWithPagingResponse;
 import com.lucistore.lucistorebe.entity.order.OrderDetailPK;
 import com.lucistore.lucistorebe.entity.product.ProductReview;
+import com.lucistore.lucistorebe.entity.product.ProductReview_;
 import com.lucistore.lucistorebe.repo.BuyerRepo;
 import com.lucistore.lucistorebe.repo.OrderDetailRepo;
 import com.lucistore.lucistorebe.repo.ProductReviewRepo;
 import com.lucistore.lucistorebe.repo.ProductVariationRepo;
 import com.lucistore.lucistorebe.service.util.ServiceUtils;
+import com.lucistore.lucistorebe.utility.EOrderStatus;
 
 @Service
 public class ProductReviewService {
@@ -36,6 +38,9 @@ public class ProductReviewService {
 	@Autowired
 	BuyerRepo buyerRepo;
 	
+	@Autowired 
+	OrderService orderService;
+	
 	@Autowired
 	ProductReviewImageService productReviewImageService;
 	
@@ -47,6 +52,9 @@ public class ProductReviewService {
 		var od = orderDetailRepo.findById(new OrderDetailPK(data.getIdOrder(), data.getIdProductVariation())).orElseThrow(
 				() -> new InvalidInputDataException("Order does not contain given product variation or no order found")
 			);
+		
+		if (od.getOrder().getStatus() != EOrderStatus.DELIVERED)
+			throw new InvalidInputDataException("Can not review order which is in processing state");
 		
 		if (!od.getOrder().getBuyer().getId().equals(idBuyer))
 			throw new InvalidInputDataException("Can not review order of other users");
@@ -66,8 +74,9 @@ public class ProductReviewService {
 		if (images != null)
 			productReviewImageService.create(pr, images);
 		
+		orderService.checkAndCompleteOrder(od.getOrder().getId());
 		productReviewRepo.refresh(pr);
-		
+
 		return serviceUtils.convertToDataResponse(pr, ProductReviewDTO.class);
 	}
 	
@@ -75,14 +84,13 @@ public class ProductReviewService {
 		PageRequest pr = serviceUtils.getPageRequest(page, size);
 		
 		if (sortByOldest != null && sortByOldest.booleanValue())
-			pr = pr.withSort(Sort.by("time").descending()); //sort by lasted
+			pr = pr.withSort(Sort.by(ProductReview_.TIME).descending()); //sort by lasted
 		else
-			pr = pr.withSort(Sort.by("time").ascending()); //sort by oldest
+			pr = pr.withSort(Sort.by(ProductReview_.TIME).ascending()); //sort by oldest
 		
 		return serviceUtils.convertToListResponse(
 				productReviewRepo.findByIdProduct(idProduct, pr), 
-				ProductReviewDTO.class, 
-				pr.getPageNumber()
+				ProductReviewDTO.class
 			);
 	}
 }

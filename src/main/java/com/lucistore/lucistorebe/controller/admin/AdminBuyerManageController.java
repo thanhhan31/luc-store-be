@@ -24,6 +24,8 @@ import com.lucistore.lucistorebe.service.BuyerService;
 import com.lucistore.lucistorebe.service.UserService;
 import com.lucistore.lucistorebe.utility.EGender;
 import com.lucistore.lucistorebe.utility.EUserStatus;
+import com.lucistore.lucistorebe.utility.filter.BuyerFilter;
+import com.lucistore.lucistorebe.utility.filter.PagingInfo;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -108,23 +110,23 @@ public class AdminBuyerManageController {
 			@RequestParam(required = false) @Parameter(description = "Specify sort order. True for sort in descending order.")
 				Boolean sortDescending) {
 
+		
 		return ResponseEntity.ok(
-				buyerService.searchBuyer(
-					searchFullname, 
-					searchUsername, 
-					searchEmail, 
-					searchPhone, 
-					status, 
-					dob, 
-					gender, 
-					emailConfirmed, 
-					phoneConfirmed, 
-					createdDate, 
-					lastModifiedBy, 
-					page, 
-					size, 
-					sortBy, 
-					sortDescending
+				buyerService.search(
+					new BuyerFilter(
+						searchFullname, 
+						searchUsername, 
+						searchEmail, 
+						searchPhone, 
+						status, 
+						dob, 
+						gender, 
+						emailConfirmed, 
+						phoneConfirmed, 
+						createdDate, 
+						lastModifiedBy
+					),
+					new PagingInfo(page, size, sortBy, sortDescending)
 				)
 			);
 	}

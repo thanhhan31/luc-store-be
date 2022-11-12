@@ -6,7 +6,6 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
@@ -17,9 +16,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
-
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.lucistore.lucistorebe.entity.MediaResource;
 import com.lucistore.lucistorebe.entity.UpdatableAvatar;
@@ -36,7 +32,6 @@ import lombok.Setter;
 @Getter @Setter
 @NoArgsConstructor
 @Entity
-@EntityListeners(AuditingEntityListener.class)
 @Table(name = "buyer")
 public class Buyer implements UserInfo, UpdatableAvatar {
 	@Id
@@ -88,7 +83,6 @@ public class Buyer implements UserInfo, UpdatableAvatar {
 	private Long totalSpent;
 	
 	@Column(name = "created_date")
-	@CreatedDate
 	private Date createdDate;
 
 	@Override
@@ -118,7 +112,7 @@ public class Buyer implements UserInfo, UpdatableAvatar {
 
 	@Override
 	public boolean equals(Object obj) {
-		return obj != null && this.id.equals(((Buyer) obj).getId());
+		return obj instanceof Buyer buyer && this.id.equals(buyer.getId());
 	}
 	
 	public Buyer(User user, Boolean canChangeUsername, Boolean emailConfirmed, Boolean phoneConfirmed) {
@@ -127,6 +121,7 @@ public class Buyer implements UserInfo, UpdatableAvatar {
 		this.canChangeUsername = canChangeUsername;
 		this.emailConfirmed = emailConfirmed;
 		this.phoneConfirmed = phoneConfirmed;
+		this.createdDate = new Date();
 	}
 	
 	public Buyer(User user, EGender gender,

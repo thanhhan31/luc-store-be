@@ -20,10 +20,18 @@ import com.lucistore.lucistorebe.controller.payload.dto.ProductImageDTO;
 import com.lucistore.lucistorebe.controller.payload.dto.ProductReviewDTO;
 import com.lucistore.lucistorebe.controller.payload.dto.ProductReviewImageDTO;
 import com.lucistore.lucistorebe.controller.payload.dto.ProductVariationDTO;
+import com.lucistore.lucistorebe.controller.payload.dto.order.AdminDetailedOrderDTO;
+import com.lucistore.lucistorebe.controller.payload.dto.order.AdminOrderDTO;
+import com.lucistore.lucistorebe.controller.payload.dto.order.BuyerDetailedOrderDTO;
+import com.lucistore.lucistorebe.controller.payload.dto.order.BuyerOrderDTO;
+import com.lucistore.lucistorebe.controller.payload.dto.order.OrderDetailDTO;
+import com.lucistore.lucistorebe.controller.payload.dto.order.OrderProductGeneralDetailDTO;
 import com.lucistore.lucistorebe.controller.payload.dto.productdetail.ProductCategoryDetailDTO;
 import com.lucistore.lucistorebe.controller.payload.dto.productdetail.ProductDetailDTO;
 import com.lucistore.lucistorebe.entity.Log;
 import com.lucistore.lucistorebe.entity.MediaResource;
+import com.lucistore.lucistorebe.entity.order.Order;
+import com.lucistore.lucistorebe.entity.order.OrderDetail;
 import com.lucistore.lucistorebe.entity.product.Product;
 import com.lucistore.lucistorebe.entity.product.ProductCategory;
 import com.lucistore.lucistorebe.entity.product.ProductImage;
@@ -56,11 +64,13 @@ public class ModelMapperConfig {
 		var lstProductImageCvt = generateListConverter(ProductImage.class, ProductImageDTO.class, mapper);
 		var lstProductReviewImageCvt = generateListConverter(ProductReviewImage.class, ProductReviewImageDTO.class, mapper);
 		var lstProductVariationCvt = generateListConverter(ProductVariation.class, ProductVariationDTO.class, mapper);
+		var lstOrderDetailCvt = generateListConverter(OrderDetail.class, OrderDetailDTO.class, mapper);
 		
 		mapper.createTypeMap(Buyer.class, BuyerDTO.class).addMappings(m -> {
 			m.using(mediaResourceCvt).map(Buyer::getAvatar, BuyerDTO::setAvatar);
 			m.using(emptyPasswordCvt).map(src -> src.getUser().getPassword(), BuyerDTO::setEmptyPassword);
 			m.map(src -> src.getUser().getUsername(), BuyerDTO::setUsername);
+			m.map(src -> src.getUser().getFullname(), BuyerDTO::setFullname);
 			m.map(src -> src.getUser().getPhone(), BuyerDTO::setPhone);
 			m.map(src -> src.getUser().getEmail(), BuyerDTO::setEmail);
 		});
@@ -114,11 +124,34 @@ public class ModelMapperConfig {
 		});
 
 		mapper.createTypeMap(BuyerFavouriteProduct.class, BuyerFavouriteProductDTO.class).addMappings(m -> {
-			m.map(src -> src.getBuyer(), BuyerFavouriteProductDTO::setBuyer);
+			m.map(BuyerFavouriteProduct::getBuyer, BuyerFavouriteProductDTO::setBuyer);
 		});
 		
 		mapper.createTypeMap(Log.class, LogDTO.class).addMappings(m -> {
 			m.map(src -> src.getUser().getUsername(), LogDTO::setUsername);
+		});
+		
+		/*******/		
+		mapper.createTypeMap(Product.class, OrderProductGeneralDetailDTO.class).addMappings(m -> {
+			m.using(mediaResourceCvt).map(Product::getAvatar, OrderProductGeneralDetailDTO::setAvatar);
+		});
+		
+		mapper.createTypeMap(Order.class, AdminOrderDTO.class).addMappings(m -> {
+			m.map(src -> src.getDeliveryAddress().getId(), AdminOrderDTO::setIdDeliveryAddress);
+			m.using(lstOrderDetailCvt).map(Order::getOrderDetails, AdminOrderDTO::setOrderDetails);
+		});
+		
+		mapper.createTypeMap(Order.class, BuyerOrderDTO.class).addMappings(m -> {
+			m.map(src -> src.getDeliveryAddress().getId(), BuyerOrderDTO::setIdDeliveryAddress);
+			m.using(lstOrderDetailCvt).map(Order::getOrderDetails, BuyerOrderDTO::setOrderDetails);
+		});
+		
+		mapper.createTypeMap(Order.class, AdminDetailedOrderDTO.class).addMappings(m -> {
+			m.using(lstOrderDetailCvt).map(Order::getOrderDetails, AdminDetailedOrderDTO::setOrderDetails);
+		});
+		
+		mapper.createTypeMap(Order.class, BuyerDetailedOrderDTO.class).addMappings(m -> {
+			m.using(lstOrderDetailCvt).map(Order::getOrderDetails, BuyerDetailedOrderDTO::setOrderDetails);
 		});
 		
 		return mapper;

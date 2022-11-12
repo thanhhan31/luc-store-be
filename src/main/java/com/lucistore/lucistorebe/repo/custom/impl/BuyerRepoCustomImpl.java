@@ -1,159 +1,97 @@
 package com.lucistore.lucistorebe.repo.custom.impl;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.function.TriFunction;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Repository;
 
-import com.lucistore.lucistorebe.controller.advice.exception.InvalidInputDataException;
 import com.lucistore.lucistorebe.entity.user.UserRole_;
 import com.lucistore.lucistorebe.entity.user.User_;
 import com.lucistore.lucistorebe.entity.user.buyer.Buyer;
 import com.lucistore.lucistorebe.entity.user.buyer.Buyer_;
 import com.lucistore.lucistorebe.repo.custom.BuyerRepoCustom;
-import com.lucistore.lucistorebe.utility.EGender;
 import com.lucistore.lucistorebe.utility.EUserRole;
-import com.lucistore.lucistorebe.utility.EUserStatus;
-import com.lucistore.lucistorebe.utility.Page;
+import com.lucistore.lucistorebe.utility.filter.BuyerFilter;
+import com.lucistore.lucistorebe.utility.filter.PagingInfo;
 
 @Repository
 public class BuyerRepoCustomImpl implements BuyerRepoCustom {
 	@PersistenceContext
 	private EntityManager em;
-
-	@Override
-	public List<Buyer> searchBuyer(String searchFullname, String searchUsername, String searchEmail, String searchPhone, 
-			EUserStatus status, Date dob, EGender gender, Boolean emailConfirmed, Boolean phoneConfirmed,
-			Date createdDate, String lastModifiedBy, Page page) {
-		CriteriaBuilder cb = em.getCriteriaBuilder();
-		CriteriaQuery<Buyer> cq = cb.createQuery(Buyer.class);
-		Root<Buyer> root = cq.from(Buyer.class);
-
-		List<Predicate> filters = new ArrayList<>();
-		
-		if (StringUtils.isNotEmpty(searchFullname)) {
-			filters.add(cb.like(root.get(Buyer_.user).get(User_.fullname), "%" + searchFullname + "%"));
-		}
-		if (StringUtils.isNotEmpty(searchUsername)) {
-			filters.add(cb.like(root.get(Buyer_.user).get(User_.username), "%" + searchUsername + "%"));
-		}
-		if (StringUtils.isNotEmpty(searchEmail)) {
-			filters.add(cb.like(root.get(Buyer_.user).get(User_.email), "%" + searchEmail + "%"));
-		}
-		if (StringUtils.isNotEmpty(searchPhone)) {
-			filters.add(cb.like(root.get(Buyer_.user).get(User_.phone), "%" + searchPhone + "%"));
-		}
-		/*if (StringUtils.isNotEmpty(lastModifiedBy)) {
-			filters.add(cb.like(root.get(Buyer_.user).get(User_.), "%" + lastModifiedBy + "%"));
-		}*/
-		
-		if (status != null) {
-			filters.add(cb.equal(root.get(Buyer_.user).get(User_.status), status));
-		}
-		
-		if (dob != null) {
-			filters.add(cb.equal(root.get(Buyer_.dob), dob));
-		}
-		if (gender != null) {
-			filters.add(cb.equal(root.get(Buyer_.gender), gender));
-		}
-		if (emailConfirmed != null) {
-			filters.add(cb.equal(root.get(Buyer_.emailConfirmed), emailConfirmed));
-		}
-		if (phoneConfirmed != null) {
-			filters.add(cb.equal(root.get(Buyer_.phoneConfirmed), phoneConfirmed));
-		}
-		if (createdDate != null) {
-			filters.add(cb.equal(root.get(Buyer_.createdDate), createdDate));
-		}
-		
-		filters.add(cb.equal(root.get(Buyer_.user).get(User_.role).get(UserRole_.name), EUserRole.BUYER.toString()));
-
-		if (page.getSortBy() != null) {
-			cq.orderBy(createSort(cb, root, page.getSortBy(), page.getSortDescending()));
-		}
-
-		Predicate filter = cb.and(filters.toArray(new Predicate[0]));
-		cq.select(root).where(filter);
-		TypedQuery<Buyer> query = em.createQuery(cq);
-
-		if (page != null) {
-			query.setFirstResult(page.getPageNumber() * page.getPageSize());
-			query.setMaxResults(page.getPageSize());
-		}
-		return query.getResultList();
+	
+	private final SearchRepo<Buyer, BuyerFilter> searchRepo;
+	private final TriFunction<BuyerFilter, CriteriaBuilder, Root<Buyer>, Predicate> createFiltersDelegate;
+	private final TriFunction<CriteriaBuilder, Root<Buyer>, PagingInfo, List<Order>> createOrdersDelegate;
+	
+	public BuyerRepoCustomImpl() {
+		searchRepo = new SearchRepo<>(Buyer.class);
+		createFiltersDelegate = this::createFilters;
+		createOrdersDelegate = (cb, root, pagingInfo) -> createSort(cb, root, pagingInfo.getSortBy(), pagingInfo.getSortDescending());
 	}
 
 	@Override
-	public Long searchBuyerCount(String searchFullname, String searchUsername, String searchEmail, String searchPhone,
-			EUserStatus status, Date dob, EGender gender, Boolean emailConfirmed, Boolean phoneConfirmed,
-			Date createdDate, String lastModifiedBy) {
-		CriteriaBuilder cb = em.getCriteriaBuilder();
-		CriteriaQuery<Long> cq = cb.createQuery(Long.class);
-		Root<Buyer> root = cq.from(Buyer.class);
-		
-		List<Predicate> filters = new ArrayList<>();
+	public Page<Buyer> search(BuyerFilter filter, PagingInfo pagingInfo) {
+		return searchRepo.search(filter, pagingInfo, createFiltersDelegate, createOrdersDelegate, em);
+	}
 
-		if (StringUtils.isNotEmpty(searchFullname)) {
-			filters.add(cb.like(root.get(Buyer_.user).get(User_.fullname), "%" + searchFullname + "%"));
+	private Predicate createFilters(BuyerFilter filter, CriteriaBuilder cb, Root<Buyer> root) {
+		List<Predicate> filters = new ArrayList<>();
+		
+		if (StringUtils.isNotEmpty(filter.getSearchFullname())) {
+			filters.add(cb.like(root.get(Buyer_.user).get(User_.fullname), "%" + filter.getSearchFullname() + "%"));
 		}
-		if (StringUtils.isNotEmpty(searchUsername)) {
-			filters.add(cb.like(root.get(Buyer_.user).get(User_.username), "%" + searchUsername + "%"));
+		if (StringUtils.isNotEmpty(filter.getSearchUsername())) {
+			filters.add(cb.like(root.get(Buyer_.user).get(User_.username), "%" + filter.getSearchUsername() + "%"));
 		}
-		if (StringUtils.isNotEmpty(searchEmail)) {
-			filters.add(cb.like(root.get(Buyer_.user).get(User_.email), "%" + searchEmail + "%"));
+		if (StringUtils.isNotEmpty(filter.getSearchEmail())) {
+			filters.add(cb.like(root.get(Buyer_.user).get(User_.email), "%" + filter.getSearchEmail() + "%"));
 		}
-		if (StringUtils.isNotEmpty(searchPhone)) {
-			filters.add(cb.like(root.get(Buyer_.user).get(User_.phone), "%" + searchPhone + "%"));
+		if (StringUtils.isNotEmpty(filter.getSearchPhone())) {
+			filters.add(cb.like(root.get(Buyer_.user).get(User_.phone), "%" + filter.getSearchPhone() + "%"));
 		}
-		if (StringUtils.isNotEmpty(lastModifiedBy)) {
-			throw new InvalidInputDataException("Not implement yet");
-			//filters.add(cb.like(root.get(Buyer_.lastModifiedBy), "%" + lastModifiedBy + "%"));
+		if (StringUtils.isNotEmpty(filter.getLastModifiedBy())) {
+			filters.add(cb.like(root.get(Buyer_.user).get(User_.lastModifiedBy), "%" + filter.getLastModifiedBy() + "%"));
 		}
 		
-		if (status != null) {
-			filters.add(cb.equal(root.get(Buyer_.user).get(User_.status), status));
+		if (filter.getStatus() != null) {
+			filters.add(cb.equal(root.get(Buyer_.user).get(User_.status), filter.getStatus()));
 		}
 		
-		if (dob != null) {
-			filters.add(cb.equal(root.get(Buyer_.dob), dob));
+		if (filter.getDob() != null) {
+			filters.add(cb.equal(root.get(Buyer_.dob), filter.getDob()));
 		}
-		if (gender != null) {
-			filters.add(cb.equal(root.get(Buyer_.gender), gender));
+		if (filter.getGender() != null) {
+			filters.add(cb.equal(root.get(Buyer_.gender), filter.getGender()));
 		}
-		if (emailConfirmed != null) {
-			filters.add(cb.equal(root.get(Buyer_.emailConfirmed), emailConfirmed));
+		if (filter.getEmailConfirmed() != null) {
+			filters.add(cb.equal(root.get(Buyer_.emailConfirmed), filter.getEmailConfirmed()));
 		}
-		if (phoneConfirmed != null) {
-			filters.add(cb.equal(root.get(Buyer_.phoneConfirmed), phoneConfirmed));
+		if (filter.getPhoneConfirmed() != null) {
+			filters.add(cb.equal(root.get(Buyer_.phoneConfirmed), filter.getPhoneConfirmed()));
 		}
-		if (createdDate != null) {
-			filters.add(cb.equal(root.get(Buyer_.createdDate), createdDate));
+		if (filter.getCreatedDate() != null) {
+			filters.add(cb.equal(root.get(Buyer_.createdDate), filter.getCreatedDate()));
 		}
 		
 		filters.add(cb.equal(root.get(Buyer_.user).get(User_.role).get(UserRole_.name), EUserRole.BUYER.toString()));
-
-		Predicate filter = cb.and(filters.toArray(new Predicate[0]));
-		cq.select(cb.count(root)).where(filter);
-		return em.createQuery(cq).getSingleResult();
+		return cb.and(filters.toArray(new Predicate[0]));
 	}
 	
 	private List<Order> createSort(CriteriaBuilder cb, Root<Buyer> root, Integer sortBy, Boolean sortDescending) {
 		List<Order> orders = new ArrayList<>();
 		
 		if (sortBy != null) {
-			if (sortDescending == null || sortDescending.booleanValue() == false) { //ASC
+			if (sortDescending == null || !sortDescending.booleanValue()) { //ASC
 				if (sortBy >= 16) {
 					orders.add(cb.asc(root.get(Buyer_.createdDate)));
 					sortBy -= 16;
@@ -172,7 +110,6 @@ public class BuyerRepoCustomImpl implements BuyerRepoCustom {
 				}
 				if (sortBy >= 1) {
 					orders.add(cb.asc(root.get(Buyer_.user).get(User_.fullname)));
-					sortBy -= 1;
 				}
 			}
 			else {	//DESC
@@ -194,7 +131,6 @@ public class BuyerRepoCustomImpl implements BuyerRepoCustom {
 				}
 				if (sortBy >= 1) {
 					orders.add(cb.desc(root.get(Buyer_.user).get(User_.fullname)));
-					sortBy -= 1;
 				}
 			}
 		}

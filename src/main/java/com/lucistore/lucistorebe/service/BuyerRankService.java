@@ -42,7 +42,7 @@ public class BuyerRankService {
 	
 	public DataResponse<BuyerRankDTO> update(Long id, @Valid UpdateBuyerRankRequest data) {
 		BuyerRank buyerRank = buyerRankRepo.findById(id).orElseThrow(
-				() -> new InvalidInputDataException("No Buyer Rank found with given id")
+				() -> new InvalidInputDataException("No buyer rank found with given id")
 			);
 		
 			buyerRank.setDiscountRate(data.getDiscountRate());
@@ -52,7 +52,7 @@ public class BuyerRankService {
 
 	public DataResponse<BuyerDTO> rankUp(Long idBuyer) {
 		Buyer buyer = buyerRepo.findById(idBuyer).orElseThrow(
-				() -> new InvalidInputDataException("No Buyer found with given id")
+				() -> new InvalidInputDataException("No buyer found with given id")
 			);
 		
 		if (buyer.getRank().getNextRank() == null) {

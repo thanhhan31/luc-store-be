@@ -9,7 +9,6 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,6 +20,7 @@ import com.lucistore.lucistorebe.controller.payload.dto.productdetail.ProductDet
 import com.lucistore.lucistorebe.controller.payload.request.product.CreateProductRequest;
 import com.lucistore.lucistorebe.controller.payload.request.product.UpdateProductRequest;
 import com.lucistore.lucistorebe.controller.payload.response.DataResponse;
+import com.lucistore.lucistorebe.controller.payload.response.ListResponse;
 import com.lucistore.lucistorebe.controller.payload.response.ListWithPagingResponse;
 import com.lucistore.lucistorebe.entity.product.Product;
 import com.lucistore.lucistorebe.entity.product.ProductCategory;
@@ -31,8 +31,9 @@ import com.lucistore.lucistorebe.service.util.ServiceUtils;
 import com.lucistore.lucistorebe.utility.EProductCategoryStatus;
 import com.lucistore.lucistorebe.utility.EProductStatus;
 import com.lucistore.lucistorebe.utility.EProductVariationStatus;
-import com.lucistore.lucistorebe.utility.PageWithJpaSort;
 import com.lucistore.lucistorebe.utility.PlatformPolicyParameter;
+import com.lucistore.lucistorebe.utility.filter.PagingInfo;
+import com.lucistore.lucistorebe.utility.filter.ProductFilter;
 
 @Service
 public class ProductService {
@@ -57,45 +58,31 @@ public class ProductService {
 	@Autowired
 	ServiceUtils serviceUtils;
 	
-	public ListWithPagingResponse<ProductGeneralDetailDTO> search(Long idCategory, String searchName, String searchDescription, 
-			EProductStatus status, Long minPrice, Long maxPrice, Integer currentPage, Integer size, Sort sort, boolean isBuyer) {
-		
-		List<Long> idsCategory = new ArrayList<>();
-		
-		if (idCategory != null) {
-			var pc = productCategoryRepo.findById(idCategory).orElse(null);
-			if (pc != null) {
-				
-				if (isBuyer) {
-					if (serviceUtils.checkStatusProductCategory(pc, EProductCategoryStatus.BANNED))
-						throw new InvalidInputDataException("Given category id has been banned");
-					else {
-						if (!pc.getChild().isEmpty()) {
-							for (var c : pc.getChild()) {
-								if (c.getStatus() != EProductCategoryStatus.BANNED)
-									idsCategory.add(c.getId());
-							}
-						}
-					}
-				}
-				else {
-					idsCategory.addAll(pc.getChild().stream().map(ProductCategory::getId).toList());
-				}
-				
-				idsCategory.add(idCategory);
-			}
-			else {
-				throw new InvalidInputDataException("Given category id does not exists");
-			}
-		}
-		
-		int count = productRepo.searchCount(idsCategory, searchName, searchDescription, status, minPrice, maxPrice).intValue();
-		PageWithJpaSort page = new PageWithJpaSort(currentPage, size, count, sort);
-		
+	public ListWithPagingResponse<ProductGeneralDetailDTO> search(ProductFilter filter, PagingInfo pagingInfo) {
 		return serviceUtils.convertToListResponse(
-				productRepo.search(idsCategory, searchName, searchDescription, status, minPrice, maxPrice, page),
-				ProductGeneralDetailDTO.class, 
-				page
+				productRepo.search(filter, pagingInfo),
+				ProductGeneralDetailDTO.class
+			);
+	}
+	
+	public ListResponse<ProductGeneralDetailDTO> getTopLastedProduct() {
+		return serviceUtils.convertToListResponse(
+				productRepo.findTop10ByStatusOrderByCreatedDateDesc(EProductStatus.ENABLED),
+				ProductGeneralDetailDTO.class
+			);
+	}
+	
+	public ListResponse<ProductGeneralDetailDTO> getTopVisitProduct() {
+		return serviceUtils.convertToListResponse(
+				productRepo.findTop10ByStatusOrderByNvisitDesc(EProductStatus.ENABLED),
+				ProductGeneralDetailDTO.class
+			);
+	}
+	
+	public ListResponse<ProductGeneralDetailDTO> getTopSoldProduct() {
+		return serviceUtils.convertToListResponse(
+				productRepo.findTop10ByStatusOrderByNsoldDesc(EProductStatus.ENABLED),
+				ProductGeneralDetailDTO.class
 			);
 	}
 	
@@ -238,5 +225,35 @@ public class ProductService {
 			p.setMaxPrice(maxPv.get().getPriceAfterDiscount());
 		
 		productRepo.save(p);
+	}
+	
+	public List<Long> getAllParentCategories(Long idCategory, boolean isBuyer) {
+		List<Long> idsCategory = new ArrayList<>();
+		
+		if (idCategory != null) {
+			var pc = productCategoryRepo.findById(idCategory).orElse(null);
+			if (pc != null) {
+				if (isBuyer) {
+					if (serviceUtils.checkStatusProductCategory(pc, EProductCategoryStatus.BANNED))
+						throw new InvalidInputDataException("Given category id has been banned");
+					else {
+						if (!pc.getChild().isEmpty()) {
+							for (var c : pc.getChild()) {
+								if (c.getStatus() != EProductCategoryStatus.BANNED)
+									idsCategory.add(c.getId());
+							}
+						}
+					}
+				}
+				else
+					idsCategory.addAll(pc.getChild().stream().map(ProductCategory::getId).toList());
+				
+				idsCategory.add(idCategory);
+			}
+			else
+				throw new InvalidInputDataException("Given category id does not exists");
+		}
+		
+		return idsCategory;
 	}
 }

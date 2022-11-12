@@ -7,17 +7,19 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.lucistore.lucistorebe.controller.advice.exception.CommonRuntimeException;
 import com.lucistore.lucistorebe.controller.advice.exception.InvalidInputDataException;
 import com.lucistore.lucistorebe.controller.payload.dto.OrderDTO;
+import com.lucistore.lucistorebe.controller.payload.dto.order.AdminDetailedOrderDTO;
+import com.lucistore.lucistorebe.controller.payload.dto.order.AdminOrderDTO;
+import com.lucistore.lucistorebe.controller.payload.dto.order.BuyerDetailedOrderDTO;
+import com.lucistore.lucistorebe.controller.payload.dto.order.BuyerOrderDTO;
 import com.lucistore.lucistorebe.controller.payload.request.buyerorder.CreateBuyerOrderFromCartRequest;
 import com.lucistore.lucistorebe.controller.payload.request.buyerorder.CreateBuyerOrderFromProductRequest;
 import com.lucistore.lucistorebe.controller.payload.request.buyerorder.CreateBuyerOrderRequest;
 import com.lucistore.lucistorebe.controller.payload.response.DataResponse;
-import com.lucistore.lucistorebe.controller.payload.response.ListResponse;
 import com.lucistore.lucistorebe.controller.payload.response.ListWithPagingResponse;
 import com.lucistore.lucistorebe.entity.order.Order;
 import com.lucistore.lucistorebe.entity.order.OrderDetail;
@@ -28,6 +30,7 @@ import com.lucistore.lucistorebe.entity.user.buyer.BuyerDeliveryAddress;
 import com.lucistore.lucistorebe.repo.BuyerCartDetailRepo;
 import com.lucistore.lucistorebe.repo.BuyerDeliveryAddressRepo;
 import com.lucistore.lucistorebe.repo.BuyerRepo;
+import com.lucistore.lucistorebe.repo.OrderDetailRepo;
 import com.lucistore.lucistorebe.repo.OrderRepo;
 import com.lucistore.lucistorebe.repo.ProductVariationRepo;
 import com.lucistore.lucistorebe.service.util.ServiceUtils;
@@ -35,13 +38,16 @@ import com.lucistore.lucistorebe.utility.EBuyerDeliveryAddressStatus;
 import com.lucistore.lucistorebe.utility.EOrderStatus;
 import com.lucistore.lucistorebe.utility.EProductStatus;
 import com.lucistore.lucistorebe.utility.EProductVariationStatus;
-import com.lucistore.lucistorebe.utility.PageWithJpaSort;
-
+import com.lucistore.lucistorebe.utility.filter.OrderFilter;
+import com.lucistore.lucistorebe.utility.filter.PagingInfo;
 
 @Service
 public class OrderService {
 	@Autowired 
 	OrderRepo orderRepo;
+	
+	@Autowired
+	OrderDetailRepo orderDetailRepo;
 	
 	@Autowired 
 	BuyerRepo buyerRepo;
@@ -61,35 +67,34 @@ public class OrderService {
 	@Autowired
 	ServiceUtils serviceUtils;
 
-	/** get all order */
-	public ListWithPagingResponse<OrderDTO> get(/*  some filter */int currentPage, int size) {
-		int count = orderRepo.searchCount().intValue();
-		PageWithJpaSort page = new PageWithJpaSort(currentPage, size, count);
-		
-		return serviceUtils.convertToListResponse(
-			orderRepo.search(page),
-				OrderDTO.class, 
-				page
+	public ListWithPagingResponse<?> search(OrderFilter filter, PagingInfo pagingInfo, boolean isBuyer) {
+		if (isBuyer) {
+			return serviceUtils.convertToListResponse(
+				orderRepo.search(filter, pagingInfo),
+				BuyerOrderDTO.class
 			);
+		}
+		else {
+			return serviceUtils.convertToListResponse(
+				orderRepo.search(filter, pagingInfo),
+				AdminOrderDTO.class
+			);
+		}
 	}
 	
-	public DataResponse<OrderDTO> get(Long id, Long idBuyer) {
+	public DataResponse<?> get(Long id, Long idBuyer) {
 		Order order = orderRepo.findById(id).orElseThrow(
-				() -> new InvalidInputDataException("No Order found with given id " + id));
+				() -> new InvalidInputDataException("No order found with given id"));
 
-		if(idBuyer != null && !order.getBuyer().getId().equals(idBuyer)) {
-			throw new InvalidInputDataException("No Order found with given id " + id + " for given buyer");
-		}
+		if(idBuyer != null && !order.getBuyer().getId().equals(idBuyer)) 
+			throw new InvalidInputDataException("Can not read order of other buyers");
 		
-		return serviceUtils.convertToDataResponse(order, OrderDTO.class);
-	}
-	
-	public ListResponse<OrderDTO> getAllByIdBuyer(Long idBuyer) {
-		if(!buyerRepo.existsById(idBuyer)) {
-			throw new InvalidInputDataException("No Buyer found with given id " + idBuyer);
+		if (idBuyer != null) {
+			return serviceUtils.convertToDataResponse(order, BuyerDetailedOrderDTO.class);
 		}
-		
-		return serviceUtils.convertToListResponse(orderRepo.findAllByBuyerId(idBuyer, Sort.by("productVariation.product")), OrderDTO.class);
+		else {
+			return serviceUtils.convertToDataResponse(order, AdminDetailedOrderDTO.class);
+		}
 	}
 	
 	@Transactional
@@ -98,7 +103,7 @@ public class OrderService {
 		BuyerDeliveryAddress address = buyerDeliveryAddressRepo.getReferenceById(data.getIdAddress());
 		Buyer buyer = buyerRepo.getReferenceById(idBuyer);
 
-		if(!buyer.getPhoneConfirmed())
+		if(Boolean.FALSE.equals(buyer.getPhoneConfirmed()))
 			throw new CommonRuntimeException("Please confirm your phone number before placing order!");
 
 		if(!buyerRepo.existsById(idBuyer)) {
@@ -129,29 +134,41 @@ public class OrderService {
 		
 		return serviceUtils.convertToDataResponse(orderRepo.save(order), OrderDTO.class);
 	}
+	
+	public void checkAndCompleteOrder(Long id) {
+		if (!orderDetailRepo.existsByOrderAndReviewed(orderRepo.getReferenceById(id), false)) {
+			Order order = orderRepo.getReferenceById(id);
+			order.setStatus(EOrderStatus.COMPLETED);
+			orderRepo.save(order);
+		}
+	}
+	
+	public DataResponse<OrderDTO> updateStatus(Long id, Long idBuyer, EOrderStatus newStatus) {
+		Order order = orderRepo.findById(id).orElseThrow(
+			() -> new InvalidInputDataException("No order found with given id "));
+		
+		if(idBuyer != null && !order.getBuyer().getId().equals(idBuyer))
+			throw new InvalidInputDataException("Can not update other buyer's orders");
+		
+		if (newStatus == EOrderStatus.CANCELLED)
+			return cancelOrder(order);
+		
+		order.setStatus(newStatus);
+		return serviceUtils.convertToDataResponse(orderRepo.save(order), OrderDTO.class);
+	}
 
 	@Transactional
-	public DataResponse<OrderDTO> cancel(Long id, Long idBuyer) {
-		Order order = orderRepo
-				.findById(id).orElseThrow(
-						() -> new InvalidInputDataException("No Order found with given id " + id));
-
-		if(idBuyer != null && !order.getBuyer().getId().equals(idBuyer)) {
-			throw new InvalidInputDataException("No Order found with given id " + id);
-		}
-
+	private DataResponse<OrderDTO> cancelOrder(Order order) {
 		switch (order.getStatus()) {
-			case WAIT_FOR_CONFIRM:
-			case WAIT_FOR_SEND:
-				paymentService.refundPayment(id, idBuyer);
+			case WAIT_FOR_CONFIRM, WAIT_FOR_SEND:
+				paymentService.refundPayment(order);
 				order.setStatus(EOrderStatus.CANCELLED);
 				break;
 			case WAIT_FOR_PAYMENT:
 				order.setStatus(EOrderStatus.CANCELLED);
 				break;
-		
 			default:
-				throw new CommonRuntimeException("Order cannot be cancelled!");
+				throw new CommonRuntimeException("Order cannot be cancelled");
 		}
 		
 		return serviceUtils.convertToDataResponse(orderRepo.save(order), OrderDTO.class);

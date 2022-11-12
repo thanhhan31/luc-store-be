@@ -58,18 +58,13 @@ public class PaymentService {
 		return payment.createPayment(idOrder, o.getPayPrice().toString(), req);
 	}
 	
-	public void refundPayment(Long idOrder, Long idBuyer) {
-		Order o = orderRepo.getReferenceById(idOrder);
-		
-		if (!o.getBuyer().getId().equals(idBuyer))
-			throw new InvalidInputDataException("Can not confirm payment of other buyer's order");
-
-		if (!o.getStatus().equals(EOrderStatus.WAIT_FOR_CONFIRM) && !o.getStatus().equals(EOrderStatus.WAIT_FOR_SEND)) {
+	public void refundPayment(Order order) {		
+		if (!order.getStatus().equals(EOrderStatus.WAIT_FOR_CONFIRM) && !order.getStatus().equals(EOrderStatus.WAIT_FOR_SEND)) {
 			throw new InvalidInputDataException("Refund only can be made when order is in wait for confirm or wait for send stage");
 		}
 		
 		Payment payment = null;
-		switch (o.getPaymentMethod()) {
+		switch (order.getPaymentMethod()) {
 		case OFFLINE_CASH_ON_DELIVERY:
 			throw new InvalidInputDataException("Refund is not available for this order's payment method!");
 		case ONLINE_PAYMENT_MOMO:
@@ -82,7 +77,7 @@ public class PaymentService {
 			throw new CommonRuntimeException("Invalid payment method!");
 		}
 		
-		payment.refundPayment(idOrder);
+		payment.refundPayment(order.getId());
 	}
 	
 	public boolean confirm(Long idOrder) {

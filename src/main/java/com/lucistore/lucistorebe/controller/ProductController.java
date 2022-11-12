@@ -5,15 +5,16 @@ import javax.validation.constraints.Min;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.lucistore.lucistorebe.service.ProductService;
 import com.lucistore.lucistorebe.utility.EProductStatus;
-import com.lucistore.lucistorebe.utility.ModelSorting;
+import com.lucistore.lucistorebe.utility.filter.PagingInfo;
+import com.lucistore.lucistorebe.utility.filter.ProductFilter;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -78,19 +79,51 @@ public class ProductController {
 				Boolean sortDescending) {
 		
 		return ResponseEntity.ok(
-				productService.search(
-					idCategory, 
+			productService.search(
+				new ProductFilter(
+					productService.getAllParentCategories(idCategory, true), 
 					searchName, 
 					searchDescription, 
 					EProductStatus.ENABLED, 
 					minPrice, 
-					maxPrice, 
-					page, 
-					size, 
-					ModelSorting.getProductSort(sortBy, sortDescending),
-					true
-				)
-			);
+					maxPrice
+				),
+				new PagingInfo(page, size, sortBy, sortDescending)
+			)
+		);
+	}
+	
+	@Operation(summary = "Get top 10 lasted product")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200",
+					description = "Successful",
+					content = { @Content(mediaType = "application/json") })
+	})
+	@GetMapping("/lasted")
+	public ResponseEntity<?> getTopLasted() {
+		return ResponseEntity.ok(productService.getTopLastedProduct());
+	}
+	
+	@Operation(summary = "Get top 10 most viewed product")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200",
+					description = "Successful",
+					content = { @Content(mediaType = "application/json") })
+	})
+	@GetMapping("/most-viewed")
+	public ResponseEntity<?> getTopViewed() {
+		return ResponseEntity.ok(productService.getTopVisitProduct());
+	}
+	
+	@Operation(summary = "Get top 10 most sold product")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200",
+					description = "Successful",
+					content = { @Content(mediaType = "application/json") })
+	})
+	@GetMapping("/most-sold")
+	public ResponseEntity<?> getTopSold() {
+		return ResponseEntity.ok(productService.getTopSoldProduct());
 	}
 	
 	@Operation(summary = "Get product detail with given id. This API is for buyer, so any disabled product are invisible to this API.")

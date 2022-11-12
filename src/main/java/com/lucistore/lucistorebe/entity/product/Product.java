@@ -99,7 +99,6 @@ public class Product implements UpdatableAvatar {
 	private Date lastModifiedDate;
 
 	public Product(ProductCategory category, String name, String description, MediaResource avatar, EProductStatus status) {
-		super();
 		this.category = category;
 		this.name = name;
 		this.description = description;

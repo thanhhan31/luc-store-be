@@ -64,16 +64,16 @@ public class ServiceUtils {
 				src.stream().map(p -> mapper.map(p, cls)).toList());
 	}
 	
-	public <T, V> ListWithPagingResponse<V> convertToListResponse(org.springframework.data.domain.Page<T> src, Class<V> cls, int page) {
-		return new ListWithPagingResponse<>(page, src.getTotalPages(),
+	public <T, V> ListWithPagingResponse<V> convertToListResponse(org.springframework.data.domain.Page<T> src, Class<V> cls) {
+		return new ListWithPagingResponse<>(src.getPageable().getPageNumber() + 1, src.getTotalPages(),
 				src.stream().map(p -> mapper.map(p, cls)).toList());
 	}
 	
 	public PageRequest getPageRequest(Integer page, Integer size) {
-		if (page == null)
+		if (page == null || page < 1)
 			page = 0;
-		else if (page > 0)
-			page -= 1;
+		else 
+			page = page - 1;
 		
 		if (size == null) 
 			size = PlatformPolicyParameter.DEFAULT_PAGE_SIZE;

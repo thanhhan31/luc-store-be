@@ -1,12 +1,11 @@
 package com.lucistore.lucistorebe.repo.custom;
 
-import java.util.Date;
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 import com.lucistore.lucistorebe.entity.product.ProductInventory;
-import com.lucistore.lucistorebe.utility.PageWithJpaSort;
+import com.lucistore.lucistorebe.utility.filter.PagingInfo;
+import com.lucistore.lucistorebe.utility.filter.ProductInventoryFilter;
 
 public interface ProductInventoryRepoCustom {
-	List<ProductInventory> search(Long idProduct, Long idProductVariation, Long idImporter, Date importTimeFrom, Date importTimeTo, PageWithJpaSort page);
-	Long searchCount(Long idProduct, Long idProductVariation, Long idImporter, Date importTimeFrom, Date importTimeTo);
+	Page<ProductInventory> search(ProductInventoryFilter filter, PagingInfo pagingInfo);
 }

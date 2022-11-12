@@ -1,18 +1,13 @@
 package com.lucistore.lucistorebe.repo.custom;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 import com.lucistore.lucistorebe.entity.product.Product;
-import com.lucistore.lucistorebe.utility.EProductStatus;
-import com.lucistore.lucistorebe.utility.PageWithJpaSort;
+import com.lucistore.lucistorebe.utility.filter.PagingInfo;
+import com.lucistore.lucistorebe.utility.filter.ProductFilter;
 
 public interface ProductRepoCustom {
 	
-	List<Product> search(List<Long> idsCategory, String searchName, String searchDescription, EProductStatus status,
-			Long minPrice, Long maxPrice, PageWithJpaSort page);
-	
-	Long searchCount(List<Long> idsCategory, String searchName, String searchDescription, EProductStatus status, Long minPrice, Long maxPrice);
-	
-	void refresh(Product product);
+	Page<Product> search(ProductFilter filter, PagingInfo page);
 	
 }

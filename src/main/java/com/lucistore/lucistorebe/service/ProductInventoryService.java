@@ -1,9 +1,6 @@
 package com.lucistore.lucistorebe.service;
 
-import java.util.Date;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.lucistore.lucistorebe.controller.advice.exception.InvalidInputDataException;
@@ -18,7 +15,8 @@ import com.lucistore.lucistorebe.repo.ProductInventoryRepo;
 import com.lucistore.lucistorebe.repo.ProductVariationRepo;
 import com.lucistore.lucistorebe.repo.UserRepo;
 import com.lucistore.lucistorebe.service.util.ServiceUtils;
-import com.lucistore.lucistorebe.utility.PageWithJpaSort;
+import com.lucistore.lucistorebe.utility.filter.PagingInfo;
+import com.lucistore.lucistorebe.utility.filter.ProductInventoryFilter;
 
 @Service
 public class ProductInventoryService {
@@ -49,16 +47,11 @@ public class ProductInventoryService {
         );
     }
 
-	public ListWithPagingResponse<ProductInventoryDTO> search(Long idProduct, Long idProductVariation, Long idImporter, Date importDateFrom, Date importDateTo, Integer currentPage, Integer size, Sort sort) {
-		
-		int count = productInventoryRepo.searchCount(idProduct, idProductVariation, idImporter, importDateFrom, importDateTo).intValue();
-		PageWithJpaSort page = new PageWithJpaSort(currentPage, size, count, sort);
-		
+	public ListWithPagingResponse<ProductInventoryDTO> search(ProductInventoryFilter filter, PagingInfo pagingInfo) {
 		return serviceUtils.convertToListResponse(
-            productInventoryRepo.search(idProduct, idProductVariation, idImporter, importDateFrom, importDateTo, page),
-				ProductInventoryDTO.class, 
-				page
-			);
+            productInventoryRepo.search(filter, pagingInfo),
+			ProductInventoryDTO.class
+		);
 	}
 
     public DataResponse<ProductInventoryDTO> create(Long idProductVariation, Long idImporter, CreateProductInventoryRequest data) {

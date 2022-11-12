@@ -1,7 +1,5 @@
 package com.lucistore.lucistorebe.service;
 
-import java.util.Date;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,12 +25,12 @@ import com.lucistore.lucistorebe.repo.BuyerRepo;
 import com.lucistore.lucistorebe.repo.UserRepo;
 import com.lucistore.lucistorebe.repo.UserRoleRepo;
 import com.lucistore.lucistorebe.service.util.ServiceUtils;
-import com.lucistore.lucistorebe.utility.EGender;
 import com.lucistore.lucistorebe.utility.EUserRole;
 import com.lucistore.lucistorebe.utility.EUserStatus;
 import com.lucistore.lucistorebe.utility.OtpCache;
-import com.lucistore.lucistorebe.utility.Page;
 import com.lucistore.lucistorebe.utility.RandomString;
+import com.lucistore.lucistorebe.utility.filter.BuyerFilter;
+import com.lucistore.lucistorebe.utility.filter.PagingInfo;
 
 @Service
 public class BuyerService {
@@ -82,17 +80,10 @@ public class BuyerService {
 		
 	}
 	
-	public ListWithPagingResponse<BuyerDTO> searchBuyer(String searchFullname, String searchUsername, String searchEmail, 
-			String searchPhone, EUserStatus status, Date dob, EGender gender, Boolean emailConfirmed, Boolean phoneConfirmed,
-			Date createdDate, String lastModifiedBy, Integer currentPage, Integer size, Integer sortBy, Boolean sortDescending) {
-		
-		int count = buyerRepo.searchBuyerCount(searchFullname, searchUsername, searchEmail, searchPhone, status, dob, gender, emailConfirmed, phoneConfirmed, createdDate, lastModifiedBy).intValue();
-		Page page = new Page(currentPage, size, count, sortBy, sortDescending);
-		
+	public ListWithPagingResponse<BuyerDTO> search(BuyerFilter filter, PagingInfo pagingInfo) {
 		return serviceUtils.convertToListResponse(
-				buyerRepo.searchBuyer(searchFullname, searchUsername, searchEmail, searchPhone, status, dob, gender, emailConfirmed, phoneConfirmed, createdDate, lastModifiedBy, page),
-				BuyerDTO.class, 
-				page
+				buyerRepo.search(filter, pagingInfo),
+				BuyerDTO.class
 			);
 	}
 	

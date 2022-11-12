@@ -29,6 +29,8 @@ import com.lucistore.lucistorebe.entity.user.buyer.Buyer;
 import com.lucistore.lucistorebe.service.ProductService;
 import com.lucistore.lucistorebe.utility.EProductStatus;
 import com.lucistore.lucistorebe.utility.ModelSorting;
+import com.lucistore.lucistorebe.utility.filter.PagingInfo;
+import com.lucistore.lucistorebe.utility.filter.ProductFilter;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -96,19 +98,18 @@ public class AdminProductManageController {
 				Boolean sortDescending) {
 		
 		return ResponseEntity.ok(
-				productService.search(
-					idCategory, 
+			productService.search(
+				new ProductFilter(
+					productService.getAllParentCategories(idCategory, false), 
 					searchName, 
 					searchDescription, 
 					status, 
 					minPrice, 
-					maxPrice, 
-					page, 
-					size, 
-					ModelSorting.getProductSort(sortBy, sortDescending),
-					false
-				)
-			);
+					maxPrice
+				),
+				new PagingInfo(page, size, sortBy, sortDescending)
+			)
+		);
 	}
 	
 	@Operation(summary = "Get product detail with given id")

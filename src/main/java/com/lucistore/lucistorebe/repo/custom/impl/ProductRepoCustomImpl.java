@@ -5,13 +5,13 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.transaction.Transactional;
 
+import org.apache.commons.lang3.function.TriFunction;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.query.QueryUtils;
 import org.springframework.stereotype.Repository;
 
@@ -19,90 +19,54 @@ import com.lucistore.lucistorebe.entity.product.Product;
 import com.lucistore.lucistorebe.entity.product.ProductCategory_;
 import com.lucistore.lucistorebe.entity.product.Product_;
 import com.lucistore.lucistorebe.repo.custom.ProductRepoCustom;
-import com.lucistore.lucistorebe.utility.EProductStatus;
-import com.lucistore.lucistorebe.utility.PageWithJpaSort;
+import com.lucistore.lucistorebe.utility.ModelSorting;
+import com.lucistore.lucistorebe.utility.filter.PagingInfo;
+import com.lucistore.lucistorebe.utility.filter.ProductFilter;
 
 @Repository
 public class ProductRepoCustomImpl implements ProductRepoCustom {
 	@PersistenceContext
 	private EntityManager em;
 	
-	@Override
-	public List<Product> search(List<Long> idsCategory, String searchName, String searchDescription, EProductStatus status,
-			Long minPrice, Long maxPrice, PageWithJpaSort page) {
-		CriteriaBuilder cb = em.getCriteriaBuilder();
-		CriteriaQuery<Product> cq = cb.createQuery(Product.class);
-		Root<Product> root = cq.from(Product.class);
-
-		List<Predicate> filters = new ArrayList<>();
-		if (!idsCategory.isEmpty()) {
-			filters.add(root.get(Product_.category).get(ProductCategory_.id).in(idsCategory));
-		}
-		if (searchName != null) {
-			filters.add(cb.like(root.get(Product_.name), "%" + searchName + "%"));
-		}
-		if (searchDescription != null) {
-			filters.add(cb.like(root.get(Product_.description), "%" + searchDescription + "%"));
-		}
-		if (status != null) {
-			filters.add(cb.equal(root.get(Product_.status), status));
-		}
-		if (minPrice != null) {
-			filters.add(cb.greaterThanOrEqualTo(root.get(Product_.minPrice), minPrice));
-		}
-		if (maxPrice != null) {
-			filters.add(cb.lessThanOrEqualTo(root.get(Product_.maxPrice), maxPrice));
-		}
-
-		if (page != null) {
-			cq.orderBy(QueryUtils.toOrders(page.getSort(), root, cb));
-		}
-
-		Predicate filter = cb.and(filters.toArray(new Predicate[0]));
-		cq.select(root).where(filter);
-		TypedQuery<Product> query = em.createQuery(cq);
-
-		if (page != null) {
-			query.setFirstResult(page.getPageNumber() * page.getPageSize());
-			query.setMaxResults(page.getPageSize());
-		}
-		return query.getResultList();
+	private final SearchRepo<Product, ProductFilter> searchRepo;
+	private final TriFunction<ProductFilter, CriteriaBuilder, Root<Product>, Predicate> createFiltersDelegate;
+	private final TriFunction<CriteriaBuilder, Root<Product>, PagingInfo, List<Order>> createOrdersDelegate;
+	
+	public ProductRepoCustomImpl() {
+		searchRepo = new SearchRepo<>(Product.class);
+		createFiltersDelegate = this::createFilters;
+		createOrdersDelegate = 
+			(cb, root, pagingInfo) -> 
+				QueryUtils.toOrders(ModelSorting.getProductSort(pagingInfo.getSortBy(), pagingInfo.getSortDescending()), root, cb);
 	}
 
 	@Override
-	public Long searchCount(List<Long> idsCategory, String searchName, String searchDescription, EProductStatus status, Long minPrice, Long maxPrice) {
-		CriteriaBuilder cb = em.getCriteriaBuilder();
-		CriteriaQuery<Long> cq = cb.createQuery(Long.class);
-		Root<Product> root = cq.from(Product.class);
-		
-		List<Predicate> filters = new ArrayList<>();
-		if (!idsCategory.isEmpty()) {
-			filters.add(root.get(Product_.category).get(ProductCategory_.id).in(idsCategory));
-		}
-		if (searchName != null) {
-			filters.add(cb.like(root.get(Product_.name), "%" + searchName + "%"));
-		}
-		if (searchDescription != null) {
-			filters.add(cb.like(root.get(Product_.description), "%" + searchDescription + "%"));
-		}
-		if (status != null) {
-			filters.add(cb.equal(root.get(Product_.status), status));
-		}
-		if (minPrice != null) {
-			filters.add(cb.greaterThanOrEqualTo(root.get(Product_.minPrice), minPrice));
-		}
-		if (maxPrice != null) {
-			filters.add(cb.lessThanOrEqualTo(root.get(Product_.maxPrice), maxPrice));
-		}
-
-		Predicate filter = cb.and(filters.toArray(new Predicate[0]));
-		cq.select(cb.count(root)).where(filter);
-		return em.createQuery(cq).getSingleResult();
+	public Page<Product> search(ProductFilter filter, PagingInfo pagingInfo) {
+		return searchRepo.search(filter, pagingInfo, createFiltersDelegate, createOrdersDelegate, em);
 	}
 	
-	@Transactional
-	@Override
-	public void refresh(Product product) {
-		em.refresh(product);
+	private Predicate createFilters(ProductFilter filter, CriteriaBuilder cb, Root<Product> root) {
+		List<Predicate> filters = new ArrayList<>();
+		
+		if (!filter.getIdsCategory().isEmpty()) {
+			filters.add(root.get(Product_.category).get(ProductCategory_.id).in(filter.getIdsCategory()));
+		}
+		if (filter.getSearchName() != null) {
+			filters.add(cb.like(root.get(Product_.name), "%" + filter.getSearchName() + "%"));
+		}
+		if (filter.getSearchDescription() != null) {
+			filters.add(cb.like(root.get(Product_.description), "%" + filter.getSearchDescription() + "%"));
+		}
+		if (filter.getStatus() != null) {
+			filters.add(cb.equal(root.get(Product_.status), filter.getStatus()));
+		}
+		if (filter.getMinPrice() != null) {
+			filters.add(cb.greaterThanOrEqualTo(root.get(Product_.minPrice), filter.getMinPrice()));
+		}
+		if (filter.getMaxPrice() != null) {
+			filters.add(cb.lessThanOrEqualTo(root.get(Product_.maxPrice), filter.getMaxPrice()));
+		}
+
+		return cb.and(filters.toArray(new Predicate[0]));
 	}
 }

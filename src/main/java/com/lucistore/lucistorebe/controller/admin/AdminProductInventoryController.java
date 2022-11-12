@@ -21,13 +21,14 @@ import com.lucistore.lucistorebe.config.login.UserDetailsImpl;
 import com.lucistore.lucistorebe.controller.payload.request.CreateProductInventoryRequest;
 import com.lucistore.lucistorebe.entity.user.User;
 import com.lucistore.lucistorebe.service.ProductInventoryService;
-import com.lucistore.lucistorebe.utility.ModelSorting;
+import com.lucistore.lucistorebe.utility.filter.PagingInfo;
+import com.lucistore.lucistorebe.utility.filter.ProductInventoryFilter;
 
 import io.swagger.v3.oas.annotations.Parameter;
 
 
 @RestController
-@RequestMapping("/api/sell-admin/inventory")
+@RequestMapping("/api/admin/inventory")
 public class AdminProductInventoryController {
 
     @Autowired
@@ -70,11 +71,19 @@ public class AdminProductInventoryController {
 
 			@RequestParam(required = false) @Parameter(description = "Specify sort order. True for sort in descending order") Boolean sortDescending) {
 
+    	
 		return ResponseEntity.ok(
-				productInventoryService.search(
-						idProduct, idProductVariation, idImporter, importDateFrom, importDateTo,
-						page, size,
-						ModelSorting.getProductInventorySort(sortBy, sortDescending)));
+			productInventoryService.search(
+				new ProductInventoryFilter(
+					idProduct, 
+					idProductVariation, 
+					idImporter, 
+					importDateFrom, 
+					importDateTo
+				),
+				new PagingInfo(page, size, sortBy, sortDescending)
+			)
+		);
 	}
 
 	@PostMapping("/{idProductVariation}")

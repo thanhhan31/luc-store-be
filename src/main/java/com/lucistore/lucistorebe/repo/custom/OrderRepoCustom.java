@@ -1,12 +1,15 @@
 package com.lucistore.lucistorebe.repo.custom;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 import com.lucistore.lucistorebe.entity.order.Order;
-import com.lucistore.lucistorebe.utility.PageWithJpaSort;
+import com.lucistore.lucistorebe.utility.filter.OrderFilter;
+import com.lucistore.lucistorebe.utility.filter.PagingInfo;
 
 public interface OrderRepoCustom {
-	List<Order> search(PageWithJpaSort page);
-	Long searchCount();
+	
+	Page<Order> search(OrderFilter filter, PagingInfo pagingInfo);
+	
 	boolean isBuyerHavePendingOrder(Long idBuyer);
+	
 }

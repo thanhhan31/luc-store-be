@@ -10,6 +10,8 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.springframework.data.annotation.LastModifiedBy;
+
 import com.lucistore.lucistorebe.utility.EUserStatus;
 
 import lombok.Getter;
@@ -47,11 +49,11 @@ public class User implements UserInfo {
 	@Enumerated(EnumType.ORDINAL)
 	private EUserStatus status;
 	
-	/*@Column(name = "last_modified_by")
+	@Column(name = "last_modified_by")
 	@LastModifiedBy
 	private String lastModifiedBy;
 	
-	@Column(name = "last_modified_date")
+	/*@Column(name = "last_modified_date")
 	@LastModifiedDate
 	private Date lastModifiedDate;*/
 

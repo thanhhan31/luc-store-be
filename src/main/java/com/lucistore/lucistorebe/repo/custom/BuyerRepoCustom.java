@@ -1,21 +1,13 @@
 package com.lucistore.lucistorebe.repo.custom;
 
-import java.util.Date;
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 import com.lucistore.lucistorebe.entity.user.buyer.Buyer;
-import com.lucistore.lucistorebe.utility.EGender;
-import com.lucistore.lucistorebe.utility.EUserStatus;
-import com.lucistore.lucistorebe.utility.Page;
+import com.lucistore.lucistorebe.utility.filter.BuyerFilter;
+import com.lucistore.lucistorebe.utility.filter.PagingInfo;
 
 public interface BuyerRepoCustom {
 
-	List<Buyer> searchBuyer(String searchFullname, String searchUsername, String searchEmail, String searchPhone,
-			EUserStatus status, Date dob, EGender gender, Boolean emailConfirmed, Boolean phoneConfirmed,
-			Date createdDate, String lastModifiedBy, Page page);
-
-	Long searchBuyerCount(String searchFullname, String searchUsername, String searchEmail, String searchPhone,
-			EUserStatus status, Date dob, EGender gender, Boolean emailConfirmed, Boolean phoneConfirmed,
-			Date createdDate, String lastModifiedBy);
-
+	Page<Buyer> search(BuyerFilter filter, PagingInfo pagingInfo);
+	
 }

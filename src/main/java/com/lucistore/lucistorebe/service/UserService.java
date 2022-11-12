@@ -1,7 +1,6 @@
 package com.lucistore.lucistorebe.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +17,8 @@ import com.lucistore.lucistorebe.repo.UserRoleRepo;
 import com.lucistore.lucistorebe.service.util.ServiceUtils;
 import com.lucistore.lucistorebe.utility.EUserRole;
 import com.lucistore.lucistorebe.utility.EUserStatus;
-import com.lucistore.lucistorebe.utility.PageWithJpaSort;
+import com.lucistore.lucistorebe.utility.filter.PagingInfo;
+import com.lucistore.lucistorebe.utility.filter.UserFilter;
 
 @Service
 public class UserService {
@@ -50,16 +50,10 @@ public class UserService {
 			);
 	}
 	
-	public ListWithPagingResponse<UserDTO> searchAdmin(String searchFullname, String searchUsername, String searchEmail,
-			String searchPhone, EUserRole role, EUserStatus status, Integer currentPage, Integer size, Sort sort) {
-		
-		int count = userRepo.searchAdminCount(searchFullname, searchUsername, searchEmail, searchPhone, role, status).intValue();
-		PageWithJpaSort page = new PageWithJpaSort(currentPage, size, count, sort);
-		
+	public ListWithPagingResponse<UserDTO> search(UserFilter filter, PagingInfo pagingInfo) {
 		return serviceUtils.convertToListResponse(
-				userRepo.searchAdmin(searchFullname, searchUsername, searchEmail, searchPhone, role, status, page),
-				UserDTO.class, 
-				page
+				userRepo.search(filter, pagingInfo),
+				UserDTO.class
 			);
 	}
 	

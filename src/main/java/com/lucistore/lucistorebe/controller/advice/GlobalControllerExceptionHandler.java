@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.fasterxml.jackson.core.JsonParseException;
+import com.lucistore.lucistorebe.controller.advice.exception.CommonRestException;
+import com.lucistore.lucistorebe.controller.advice.exception.CommonRuntimeException;
 import com.lucistore.lucistorebe.controller.advice.exception.DataConflictException;
 import com.lucistore.lucistorebe.controller.advice.exception.InvalidInputDataException;
 import com.lucistore.lucistorebe.controller.advice.exception.LoginException;
@@ -22,9 +24,21 @@ import com.lucistore.lucistorebe.controller.payload.response.DataResponse;
 @RestControllerAdvice
 public class GlobalControllerExceptionHandler {
 	
+	@ExceptionHandler(CommonRestException.class)
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+	public BaseResponse commonRestException(CommonRestException e) {
+		return new BaseResponse(false, e.getMessage());
+	}
+	
+	@ExceptionHandler(CommonRuntimeException.class)
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+	public BaseResponse commonRuntimeException(CommonRuntimeException e) {
+		return new BaseResponse(false, e.getMessage());
+	}
+	
 	@ExceptionHandler(DataConflictException.class)
 	@ResponseStatus(HttpStatus.CONFLICT)
-	public BaseResponse dataConflictException(InvalidInputDataException e) {
+	public BaseResponse dataConflictException(DataConflictException e) {
 		return new BaseResponse(false, e.getMessage());
 	}
 	

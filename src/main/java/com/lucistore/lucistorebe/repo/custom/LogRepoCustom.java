@@ -1,17 +1,13 @@
 package com.lucistore.lucistorebe.repo.custom;
 
-import java.util.Date;
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 import com.lucistore.lucistorebe.entity.Log;
-import com.lucistore.lucistorebe.utility.ELogType;
-import com.lucistore.lucistorebe.utility.PageWithJpaSort;
+import com.lucistore.lucistorebe.utility.filter.LogFilter;
+import com.lucistore.lucistorebe.utility.filter.PagingInfo;
 
 public interface LogRepoCustom {
 
-	List<Log> search(Long idUser, Date beginDate, Date endDate, ELogType logType, String searchContent,
-			PageWithJpaSort page);
-
-	Long searchCount(Long idUser, Date beginDate, Date endDate, ELogType logType, String searchContent);
+	Page<Log> search(LogFilter filter, PagingInfo pagingInfo);
 
 }
