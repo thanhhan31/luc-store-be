@@ -14,9 +14,11 @@ public class BuyerDTO extends UserDTO {
 	private Date dob;
 	private Boolean emptyPassword;
 	private BuyerRankDTO rank;
+	private BuyerDeliveryAddressDTO defaultAddress;
 	private Boolean canChangeUsername;
 	private Boolean emailConfirmed;
 	private Boolean phoneConfirmed;
+	private Boolean canChangeEmail;
 	private Long totalSpent;
 	private Date createdDate;
 }
