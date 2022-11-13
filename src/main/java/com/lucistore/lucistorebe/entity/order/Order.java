@@ -55,7 +55,7 @@ public class Order {
 	private Date createTime;
 
 	@Column(name = "price")
-	private Long price;
+	private Long price = 0L;
 
 	@Column(name = "payPrice")
 	private Long payPrice;
@@ -70,9 +70,6 @@ public class Order {
 	@Column(name = "payment_method")
 	@Enumerated(EnumType.STRING)
 	private EPaymentMethod paymentMethod;
-	
-	@Column(name = "reviewed") //if all order detail get reviewed then true
-	private Boolean isAllOrderDetailReviewed;
 
 	public Order(Buyer buyer, BuyerDeliveryAddress deliveryAddress, String note,
 			EOrderStatus status, EPaymentMethod paymentMethod) {
@@ -83,7 +80,6 @@ public class Order {
 		this.paymentMethod = paymentMethod;
 		
 		this.createTime = new Date();
-		this.isAllOrderDetailReviewed = false;
 	}
 
 }

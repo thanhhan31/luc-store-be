@@ -82,6 +82,22 @@ public class Product implements UpdatableAvatar {
 	@Column(name = "nvisit")
 	private Long nvisit;
 	
+	@Column(name = "average_rating")
+	private Double averageRating;
+	
+	/***/
+	@Column(name = "rating1")
+	private Integer rating1;
+	@Column(name = "rating2")
+	private Integer rating2;
+	@Column(name = "rating3")
+	private Integer rating3;
+	@Column(name = "rating4")
+	private Integer rating4;
+	@Column(name = "rating5")
+	private Integer rating5;
+	/***/
+	
 	@Column(name = "status", nullable = false)
 	private EProductStatus status;
 	
@@ -112,5 +128,16 @@ public class Product implements UpdatableAvatar {
 		this.maxPrice = 0L;
 		this.nsold = 0L;
 		this.nvisit = 0L;
+		
+		this.averageRating = 0.0;
+		this.rating1 = 0;
+		this.rating2 = 0;
+		this.rating3 = 0;
+		this.rating4 = 0;
+		this.rating5 = 0;
+	}
+	
+	public Integer getTotalRatingTimes() {
+		return rating1 + rating2 + rating3 + rating4 + rating5;
 	}
 }

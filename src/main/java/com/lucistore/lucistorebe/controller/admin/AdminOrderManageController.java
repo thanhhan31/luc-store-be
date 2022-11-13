@@ -59,9 +59,6 @@ public class AdminOrderManageController {
 			@Parameter(description = "Payment method of order") 
 				EPaymentMethod paymentMethod,
 			@RequestParam(required = false) 
-			@Parameter(description = "True will show only reviewed orders, false will show only unreviewed order") 
-				Boolean reviewed,
-			@RequestParam(required = false) 
 			@Parameter(description = "Specify page number")
 				Integer page,
 			@RequestParam(required = false) 
@@ -89,8 +86,7 @@ public class AdminOrderManageController {
 					idDeliveryAddress, 
 					createTime, 
 					status, 
-					paymentMethod, 
-					reviewed
+					paymentMethod
 				),
 				new PagingInfo(page, size, sortBy, sortDescending),
 				false

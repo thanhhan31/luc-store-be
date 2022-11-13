@@ -198,6 +198,27 @@ public class ProductService {
 		return serviceUtils.convertToDataResponse(p, ProductDetailDTO.class);
 	}
 	
+	public void updateRating(Long id, Integer point) {
+		switch (point) {
+		case 1:
+			productRepo.updateRating1(id);
+			break;
+		case 2:
+			productRepo.updateRating2(id);
+			break;
+		case 3:
+			productRepo.updateRating3(id);
+			break;
+		case 4:
+			productRepo.updateRating4(id);
+			break;
+		case 5:
+			productRepo.updateRating5(id);
+			break;
+		}
+		productRepo.updateAverageRating(id, point);
+	}
+	
 	/***
 	 * For entity listener
 	 * @param pv

@@ -1,5 +1,7 @@
 package com.lucistore.lucistorebe.controller.payload.request;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -17,6 +19,7 @@ public class BuyerCreateProductReviewRequest {
 	private Long idProductVariation;
 	
 	@NotNull
+	@Min(1) @Max(5)
 	private Integer point;
 	
 	@NotBlank

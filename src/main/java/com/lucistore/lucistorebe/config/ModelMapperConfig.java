@@ -102,6 +102,8 @@ public class ModelMapperConfig {
 			m.using(tierVariationsCvt).map(Product::getVariations, ProductDetailDTO::setTierVariations);
 			
 			m.<List<ProductCategoryGeneralDTO>>map(Product::getParents, (dst, value) -> dst.getCategory().setParents(value));
+			
+			m.map(Product::getTotalRatingTimes, ProductDetailDTO::setTotalRatingTimes);
 		});
 		
 		mapper.createTypeMap(Product.class, ProductGeneralDetailDTO.class).addMappings(m -> {
