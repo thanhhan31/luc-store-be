@@ -22,4 +22,6 @@ public class ProductGeneralDetailDTO {
 	private Long nsold;
 	private Long nvisit;
 	private EProductStatus status;
+	
+	private Double averageRating;
 }

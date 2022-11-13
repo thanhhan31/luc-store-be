@@ -41,6 +41,9 @@ public class ProductReviewService {
 	@Autowired 
 	OrderService orderService;
 	
+	@Autowired 
+	ProductService productService;
+	
 	@Autowired
 	ProductReviewImageService productReviewImageService;
 	
@@ -62,10 +65,14 @@ public class ProductReviewService {
 		if (od.getReviewed().booleanValue())
 			throw new InvalidInputDataException("This product of this order has been reviewed!");
 		
+		od.setReviewed(true);
+		
+		var pv = productVariationRepo.getReferenceById(data.getIdProductVariation());
+		
 		var pr = productReviewRepo.save(
 				new ProductReview(
 					buyerRepo.getReferenceById(idBuyer), 
-					productVariationRepo.getReferenceById(data.getIdProductVariation()),
+					pv,
 					data.getPoint(), 
 					data.getContent()
 				)
@@ -74,6 +81,7 @@ public class ProductReviewService {
 		if (images != null)
 			productReviewImageService.create(pr, images);
 		
+		productService.updateRating(pv.getProduct().getId(), data.getPoint());
 		orderService.checkAndCompleteOrder(od.getOrder().getId());
 		productReviewRepo.refresh(pr);
 

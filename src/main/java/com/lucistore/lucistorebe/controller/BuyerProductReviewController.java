@@ -6,6 +6,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -27,11 +28,11 @@ public class BuyerProductReviewController {
 	@Autowired
 	ProductReviewService productReviewService;
 	
-	@PostMapping
+	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<?> create(
 			@AuthenticationPrincipal UserDetailsImpl<Buyer> buyer,
 			@RequestPart("data") @Valid BuyerCreateProductReviewRequest request,
-			@RequestPart("images") @Valid @NotEmpty List<MultipartFile> images) {
+			@RequestPart(name = "images", required = false) @Valid @NotEmpty List<MultipartFile> images) {
 		
 		return ResponseEntity.ok(productReviewService.create(buyer.getUser().getId(), request, images));
 	}
