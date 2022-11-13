@@ -143,6 +143,7 @@ public class OrderService {
 		}
 	}
 	
+	@Transactional
 	public DataResponse<OrderDTO> updateStatus(Long id, Long idBuyer, EOrderStatus newStatus) {
 		Order order = orderRepo.findById(id).orElseThrow(
 			() -> new InvalidInputDataException("No order found with given id "));
@@ -152,6 +153,14 @@ public class OrderService {
 		
 		if (newStatus == EOrderStatus.CANCELLED)
 			return cancelOrder(order);
+
+		if (newStatus == EOrderStatus.WAIT_FOR_SEND && order.getStatus() == EOrderStatus.WAIT_FOR_CONFIRM) {
+			order.getOrderDetails().stream().forEach(od -> {
+				if(productVariationRepo.reductStock(od.getProductVariation().getId(), od.getQuantity()) == 0 ){
+					throw new InvalidInputDataException("Product variation " + od.getProductVariation().getId() + " is out of stock");
+				}
+			});
+		}
 		
 		order.setStatus(newStatus);
 		return serviceUtils.convertToDataResponse(orderRepo.save(order), OrderDTO.class);
