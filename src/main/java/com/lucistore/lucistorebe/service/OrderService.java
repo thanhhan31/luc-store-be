@@ -36,6 +36,7 @@ import com.lucistore.lucistorebe.repo.ProductVariationRepo;
 import com.lucistore.lucistorebe.service.util.ServiceUtils;
 import com.lucistore.lucistorebe.utility.EBuyerDeliveryAddressStatus;
 import com.lucistore.lucistorebe.utility.EOrderStatus;
+import com.lucistore.lucistorebe.utility.EPaymentMethod;
 import com.lucistore.lucistorebe.utility.EProductStatus;
 import com.lucistore.lucistorebe.utility.EProductVariationStatus;
 import com.lucistore.lucistorebe.utility.filter.OrderFilter;
@@ -156,7 +157,7 @@ public class OrderService {
 
 		if (newStatus == EOrderStatus.WAIT_FOR_SEND && order.getStatus() == EOrderStatus.WAIT_FOR_CONFIRM) {
 			order.getOrderDetails().stream().forEach(od -> {
-				if(productVariationRepo.reductStock(od.getProductVariation().getId(), od.getQuantity()) == 0 ){
+				if(productVariationRepo.reduceStock(od.getProductVariation().getId(), od.getQuantity()) == 0 ){
 					throw new InvalidInputDataException("Product variation " + od.getProductVariation().getId() + " is out of stock");
 				}
 			});
@@ -169,8 +170,24 @@ public class OrderService {
 	@Transactional
 	private DataResponse<OrderDTO> cancelOrder(Order order) {
 		switch (order.getStatus()) {
-			case WAIT_FOR_CONFIRM, WAIT_FOR_SEND:
-				paymentService.refundPayment(order);
+			case WAIT_FOR_CONFIRM:
+				if (order.getPaymentMethod().equals(EPaymentMethod.ONLINE_PAYMENT_MOMO)
+						|| order.getPaymentMethod().equals(EPaymentMethod.ONLINE_PAYMENT_PAYPAL)) {
+					paymentService.refundPayment(order);
+				}
+				order.setStatus(EOrderStatus.CANCELLED);
+				break;
+			case WAIT_FOR_SEND:
+				if (order.getPaymentMethod().equals(EPaymentMethod.ONLINE_PAYMENT_MOMO)
+						|| order.getPaymentMethod().equals(EPaymentMethod.ONLINE_PAYMENT_PAYPAL)) {
+					paymentService.refundPayment(order);
+				}
+				
+				// revert stock when order is cancelled
+				order.getOrderDetails().stream().forEach(od -> 
+					productVariationRepo.refundStock(od.getProductVariation().getId(), od.getQuantity())
+				);
+
 				order.setStatus(EOrderStatus.CANCELLED);
 				break;
 			case WAIT_FOR_PAYMENT:

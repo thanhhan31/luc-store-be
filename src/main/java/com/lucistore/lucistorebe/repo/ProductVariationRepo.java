@@ -18,6 +18,11 @@ public interface ProductVariationRepo extends JpaRepository<ProductVariation, Lo
 	@Transactional
 	@Modifying
 	@Query("UPDATE ProductVariation SET availableQuantity = availableQuantity - :quantity WHERE id = :id AND availableQuantity >= :quantity")
-	Integer reductStock(@Param("id") Long id, @Param("quantity") Long quantity);
+	Integer reduceStock(@Param("id") Long id, @Param("quantity") Long quantity);
+
+	@Transactional
+	@Modifying
+	@Query("UPDATE ProductVariation SET availableQuantity = availableQuantity + :quantity WHERE id = :id")
+	Integer refundStock(@Param("id") Long id, @Param("quantity") Long quantity);
 	
 }
