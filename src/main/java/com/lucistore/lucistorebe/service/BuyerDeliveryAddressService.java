@@ -60,7 +60,7 @@ public class BuyerDeliveryAddressService {
         return serviceUtils.convertToListResponse(
                     buyerDeliveryAddressRepo.findAllByBuyer(buyer,
                     Sort.by(BuyerDeliveryAddress_.RECEIVER_NAME)).stream().filter(
-                        (x) -> x.getStatus()!= EBuyerDeliveryAddressStatus.ACTIVE).toList(),
+                        x -> x.getStatus() == EBuyerDeliveryAddressStatus.ACTIVE).toList(),
             BuyerDeliveryAddressDTO.class);
 	}
 	

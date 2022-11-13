@@ -1,7 +1,6 @@
 package com.lucistore.lucistorebe.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.lucistore.lucistorebe.controller.advice.exception.InvalidInputDataException;
@@ -10,14 +9,13 @@ import com.lucistore.lucistorebe.controller.payload.response.BaseResponse;
 import com.lucistore.lucistorebe.controller.payload.response.DataResponse;
 import com.lucistore.lucistorebe.controller.payload.response.ListResponse;
 import com.lucistore.lucistorebe.entity.pk.BuyerFavouriteProductPK;
-import com.lucistore.lucistorebe.entity.product.Product_;
 import com.lucistore.lucistorebe.entity.user.buyer.Buyer;
 import com.lucistore.lucistorebe.entity.user.buyer.BuyerFavouriteProduct;
-import com.lucistore.lucistorebe.entity.user.buyer.BuyerFavouriteProduct_;
 import com.lucistore.lucistorebe.repo.BuyerFavouriteProductRepo;
 import com.lucistore.lucistorebe.repo.BuyerRepo;
 import com.lucistore.lucistorebe.repo.ProductRepo;
 import com.lucistore.lucistorebe.service.util.ServiceUtils;
+import com.lucistore.lucistorebe.utility.EProductStatus;
 
 
 @Service
@@ -38,6 +36,8 @@ public class BuyerFavouriteProductService {
 		BuyerFavouriteProduct favouriteProduct = buyerFavouriteProductRepo.findById(
 				new BuyerFavouriteProductPK(idBuyer, id)).orElseThrow(
 						() -> new InvalidInputDataException("No buyer favorite product found with given id " + id));
+		
+		checkAvailable(favouriteProduct);
 
 		return serviceUtils.convertToDataResponse(favouriteProduct, BuyerFavouriteProductDTO.class);
 	}
@@ -49,7 +49,10 @@ public class BuyerFavouriteProductService {
 		
 		Buyer buyer = buyerRepo.getReferenceById(idBuyer);
 
-		return serviceUtils.convertToListResponse(buyerFavouriteProductRepo.findAllByBuyer(buyer, null), BuyerFavouriteProductDTO.class);
+		return serviceUtils.convertToListResponse(
+				buyerFavouriteProductRepo.findAllByBuyer(buyer, null).stream().filter(
+						fp -> fp.getProduct().getStatus() == EProductStatus.ENABLED).toList(),
+				BuyerFavouriteProductDTO.class);
 	}
 	
 	public DataResponse<BuyerFavouriteProductDTO> create(Long idProduct, Long idBuyer) {
@@ -59,6 +62,8 @@ public class BuyerFavouriteProductService {
 
 		BuyerFavouriteProduct favouriteProduct = new BuyerFavouriteProduct(
 				buyerRepo.getReferenceById(idBuyer), productRepo.getReferenceById(idProduct));
+
+		checkAvailable(favouriteProduct);
 		
 		return serviceUtils.convertToDataResponse(buyerFavouriteProductRepo.save(favouriteProduct), BuyerFavouriteProductDTO.class);
 	}
@@ -72,5 +77,12 @@ public class BuyerFavouriteProductService {
 		buyerFavouriteProductRepo.deleteById(id);
 
 		return new BaseResponse();
+	}
+
+	private void checkAvailable(BuyerFavouriteProduct favouriteProduct) {
+		if (favouriteProduct.getProduct().getStatus() != EProductStatus.ENABLED) {
+			throw new InvalidInputDataException(
+					"Product with id " + favouriteProduct.getProduct().getId() + " is not available");
+		}
 	}
 }
