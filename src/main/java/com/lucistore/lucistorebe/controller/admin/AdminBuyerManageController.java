@@ -131,6 +131,17 @@ public class AdminBuyerManageController {
 			);
 	}
 	
+	@Operation(summary = "Get buyer profile information by id")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200",
+					description = "Successful",
+					content = { @Content(mediaType = "application/json") })
+	})
+	@GetMapping(path = "/{id}", produces = "application/json")
+	public ResponseEntity<?> getById(@PathVariable Long id) {
+		return ResponseEntity.ok(buyerService.getById(id));
+	}
+	
 	@Operation(summary = "Update buyer account status")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200",
