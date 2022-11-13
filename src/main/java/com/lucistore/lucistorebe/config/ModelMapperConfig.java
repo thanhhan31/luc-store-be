@@ -120,8 +120,9 @@ public class ModelMapperConfig {
 			m.map(src -> src.getBuyer().getId(), ProductReviewDTO::setIdBuyer);
 			m.map(src -> src.getBuyer().getUsername(), ProductReviewDTO::setBuyerUsername);
 			
+			m.using(mediaResourceCvt).map(src -> src.getBuyer().getAvatar(), ProductReviewDTO::setBuyerAvatar);
 			m.using(lstProductReviewImageCvt).map(ProductReview::getImages, ProductReviewDTO::setImages);
-		});
+		});/***/
 		
 		mapper.createTypeMap(ProductReviewImage.class, ProductReviewImageDTO.class).addMappings(m -> {
 			m.map(src -> src.getMedia().getUrl(), ProductReviewImageDTO::setUrl);

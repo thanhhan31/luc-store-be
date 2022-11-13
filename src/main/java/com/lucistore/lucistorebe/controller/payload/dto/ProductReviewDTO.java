@@ -13,6 +13,7 @@ public class ProductReviewDTO {
 	private Long id;
 	private Long idBuyer;
 	private String buyerUsername;
+	private String buyerAvatar;
 
 	private List<ProductReviewImageDTO> images;
 	private Integer point;
