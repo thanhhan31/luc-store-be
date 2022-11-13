@@ -73,6 +73,9 @@ public class Product implements UpdatableAvatar {
 	@Column(name = "max_price")
 	private Long maxPrice;
 	
+	@Column(name = "max_discount")
+	private Integer maxDiscount;
+	
 	@Column(name = "nsold")
 	private Long nsold;
 	

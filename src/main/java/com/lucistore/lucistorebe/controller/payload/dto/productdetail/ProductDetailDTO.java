@@ -22,10 +22,12 @@ public class ProductDetailDTO {
 
 	private Long minPrice;
 	private Long maxPrice;
+	private Integer maxDiscount;
 	private Long nsold;
 	private Long nvisit;
 	private EProductStatus status;
-
+	
+	private List<String> tierVariations;
 	private List<ProductImageDTO> images;
 	private List<ProductVariationDTO> variations;
 }

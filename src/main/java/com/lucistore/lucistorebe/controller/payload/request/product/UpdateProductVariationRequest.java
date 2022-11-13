@@ -12,6 +12,8 @@ public class UpdateProductVariationRequest {
 	
 	private String variationName;
 	
+	private String tier;
+	
 	@Range(min = 1)
 	private Long price;
 	

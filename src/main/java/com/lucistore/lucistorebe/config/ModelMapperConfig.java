@@ -56,6 +56,13 @@ public class ModelMapperConfig {
 				return c.getSource().getUrl();
 		};
 		
+		Converter<List<ProductVariation>, List<String>> tierVariationsCvt = c -> {
+			if (c.getSource() == null)
+				return null;
+			else
+				return c.getSource().stream().map(ProductVariation::getTier).distinct().toList();
+		};
+		
 		Converter<String, Boolean> emptyPasswordCvt = c -> {
 			return StringUtils.isBlank(c.getSource());
 		};
@@ -89,6 +96,10 @@ public class ModelMapperConfig {
 			m.using(lstProductImageCvt).map(Product::getImages, ProductDetailDTO::setImages);
 			m.using(lstProductVariationCvt).map(Product::getVariations, ProductDetailDTO::setVariations);
 			m.using(mediaResourceCvt).map(Product::getAvatar, ProductDetailDTO::setAvatar);
+			
+			m.using(mediaResourceCvt).map(Product::getAvatar, ProductDetailDTO::setAvatar);
+			
+			m.using(tierVariationsCvt).map(Product::getVariations, ProductDetailDTO::setTierVariations);
 			
 			m.<List<ProductCategoryGeneralDTO>>map(Product::getParents, (dst, value) -> dst.getCategory().setParents(value));
 		});

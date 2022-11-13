@@ -31,12 +31,18 @@ public final class ModelSorting {
 	 * &nbsp;&nbsp;&nbsp;&nbsp; 8: by createdDate
 	 * <br>
 	 * &nbsp;&nbsp;&nbsp;&nbsp; 16: by lastModifiedDate
+	 * * <br>
+	 * &nbsp;&nbsp;&nbsp;&nbsp; 32: by maxDiscount
 	 */
 	public static Sort getProductSort(Integer sortBy, Boolean sortDescending)  {		 
 		Sort sort = Sort.unsorted();
 		
 		if (sortBy != null) {
 			if (sortDescending == null || sortDescending.booleanValue() == false) { //ASC
+				if (sortBy >= 32) {
+					sort = sort.and(JpaSort.of(Product_.maxDiscount).ascending());
+					sortBy -= 32;
+				}
 				if (sortBy >= 16) {
 					sort = sort.and(JpaSort.of(Product_.lastModifiedDate).ascending());
 					sortBy -= 16;
@@ -59,6 +65,10 @@ public final class ModelSorting {
 				}
 			}
 			else {	//DESC
+				if (sortBy >= 32) {
+					sort = sort.and(JpaSort.of(Product_.maxDiscount).descending());
+					sortBy -= 32;
+				}
 				if (sortBy >= 16) {
 					sort = sort.and(JpaSort.of(Product_.lastModifiedDate).descending());
 					sortBy -= 16;

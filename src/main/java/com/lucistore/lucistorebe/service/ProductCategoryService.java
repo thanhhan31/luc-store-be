@@ -96,7 +96,7 @@ public class ProductCategoryService {
 	}
 	
 	/** For data generation **/
-	public ProductCategory create(TestRequest request) {
+	/*public ProductCategory create(TestRequest request) {
 		ProductCategory prev = null;
 		for (int i = 0; i < request.getCategoryNames().size(); i++) {
 			if (i == 0) {
@@ -128,5 +128,5 @@ public class ProductCategoryService {
 			}
 		}
 		return prev;
-	}
+	}*/
 }

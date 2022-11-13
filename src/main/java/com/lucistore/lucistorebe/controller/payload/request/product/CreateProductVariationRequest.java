@@ -13,6 +13,9 @@ public class CreateProductVariationRequest {
 	@NotBlank
 	private String variationName;
 	
+	@NotBlank
+	private String tier;
+	
 	@NotNull
 	@Range(min = 1)
 	private Long price;

@@ -25,10 +25,8 @@ import com.lucistore.lucistorebe.config.login.UserDetailsImpl;
 import com.lucistore.lucistorebe.controller.payload.request.product.CreateProductRequest;
 import com.lucistore.lucistorebe.controller.payload.request.product.UpdateProductRequest;
 import com.lucistore.lucistorebe.entity.user.User;
-import com.lucistore.lucistorebe.entity.user.buyer.Buyer;
 import com.lucistore.lucistorebe.service.ProductService;
 import com.lucistore.lucistorebe.utility.EProductStatus;
-import com.lucistore.lucistorebe.utility.ModelSorting;
 import com.lucistore.lucistorebe.utility.filter.PagingInfo;
 import com.lucistore.lucistorebe.utility.filter.ProductFilter;
 
@@ -78,7 +76,7 @@ public class AdminProductManageController {
 			@Parameter(description = "Specify page size")
 				Integer size,
 			@RequestParam(required = false) 
-			@Min(1) @Max(31)
+			@Min(1) @Max(63)
 			@Parameter(description = "Specify sort by condition"
 					+ "<br>sortBy value:\r\n"
 					+ "<br>\r\n"
@@ -91,6 +89,8 @@ public class AdminProductManageController {
 					+ "&nbsp;&nbsp;&nbsp;&nbsp; 8: &nbsp;&nbsp;by createdDate\r\n"
 					+ "<br>\r\n"
 					+ "&nbsp;&nbsp;&nbsp;&nbsp; 16: by lastModifiedDate"
+					+ "<br>\r\n"
+					+ "&nbsp;&nbsp;&nbsp;&nbsp; 32: by maxDiscount"
 					+ "<br><i>Example: sortBy = (1+2+4) = 7 => sort by price, nvisit and nsold attribute</i>")
 				Integer sortBy,
 			@RequestParam(required = false) 

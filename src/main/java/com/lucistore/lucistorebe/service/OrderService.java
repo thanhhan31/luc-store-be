@@ -104,7 +104,7 @@ public class OrderService {
 		Buyer buyer = buyerRepo.getReferenceById(idBuyer);
 
 		if(Boolean.FALSE.equals(buyer.getPhoneConfirmed()))
-			throw new CommonRuntimeException("Please confirm your phone number before placing order!");
+			throw new CommonRuntimeException("Please confirm your phone number before placing order");
 
 		if(!buyerRepo.existsById(idBuyer)) {
 			throw new InvalidInputDataException("No Buyer found with given id " + idBuyer);

@@ -59,7 +59,7 @@ public class ProductController {
 			@Parameter(description = "Specify page size")
 				Integer size,
 			@RequestParam(required = false) 
-			@Min(1) @Max(31)
+			@Min(1) @Max(63)
 			@Parameter(description = "Specify sort by condition"
 					+ "<br>sortBy value:\r\n"
 					+ "<br>\r\n"
@@ -72,6 +72,8 @@ public class ProductController {
 					+ "&nbsp;&nbsp;&nbsp;&nbsp; 8: &nbsp;&nbsp;by createdDate\r\n"
 					+ "<br>\r\n"
 					+ "&nbsp;&nbsp;&nbsp;&nbsp; 16: by lastModifiedDate"
+					+ "<br>\r\n"
+					+ "&nbsp;&nbsp;&nbsp;&nbsp; 32: by maxDiscount"
 					+ "<br><i>Example: sortBy = (1+2+4) = 7 => sort by price, nvisit and nsold attribute</i>")
 				Integer sortBy,
 			@RequestParam(required = false) 
@@ -91,6 +93,17 @@ public class ProductController {
 				new PagingInfo(page, size, sortBy, sortDescending)
 			)
 		);
+	}
+	
+	@Operation(summary = "Get top 10 sale product")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200",
+					description = "Successful",
+					content = { @Content(mediaType = "application/json") })
+	})
+	@GetMapping("/sale")
+	public ResponseEntity<?> getTopSale() {
+		return ResponseEntity.ok(productService.getTopSaleProduct());
 	}
 	
 	@Operation(summary = "Get top 10 lasted product")

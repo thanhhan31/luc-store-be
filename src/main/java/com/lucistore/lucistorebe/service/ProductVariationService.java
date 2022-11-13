@@ -47,7 +47,8 @@ public class ProductVariationService {
 		
 		ProductVariation variation = new ProductVariation(
 				productRepo.getReferenceById(idProduct), 
-				data.getVariationName(), 
+				data.getVariationName(),
+				data.getTier(),
 				data.getPrice(), 
 				data.getAvailableQuantity(), 
 				data.getDiscount(), 
@@ -68,6 +69,7 @@ public class ProductVariationService {
 					new ProductVariation(
 						p, 
 						variation.getVariationName(), 
+						variation.getTier(),
 						variation.getPrice(), 
 						variation.getAvailableQuantity(), 
 						variation.getDiscount(), 
@@ -88,6 +90,10 @@ public class ProductVariationService {
 		
 		if (StringUtils.isNotEmpty(data.getVariationName()) && !variation.getVariationName().equals(data.getVariationName())) {
 			variation.setVariationName(data.getVariationName());
+		}
+		
+		if (StringUtils.isNotEmpty(data.getTier()) && !variation.getTier().equals(data.getTier())) {
+			variation.setTier(data.getTier());
 		}
 		
 		if (data.getPrice() != null && !variation.getPrice().equals(data.getPrice())) {

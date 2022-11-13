@@ -12,6 +12,7 @@ public class OrderProductVariationDTO {
 	private Long id;
 	private OrderProductGeneralDetailDTO product;
 	private String variationName;
+	private String tier;
 	private Long price;
 	private Long availableQuantity;
 	private Integer discount;

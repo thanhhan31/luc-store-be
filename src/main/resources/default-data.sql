@@ -10,3 +10,7 @@ INSERT IGNORE INTO `user` (`email`, `full_name`, `password`, `phone`, `status`, 
 -- Buyer rank
 INSERT IGNORE INTO buyer_rank VALUES (3, 0.1, 'Gold', 10000, null), (2, 0.05, 'Silver', 5000, 3), (1, 0.03, 'Bronze', 1000, 2);
 
+-- Product category
+INSERT IGNORE INTO product_category (`level`, `name`, `status`) VALUES ('0', 'Phụ kiện nam', '0');
+INSERT IGNORE INTO product_category (`level`, `name`, `status`) VALUES ('0', 'Phụ kiện nữ', '0');
+INSERT IGNORE INTO product_category (`level`, `name`, `status`) VALUES ('0', 'Phụ kiện khác', '0');

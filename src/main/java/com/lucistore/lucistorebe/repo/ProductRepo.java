@@ -20,7 +20,10 @@ public interface ProductRepo extends JpaRepository<Product, Long>, ProductRepoCu
     @Query(value = "UPDATE product SET nvisit = nvisit + 1 WHERE id = ?1", nativeQuery = true)
     int updateVisitCount(Long id);
 	
+	List<Product> findTop10ByStatusOrderByMaxDiscountDesc(EProductStatus status);
 	List<Product> findTop10ByStatusOrderByCreatedDateDesc(EProductStatus status);
 	List<Product> findTop10ByStatusOrderByNvisitDesc(EProductStatus status);
 	List<Product> findTop10ByStatusOrderByNsoldDesc(EProductStatus status);
+	
+	//List<Product> findByName(String name);
 }

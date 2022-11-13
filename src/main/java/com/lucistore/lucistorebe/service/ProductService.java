@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.lucistore.lucistorebe.controller.TestRequest;
+import com.lucistore.lucistorebe.controller.TierVariation;
 import com.lucistore.lucistorebe.controller.advice.exception.CommonRuntimeException;
 import com.lucistore.lucistorebe.controller.advice.exception.InvalidInputDataException;
 import com.lucistore.lucistorebe.controller.payload.dto.ProductGeneralDetailDTO;
@@ -27,6 +29,7 @@ import com.lucistore.lucistorebe.entity.product.ProductCategory;
 import com.lucistore.lucistorebe.entity.product.ProductVariation;
 import com.lucistore.lucistorebe.repo.ProductCategoryRepo;
 import com.lucistore.lucistorebe.repo.ProductRepo;
+import com.lucistore.lucistorebe.repo.ProductVariationRepo;
 import com.lucistore.lucistorebe.service.util.ServiceUtils;
 import com.lucistore.lucistorebe.utility.EProductCategoryStatus;
 import com.lucistore.lucistorebe.utility.EProductStatus;
@@ -61,6 +64,13 @@ public class ProductService {
 	public ListWithPagingResponse<ProductGeneralDetailDTO> search(ProductFilter filter, PagingInfo pagingInfo) {
 		return serviceUtils.convertToListResponse(
 				productRepo.search(filter, pagingInfo),
+				ProductGeneralDetailDTO.class
+			);
+	}
+	
+	public ListResponse<ProductGeneralDetailDTO> getTopSaleProduct() {
+		return serviceUtils.convertToListResponse(
+				productRepo.findTop10ByStatusOrderByMaxDiscountDesc(EProductStatus.ENABLED),
 				ProductGeneralDetailDTO.class
 			);
 	}
@@ -144,7 +154,7 @@ public class ProductService {
 		
 		if (p.getCategory().getParent() != null) {
 			p.setParents(productCategoryRepo.findAncestry(p.getCategory().getParent().getId()));
-		}		
+		}
 		
 		logService.logInfo(idUser, String.format("New product has been created with id %d", p.getId()));
 		
@@ -179,7 +189,9 @@ public class ProductService {
 		}
 		
 		p = productRepo.save(p);
-		p.setParents(productCategoryRepo.findAncestry(p.getCategory().getParent().getId()));
+		if (p.getCategory().getParent() != null) 
+			p.setParents(productCategoryRepo.findAncestry(p.getCategory().getParent().getId()));
+		
 		
 		logService.logInfo(idUser, String.format("Product with id %d has been edited", p.getId()));
 		
@@ -212,15 +224,23 @@ public class ProductService {
 				.stream()
 				.filter(x -> x.getAvailableQuantity() > 0 && x.getStatus() == EProductVariationStatus.ENABLED);
 		
+		Optional<ProductVariation> maxDiscount = streamSupplier.get().max(
+				(first, second) -> Long.compare(first.getDiscount(), second.getDiscount())
+			);
+		
 		Optional<ProductVariation> minPv = streamSupplier.get().min(
 				(first, second) -> Long.compare(first.getPriceAfterDiscount(), second.getPriceAfterDiscount())
 			);
 		Optional<ProductVariation> maxPv = streamSupplier.get().max(
 				(first, second) -> Long.compare(first.getPriceAfterDiscount(), second.getPriceAfterDiscount())
 			);
+		
+		if (maxDiscount.isPresent())
+			p.setMaxDiscount(maxDiscount.get().getDiscount());
 
 		if (minPv.isPresent())
 			p.setMinPrice(minPv.get().getPriceAfterDiscount());
+			
 		if (maxPv.isPresent())
 			p.setMaxPrice(maxPv.get().getPriceAfterDiscount());
 		
@@ -256,4 +276,42 @@ public class ProductService {
 		
 		return idsCategory;
 	}
+	
+	/*** FOR DATA GENERATION ***/
+	/*public boolean tier(TestRequest data) {
+		var ps = productRepo.findByName(data.getProductName());
+		if (ps.isEmpty())
+			return false;
+		for (var p : ps) {
+			if (p.getId() == 27L) {
+				System.out.println("hi");
+			}
+			assignTier(p, data.getTier_variations());
+		}
+		return true;
+	}
+	
+	@Autowired ProductVariationRepo productVariationRepo;
+	
+	@Transactional
+	private void assignTier(Product p, List<TierVariation> tiers) {
+		for (var tier : tiers) {
+			for (var pvName : tier.getOptions()) {
+				var pvs = productVariationRepo.findByProductAndVariationName(p, pvName);
+				if (pvs.size() > 1)
+					continue;
+					//return;
+					//throw new CommonRuntimeException("Duplicate variation <" + pvs.get(0).getVariationName() + ">");
+				else if (pvs.isEmpty())
+					continue;
+					//return;
+					//throw new CommonRuntimeException("Not found variation <" + pvName + "> in product id " + p.getId().toString());
+				else {
+					var pv = pvs.get(0);
+					pv.setTier(tier.getName());
+					productVariationRepo.save(pv);
+				}
+			}
+		}
+	}*/
 }

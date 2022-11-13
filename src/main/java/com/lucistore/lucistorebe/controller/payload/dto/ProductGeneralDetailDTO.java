@@ -18,6 +18,7 @@ public class ProductGeneralDetailDTO {
 
 	private Long minPrice;
 	private Long maxPrice;
+	private Integer maxDiscount;
 	private Long nsold;
 	private Long nvisit;
 	private EProductStatus status;
