@@ -23,7 +23,7 @@ public class AddressDistrict {
 	private Long id;
 	
 	@OneToMany(mappedBy = "district", fetch = FetchType.LAZY)
-	private List<AddressWard> communeWardTowns;
+	private List<AddressWard> wards;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	private AddressProvinceCity provinceCity;

@@ -15,9 +15,9 @@ import com.lucistore.lucistorebe.controller.payload.response.ListResponse;
 import com.lucistore.lucistorebe.entity.user.buyer.Buyer;
 import com.lucistore.lucistorebe.entity.user.buyer.BuyerDeliveryAddress;
 import com.lucistore.lucistorebe.entity.user.buyer.BuyerDeliveryAddress_;
-import com.lucistore.lucistorebe.repo.AddressWardRepo;
 import com.lucistore.lucistorebe.repo.BuyerDeliveryAddressRepo;
 import com.lucistore.lucistorebe.repo.BuyerRepo;
+import com.lucistore.lucistorebe.repo.address.AddressWardRepo;
 import com.lucistore.lucistorebe.service.util.ServiceUtils;
 import com.lucistore.lucistorebe.utility.EBuyerDeliveryAddressStatus;
 
