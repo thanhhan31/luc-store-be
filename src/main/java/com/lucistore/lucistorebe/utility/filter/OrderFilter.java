@@ -18,16 +18,14 @@ public class OrderFilter {
 	Date createTime;
 	EOrderStatus status;
 	EPaymentMethod paymentMethod;
-	Boolean isAllOrderDetailReviewed;
 	
 	public OrderFilter(Long idBuyer, Long idSeller, Long idDeliveryAddress, Date createTime, EOrderStatus status,
-			EPaymentMethod paymentMethod, Boolean isAllOrderDetailReviewed) {
+			EPaymentMethod paymentMethod) {
 		this.idBuyer = idBuyer;
 		this.idSeller = idSeller;
 		this.idDeliveryAddress = idDeliveryAddress;
 		this.createTime = createTime;
 		this.status = status;
 		this.paymentMethod = paymentMethod;
-		this.isAllOrderDetailReviewed = isAllOrderDetailReviewed;
 	}
 }

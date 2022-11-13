@@ -103,9 +103,6 @@ public class OrderRepoCustomImpl implements OrderRepoCustom {
 		if (filter.getPaymentMethod() != null) {
 			filters.add(cb.equal(root.get(Order_.paymentMethod), filter.getPaymentMethod()));
 		}
-		if (filter.getIsAllOrderDetailReviewed() != null) {
-			filters.add(cb.equal(root.get(Order_.isAllOrderDetailReviewed), filter.getIsAllOrderDetailReviewed()));
-		}
 		
 		return cb.and(filters.toArray(new Predicate[0]));
 	}
