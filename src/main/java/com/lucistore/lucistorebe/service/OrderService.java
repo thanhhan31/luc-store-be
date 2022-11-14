@@ -175,7 +175,7 @@ public class OrderService {
 			Long totalSpend = order.getBuyer().getTotalSpent() == null ? order.getPayPrice() : order.getBuyer().getTotalSpent() + order.getPayPrice();
 			Buyer buyer = order.getBuyer();
 			buyer.setTotalSpent(totalSpend);
-			if(buyer.getRank().getNextRank() != null) {
+			if(buyer.getRank().getNextRank() != null && buyer.getTotalSpent() >= buyer.getRank().getThreshold()) {
 				buyerRankService.rankUp(buyerRepo.save(buyer).getId());
 			}else{
 				buyerRepo.save(buyer);
