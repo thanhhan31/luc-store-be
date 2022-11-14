@@ -1,4 +1,4 @@
-package com.lucistore.lucistorebe.controller.payload.dto.address;
+package com.lucistore.lucistorebe.controller.payload.dto.address.forward;
 
 import java.util.List;
 
@@ -8,8 +8,8 @@ import lombok.Setter;
 
 @Getter @Setter
 @NoArgsConstructor
-public class AddressDistrictDTO {
+public class AddressDistrictDetailDTO {
 	private Long id;
-	private List<AddressWardDTO> provinceCity;
 	private String name;
+	private List<AddressWardDTO> wards;
 }

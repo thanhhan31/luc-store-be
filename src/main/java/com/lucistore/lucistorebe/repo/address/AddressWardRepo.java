@@ -1,4 +1,4 @@
-package com.lucistore.lucistorebe.repo;
+package com.lucistore.lucistorebe.repo.address;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
