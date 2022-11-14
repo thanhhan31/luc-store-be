@@ -30,7 +30,6 @@ import com.lucistore.lucistorebe.entity.user.buyer.BuyerCartDetail;
 import com.lucistore.lucistorebe.entity.user.buyer.BuyerDeliveryAddress;
 import com.lucistore.lucistorebe.repo.BuyerCartDetailRepo;
 import com.lucistore.lucistorebe.repo.BuyerDeliveryAddressRepo;
-import com.lucistore.lucistorebe.repo.BuyerRankRepo;
 import com.lucistore.lucistorebe.repo.BuyerRepo;
 import com.lucistore.lucistorebe.repo.OrderDetailRepo;
 import com.lucistore.lucistorebe.repo.OrderRepo;
@@ -126,7 +125,7 @@ public class OrderService {
 			buyer,
 			address,
 			data.getNote(),
-			EOrderStatus.WAIT_FOR_CONFIRM,
+			EOrderStatus.WAIT_FOR_PAYMENT,
 			data.getPaymentMethod()
 		);
 
