@@ -1,6 +1,7 @@
 package com.lucistore.lucistorebe.service;
 
 import java.text.MessageFormat;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -40,28 +41,25 @@ public class BuyerDeliveryAddressService {
         BuyerDeliveryAddress deliveryAddress = buyerDeliveryAddressRepo.findById(id).orElseThrow(
                 () -> new InvalidInputDataException("No Delivery Address found with given id " + id));
         
-        if (idBuyer != null) {
-            if (!deliveryAddress.getBuyer().getId().equals(idBuyer)) {
-                throw new InvalidInputDataException(
-                    MessageFormat.format("No Delivery Address found with given id {0} for buyer with id {1} ", id, idBuyer));
-            }
-        }
+        checkAvailable(deliveryAddress, idBuyer);
 
 		return serviceUtils.convertToDataResponse(deliveryAddress, BuyerDeliveryAddressDTO.class);
 	}
 	
-	public ListResponse<BuyerDeliveryAddressDTO> getAllByIdBuyer(Long idBuyer) {
+	public ListResponse<BuyerDeliveryAddressDTO> getAllByIdBuyer(Long idBuyer, Boolean isAdmin) {
 		if(!buyerRepo.existsById(idBuyer)) {
 			throw new InvalidInputDataException("No Buyer found with given id " + idBuyer);
 		}
 		
 		Buyer buyer = buyerRepo.getReferenceById(idBuyer);
 
-        return serviceUtils.convertToListResponse(
-                    buyerDeliveryAddressRepo.findAllByBuyer(buyer,
-                    Sort.by(BuyerDeliveryAddress_.RECEIVER_NAME)).stream().filter(
-                        x -> x.getStatus() == EBuyerDeliveryAddressStatus.ACTIVE).toList(),
-            BuyerDeliveryAddressDTO.class);
+        List<BuyerDeliveryAddress> deliveryAddresses = buyerDeliveryAddressRepo.findAllByBuyer(buyer, Sort.by(Sort.Direction.ASC, BuyerDeliveryAddress_.RECEIVER_NAME));
+
+        if(!isAdmin) {
+            deliveryAddresses.removeIf(deliveryAddress -> deliveryAddress.getStatus() == EBuyerDeliveryAddressStatus.DELETED);
+        }
+
+        return serviceUtils.convertToListResponse(deliveryAddresses,BuyerDeliveryAddressDTO.class);
 	}
 	
 	public DataResponse<BuyerDeliveryAddressDTO> create(Long idBuyer, CreateBuyerDeliveryAddressRequest data) {
@@ -99,12 +97,7 @@ public class BuyerDeliveryAddressService {
 				.findById(id).orElseThrow(
 						() -> new InvalidInputDataException("No Delivery Address found with given id " + id));
 
-        if (idBuyer != null) {
-            if (!deliveryAddress.getBuyer().getId().equals(idBuyer)) {
-                throw new InvalidInputDataException(
-                    MessageFormat.format("No Delivery Address found with given id {0} for buyer with id {1} ", id, idBuyer));
-            }
-        }
+        checkAvailable(deliveryAddress, idBuyer);
 
         if(!addressWardRepo.existsById(data.getIdAddressWard())) {
             throw new InvalidInputDataException("No Address Ward found with given id " + data.getIdAddressWard());
@@ -127,11 +120,7 @@ public class BuyerDeliveryAddressService {
                         () -> new InvalidInputDataException("No Delivery Address found with given id " + id));
 
         if (idBuyer != null) {
-            if (!deliveryAddress.getBuyer().getId().equals(idBuyer)) {
-                throw new InvalidInputDataException(
-                        MessageFormat.format("No Delivery Address found with given id {0} for buyer with id {1} ", id,
-                                idBuyer));
-            }
+            checkAvailable(deliveryAddress, idBuyer);
 
             if (deliveryAddress.getBuyer().getDefaultAddress().getId().equals(id)) {
                 throw new InvalidInputDataException(MessageFormat.format(
@@ -143,5 +132,15 @@ public class BuyerDeliveryAddressService {
 
         return serviceUtils.convertToDataResponse(buyerDeliveryAddressRepo.save(deliveryAddress),
                 BuyerDeliveryAddressDTO.class);
+    }
+
+    private void checkAvailable(BuyerDeliveryAddress deliveryAddress, Long idBuyer) {
+        if(!deliveryAddress.getBuyer().getId().equals(idBuyer)) {
+            throw new InvalidInputDataException(
+                MessageFormat.format("No Delivery Address found with given id {0} for buyer with id {1} ", deliveryAddress.getId(), idBuyer));
+        }
+        if(deliveryAddress.getStatus() == EBuyerDeliveryAddressStatus.DELETED) {
+            throw new InvalidInputDataException("Delivery Address has been deleted");
+        }
     }
 }
