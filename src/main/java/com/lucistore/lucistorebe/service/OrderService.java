@@ -137,7 +137,7 @@ public class OrderService {
 			order.setPrice(order.getPrice() + orderDetail.getUnitPrice() * orderDetail.getQuantity());
 		});
 
-		order.setPrice(Math.round(order.getPayPrice()*(1 - buyer.getRank().getDiscountRate()))); // apply discount from rank
+		order.setPrice(Math.round(order.getPrice()*(1 - buyer.getRank().getDiscountRate()))); // apply discount from rank
 		order.setPayPrice(order.getPrice() + 30000L); // shipping fee
 		
 		return serviceUtils.convertToDataResponse(orderRepo.save(order), CreateOrderDTO.class);
