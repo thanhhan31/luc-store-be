@@ -26,7 +26,7 @@ public class PaymentService {
 	@Autowired
 	PayPalService payPalService;
 	
-	@Value("com.lucistore.lucistorebe.service.payment.return-url")
+	@Value("${com.lucistore.lucistorebe.service.payment.return-url}")
 	private String returnUrl;
 	
 	public String createPayment(Long idOrder, Long idBuyer, HttpServletRequest req) {
