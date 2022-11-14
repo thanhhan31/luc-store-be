@@ -157,6 +157,7 @@ public class BuyerService {
 				true,
 				false
 			);
+		buyer.setRank(buyerRankRepo.getReferenceById(1L));
 		buyerRepo.save(buyer);
 		return username;
 	}
