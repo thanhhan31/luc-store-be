@@ -13,8 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.lucistore.lucistorebe.controller.TestRequest;
-import com.lucistore.lucistorebe.controller.TierVariation;
 import com.lucistore.lucistorebe.controller.advice.exception.CommonRuntimeException;
 import com.lucistore.lucistorebe.controller.advice.exception.InvalidInputDataException;
 import com.lucistore.lucistorebe.controller.payload.dto.ProductGeneralDetailDTO;
@@ -29,7 +27,6 @@ import com.lucistore.lucistorebe.entity.product.ProductCategory;
 import com.lucistore.lucistorebe.entity.product.ProductVariation;
 import com.lucistore.lucistorebe.repo.ProductCategoryRepo;
 import com.lucistore.lucistorebe.repo.ProductRepo;
-import com.lucistore.lucistorebe.repo.ProductVariationRepo;
 import com.lucistore.lucistorebe.service.util.ServiceUtils;
 import com.lucistore.lucistorebe.utility.EProductCategoryStatus;
 import com.lucistore.lucistorebe.utility.EProductStatus;
