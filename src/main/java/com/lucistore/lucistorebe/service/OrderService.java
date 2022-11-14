@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.lucistore.lucistorebe.controller.advice.exception.CommonRuntimeException;
 import com.lucistore.lucistorebe.controller.advice.exception.InvalidInputDataException;
+import com.lucistore.lucistorebe.controller.payload.dto.CreateOrderDTO;
 import com.lucistore.lucistorebe.controller.payload.dto.OrderDTO;
 import com.lucistore.lucistorebe.controller.payload.dto.order.AdminDetailedOrderDTO;
 import com.lucistore.lucistorebe.controller.payload.dto.order.AdminOrderDTO;
@@ -99,7 +100,7 @@ public class OrderService {
 	}
 	
 	@Transactional
-	public DataResponse<OrderDTO> create(Long idBuyer, CreateBuyerOrderRequest data) {
+	public DataResponse<CreateOrderDTO> create(Long idBuyer, CreateBuyerOrderRequest data) {
 
 		BuyerDeliveryAddress address = buyerDeliveryAddressRepo.getReferenceById(data.getIdAddress());
 		Buyer buyer = buyerRepo.getReferenceById(idBuyer);
@@ -133,7 +134,9 @@ public class OrderService {
 			order.setPrice(order.getPrice() + orderDetail.getUnitPrice() * orderDetail.getQuantity());
 		});
 		
-		return serviceUtils.convertToDataResponse(orderRepo.save(order), OrderDTO.class);
+		order.setPayPrice(order.getPrice() + 30000L);
+		
+		return serviceUtils.convertToDataResponse(orderRepo.save(order), CreateOrderDTO.class);
 	}
 	
 	public void checkAndCompleteOrder(Long id) {

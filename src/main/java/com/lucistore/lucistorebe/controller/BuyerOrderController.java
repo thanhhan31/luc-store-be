@@ -2,6 +2,7 @@ package com.lucistore.lucistorebe.controller;
 
 import java.util.Date;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -24,6 +25,7 @@ import com.lucistore.lucistorebe.controller.payload.request.buyerorder.CreateBuy
 import com.lucistore.lucistorebe.controller.payload.request.buyerorder.CreateBuyerOrderFromProductRequest;
 import com.lucistore.lucistorebe.entity.user.buyer.Buyer;
 import com.lucistore.lucistorebe.service.OrderService;
+import com.lucistore.lucistorebe.service.PaymentService;
 import com.lucistore.lucistorebe.utility.EOrderStatus;
 import com.lucistore.lucistorebe.utility.EPaymentMethod;
 import com.lucistore.lucistorebe.utility.filter.OrderFilter;
@@ -40,6 +42,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 public class BuyerOrderController {
 	@Autowired
 	OrderService orderService;
+	
+	@Autowired
+	PaymentService paymentService;
+	
+	
 	
 	@Operation(summary = "Get order list of current logged in buyer with given search criteria")
 	@ApiResponses(value = {
@@ -113,15 +120,27 @@ public class BuyerOrderController {
 
 	@PreAuthorize("hasAuthority('ACTIVE_BUYER')")
 	@PostMapping
-	public ResponseEntity<?> create(@RequestBody @Valid CreateBuyerOrderFromProductRequest body,
+	public ResponseEntity<?> create(
+			HttpServletRequest req,
+			@RequestBody @Valid CreateBuyerOrderFromProductRequest body,
 			@AuthenticationPrincipal UserDetailsImpl<Buyer> buyer) {
-		return ResponseEntity.ok(orderService.create(buyer.getUser().getId(), body));
+		
+		var resp = orderService.create(buyer.getUser().getId(), body);
+		resp.getData().setPayUrl(paymentService.createPayment(resp.getData().getId(), buyer.getUser().getId(), req));
+		
+		return ResponseEntity.ok(resp);
 	}
 
 	@PreAuthorize("hasAuthority('ACTIVE_BUYER')")
 	@PostMapping("/cart")
-	public ResponseEntity<?> create(@RequestBody @Valid CreateBuyerOrderFromCartRequest body,
+	public ResponseEntity<?> create(
+			HttpServletRequest req,
+			@RequestBody @Valid CreateBuyerOrderFromCartRequest body,
 			@AuthenticationPrincipal UserDetailsImpl<Buyer> buyer) {
-		return ResponseEntity.ok(orderService.create(buyer.getUser().getId(), body));
+		
+		var resp = orderService.create(buyer.getUser().getId(), body);
+		resp.getData().setPayUrl(paymentService.createPayment(resp.getData().getId(), buyer.getUser().getId(), req));
+		
+		return ResponseEntity.ok(resp);
 	}
 }
