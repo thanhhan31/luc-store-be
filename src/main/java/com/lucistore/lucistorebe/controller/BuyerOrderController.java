@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.lucistore.lucistorebe.config.login.UserDetailsImpl;
 import com.lucistore.lucistorebe.controller.payload.request.buyerorder.CreateBuyerOrderFromCartRequest;
 import com.lucistore.lucistorebe.controller.payload.request.buyerorder.CreateBuyerOrderFromProductRequest;
+import com.lucistore.lucistorebe.controller.payload.response.CreatePaymentResponse;
 import com.lucistore.lucistorebe.entity.user.buyer.Buyer;
 import com.lucistore.lucistorebe.service.OrderService;
 import com.lucistore.lucistorebe.service.PaymentService;
@@ -142,5 +143,15 @@ public class BuyerOrderController {
 		resp.getData().setPayUrl(paymentService.createPayment(resp.getData().getId(), buyer.getUser().getId(), req));
 		
 		return ResponseEntity.ok(resp);
+	}
+	
+	@PreAuthorize("hasAuthority('ACTIVE_BUYER')")
+	@PutMapping("/{id}/create-payment")
+	public ResponseEntity<?> createPayment(
+			HttpServletRequest req,
+			@PathVariable Long id, 
+			@AuthenticationPrincipal UserDetailsImpl<Buyer> buyer) {
+
+		return ResponseEntity.ok(new CreatePaymentResponse(paymentService.createPayment(id, buyer.getUser().getId(), req)));
 	}
 }
