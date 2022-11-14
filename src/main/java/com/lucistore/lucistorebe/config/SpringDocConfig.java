@@ -15,7 +15,7 @@ public class SpringDocConfig {
 		final String securitySchemeName = "bearerAuth";
 		
 		return new OpenAPI()
-			.info(new Info().title("LUC Store backend API")
+			.info(new Info().title("TDGYMSTORE backend API")
 			.version("v1.0"))
 			.addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
 	        .components(
@@ -29,15 +29,4 @@ public class SpringDocConfig {
 	                )
 	        );
 	}
-	
-	/*@Bean
-	public MappingJackson2HttpMessageConverter octetStreamJsonConverter() {
-		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
-		converter.setSupportedMediaTypes(
-				Arrays.asList(
-						MediaType.APPLICATION_JSON, 
-						MediaType.APPLICATION_OCTET_STREAM));
-		converter.getObjectMapper().setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
-		return converter;
-	}*/
 }
