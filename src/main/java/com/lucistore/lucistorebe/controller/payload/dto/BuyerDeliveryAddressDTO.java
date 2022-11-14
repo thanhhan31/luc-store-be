@@ -13,6 +13,5 @@ public class BuyerDeliveryAddressDTO {
 	private String addressDetail;
 	private String receiverName;
 	private String receiverPhone;
-	private Boolean isDefault;
 	private EBuyerDeliveryAddressStatus status;
 }
