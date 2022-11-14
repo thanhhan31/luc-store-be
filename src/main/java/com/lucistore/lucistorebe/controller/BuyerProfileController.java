@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.lucistore.lucistorebe.config.login.UserDetailsImpl;
+import com.lucistore.lucistorebe.controller.payload.request.BuyerOtpConfirmRequest;
 import com.lucistore.lucistorebe.controller.payload.request.BuyerUpdateProfileRequest;
 import com.lucistore.lucistorebe.controller.payload.request.PasswordUpdateRequest;
 import com.lucistore.lucistorebe.entity.user.buyer.Buyer;
@@ -65,7 +67,7 @@ public class BuyerProfileController {
 		return ResponseEntity.ok(buyerService.update(buyer.getUser().getId(), request, avatar));
 	}
 	
-	@Operation(summary = "Update buyer password", 
+	@Operation(summary = "Update buyer's password", 
 			description = "<b><i>If buyer doesn't have password yet (due to register via OAuth) then leave old password null.</i></b>")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200",
@@ -78,5 +80,33 @@ public class BuyerProfileController {
 			@RequestBody @Valid PasswordUpdateRequest body) {
 		
 		return ResponseEntity.ok(buyerService.updatePassword(buyer.getUser().getId(), body));
+	}
+	
+	@Operation(summary = "Confirm buyer's email address")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200",
+					description = "Successful",
+					content = { @Content(mediaType = "application/json") })
+	})
+	@PostMapping("/email-confirm")
+	public ResponseEntity<?> confirmEmail(
+			@AuthenticationPrincipal UserDetailsImpl<Buyer> buyer,
+			@RequestBody @Valid BuyerOtpConfirmRequest body) {
+		
+		return ResponseEntity.ok(buyerService.confirmBuyerEmail(buyer.getUser().getId(), body));
+	}
+	
+	@Operation(summary = "Confirm buyer's phone number")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200",
+					description = "Successful",
+					content = { @Content(mediaType = "application/json") })
+	})
+	@PostMapping("/phone-confirm")
+	public ResponseEntity<?> confirmPhone(
+			@AuthenticationPrincipal UserDetailsImpl<Buyer> buyer,
+			@RequestBody @Valid BuyerOtpConfirmRequest body) {
+		
+		return ResponseEntity.ok(buyerService.confirmBuyerPhone(buyer.getUser().getId(), body));
 	}
 }

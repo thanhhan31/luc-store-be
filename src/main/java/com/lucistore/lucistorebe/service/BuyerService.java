@@ -11,6 +11,7 @@ import com.lucistore.lucistorebe.controller.advice.exception.DataConflictExcepti
 import com.lucistore.lucistorebe.controller.advice.exception.InvalidInputDataException;
 import com.lucistore.lucistorebe.controller.payload.dto.BuyerDTO;
 import com.lucistore.lucistorebe.controller.payload.request.AdminUpdateUserStatusRequest;
+import com.lucistore.lucistorebe.controller.payload.request.BuyerOtpConfirmRequest;
 import com.lucistore.lucistorebe.controller.payload.request.BuyerUpdateProfileRequest;
 import com.lucistore.lucistorebe.controller.payload.request.PasswordResetRequest;
 import com.lucistore.lucistorebe.controller.payload.request.PasswordUpdateRequest;
@@ -158,6 +159,42 @@ public class BuyerService {
 			);
 		buyerRepo.save(buyer);
 		return username;
+	}
+	
+	public DataResponse<BuyerDTO> confirmBuyerEmail(Long idUser, BuyerOtpConfirmRequest data) {
+		Buyer buyer = buyerRepo.getReferenceById(idUser);
+		
+		if (StringUtils.isEmpty(data.getOtp())) {
+			throw new InvalidInputDataException("OTP code is required");
+		}
+		else if (!data.getOtp().equals(otpCache.get(buyer.getUsername()))) {
+			throw new InvalidInputDataException("OTP code is invalid");
+		}
+		
+		buyer.setEmailConfirmed(true);
+		
+		return serviceUtils.convertToDataResponse(
+				buyerRepo.save(buyer),
+				BuyerDTO.class
+			);		
+	}
+	
+	public DataResponse<BuyerDTO> confirmBuyerPhone(Long idUser, BuyerOtpConfirmRequest data) {
+		Buyer buyer = buyerRepo.getReferenceById(idUser);
+		
+		if (StringUtils.isEmpty(data.getOtp())) {
+			throw new InvalidInputDataException("OTP code is required");
+		}
+		else if (!data.getOtp().equals(otpCache.get(buyer.getUsername()))) {
+			throw new InvalidInputDataException("OTP code is invalid");
+		}
+		
+		buyer.setPhoneConfirmed(true);
+		
+		return serviceUtils.convertToDataResponse(
+				buyerRepo.save(buyer),
+				BuyerDTO.class
+			);		
 	}
 	
 	public DataResponse<BuyerDTO> updateStatus(Long idUser, Long id, AdminUpdateUserStatusRequest data) {
