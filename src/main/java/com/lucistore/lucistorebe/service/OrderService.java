@@ -30,6 +30,7 @@ import com.lucistore.lucistorebe.entity.user.buyer.BuyerCartDetail;
 import com.lucistore.lucistorebe.entity.user.buyer.BuyerDeliveryAddress;
 import com.lucistore.lucistorebe.repo.BuyerCartDetailRepo;
 import com.lucistore.lucistorebe.repo.BuyerDeliveryAddressRepo;
+import com.lucistore.lucistorebe.repo.BuyerRankRepo;
 import com.lucistore.lucistorebe.repo.BuyerRepo;
 import com.lucistore.lucistorebe.repo.OrderDetailRepo;
 import com.lucistore.lucistorebe.repo.OrderRepo;
@@ -65,6 +66,9 @@ public class OrderService {
 
 	@Autowired
 	BuyerCartDetailRepo buyerCartDetailRepo;
+
+	@Autowired
+	BuyerRankService buyerRankService;
 	
 	@Autowired
 	ServiceUtils serviceUtils;
@@ -133,8 +137,9 @@ public class OrderService {
 			order.getOrderDetails().add(orderDetail);
 			order.setPrice(order.getPrice() + orderDetail.getUnitPrice() * orderDetail.getQuantity());
 		});
-		
-		order.setPayPrice(order.getPrice() + 30000L);
+
+		order.setPrice(Math.round(order.getPayPrice()*(1 - buyer.getRank().getDiscountRate()))); // apply discount from rank
+		order.setPayPrice(order.getPrice() + 30000L); // shipping fee
 		
 		return serviceUtils.convertToDataResponse(orderRepo.save(order), CreateOrderDTO.class);
 	}
@@ -164,6 +169,17 @@ public class OrderService {
 					throw new InvalidInputDataException("Product variation " + od.getProductVariation().getId() + " is out of stock");
 				}
 			});
+		}
+
+		if(newStatus == EOrderStatus.COMPLETED) {
+			Long totalSpend = order.getBuyer().getTotalSpent() == null ? order.getPayPrice() : order.getBuyer().getTotalSpent() + order.getPayPrice();
+			Buyer buyer = order.getBuyer();
+			buyer.setTotalSpent(totalSpend);
+			if(buyer.getRank().getNextRank() != null) {
+				buyerRankService.rankUp(buyerRepo.save(buyer).getId());
+			}else{
+				buyerRepo.save(buyer);
+			}
 		}
 		
 		order.setStatus(newStatus);
