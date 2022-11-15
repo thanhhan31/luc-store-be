@@ -15,7 +15,7 @@ public class SpringDocConfig {
 		final String securitySchemeName = "bearerAuth";
 		
 		return new OpenAPI()
-			.info(new Info().title("TDGYMSTORE backend API")
+			.info(new Info().title("LUC Store backend API")
 			.version("v1.0"))
 			.addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
 	        .components(
