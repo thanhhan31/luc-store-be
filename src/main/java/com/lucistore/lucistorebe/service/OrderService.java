@@ -263,12 +263,11 @@ public class OrderService {
 	private OrderDetail createOrderDetail(BuyerCartDetail cartDetail, Order order) {
 
 		checkAvailable(cartDetail);
-
 		return new OrderDetail(
 			order,
 			cartDetail.getProductVariation(),
 			cartDetail.getQuantity(),
-			cartDetail.getProductVariation().getPrice()
+			(long)Math.ceil(cartDetail.getProductVariation().getPrice() * (1 - cartDetail.getProductVariation().getDiscount() / 100.0))
 		);
 	}
 
