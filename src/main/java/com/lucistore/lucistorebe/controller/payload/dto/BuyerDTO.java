@@ -2,6 +2,7 @@ package com.lucistore.lucistorebe.controller.payload.dto;
 
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.lucistore.lucistorebe.utility.EGender;
 
 import lombok.Getter;
@@ -11,6 +12,7 @@ import lombok.Setter;
 public class BuyerDTO extends UserDTO {
 	private String avatar;
 	private EGender gender;
+	@JsonFormat(pattern = "yyyy-MM-dd")
 	private Date dob;
 	private Boolean emptyPassword;
 	private BuyerRankDTO rank;
