@@ -38,7 +38,7 @@ public class AdminStatisticController {
 			@RequestParam(required = false) Integer quarter,
 
 			@Parameter(description = "Year to statistic")
-			@RequestParam(required = false) Integer year,
+			@RequestParam(required = true) Integer year,
 
 			@Parameter(description = "Type (month or quarter) if statistic by year")
 			@RequestParam(required = false) EStatisticType type,

@@ -1,6 +1,8 @@
 package com.lucistore.lucistorebe.repo.custom.impl;
 
+import java.time.YearMonth;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 
@@ -16,6 +18,7 @@ import javax.persistence.criteria.Subquery;
 
 import org.springframework.stereotype.Repository;
 
+import com.lucistore.lucistorebe.controller.advice.exception.InvalidInputDataException;
 import com.lucistore.lucistorebe.controller.payload.dto.statistic.StatisticDTO;
 import com.lucistore.lucistorebe.controller.payload.dto.statistic.TodayStatisticDTO;
 import com.lucistore.lucistorebe.entity.order.Order;
@@ -56,17 +59,16 @@ public class StatisticRepoCustomimpl implements StatisticRepoCustom{
 			filters.add(rootMain.get(Order_.seller).get(User_.id).in(idAdmins));
 		}
 		if ( year != null) {
-			filters.add(cb.equal(cb.function("YEAR", Integer.class, rootMain.get(Order_.createTime)), year));
+			filters.add(cb.equal(cb.function(EStatisticType.YEAR.name(), Integer.class, rootMain.get(Order_.createTime)), year));
 		}
 		if ( month != null) {
-			filters.add(cb.equal(cb.function("MONTH", Integer.class, rootMain.get(Order_.createTime)), month));
+			filters.add(cb.equal(cb.function(EStatisticType.MONTH.name(), Integer.class, rootMain.get(Order_.createTime)), month));
 		}
 		if ( quarter != null) {
-			filters.add(cb.equal(cb.function("QUARTER", Integer.class, rootMain.get(Order_.createTime)), quarter));
+			filters.add(cb.equal(cb.function(EStatisticType.QUARTER.name(), Integer.class, rootMain.get(Order_.createTime)), quarter));
 		}
 	
 		Predicate filter = cb.and(filters.toArray(new Predicate[0]));
-		
 		
 		Subquery<Long> sub = main.subquery(Long.class);
 		Root<OrderDetail> subRoot = sub.from(OrderDetail.class);
@@ -76,24 +78,71 @@ public class StatisticRepoCustomimpl implements StatisticRepoCustom{
 		Expression<Integer> timeUnit;
 		List<Expression<?>> timeGroup = new ArrayList<>();
 
-		if( month != null || quarter != null) {
-			timeUnit = cb.function("DAY", Integer.class, rootMain.get(Order_.createTime));
-			timeGroup.add(cb.function("MONTH", Integer.class, rootMain.get(Order_.createTime)));
-		} else {
+		String timeUnitName = "";
+
+		if( month != null ) { // statistic by month, time unit is day
+			timeUnit = cb.function(EStatisticType.DAY.name(), Integer.class, rootMain.get(Order_.createTime));
+			timeUnitName = EStatisticType.DAY.name();
+		} else if ( quarter != null ) { // statistic by quarter, time unit is month
+			timeUnit = cb.function(EStatisticType.MONTH.name(), Integer.class, rootMain.get(Order_.createTime));
+			timeUnitName = EStatisticType.MONTH.name();
+		} else{ // statistic by year, time unit is month or quarter (depend on type)
 			timeUnit = cb.function(type.name(), Integer.class, rootMain.get(Order_.createTime));
+			timeUnitName = type.name();
 		}
 		timeGroup.add(timeUnit);
 		
 		main.multiselect(timeUnit
-				, cb.sum(sub) //quantity
+				, cb.selectCase().when(cb.isNull(cb.sum(sub)), 0L).otherwise(cb.sum(sub))
 				, cb.countDistinct(rootMain.get(Order_.buyer).get(Buyer_.id))
-				, cb.sum(rootMain.get(Order_.payPrice))
+				, cb.selectCase().when(cb.isNull(rootMain.get(Order_.payPrice)), 0L).otherwise(cb.sum(rootMain.get(Order_.payPrice))) // if payPrice is null, set it to 0
 				, cb.count(rootMain.get(Order_.id)));
 		
 		main.groupBy(timeGroup);
 		main.where(filter);
 		
-		return em.createQuery(main).getResultList();
+		var rs = em.createQuery(main).getResultList();
+		List<StatisticDTO> result = new ArrayList<>();
+		int numberOfTimeUnit = 0;
+
+		if(timeUnitName.equals(EStatisticType.QUARTER.name()) && quarter == null) { // statistic by year (type quarter) time unit is quarter, need to fill missing month
+			numberOfTimeUnit = 4; // 4 quarter in a year
+		} else if(timeUnitName.equals(EStatisticType.MONTH.name()) && quarter != null){ // statistic by quarter, time unit is month, need to fill missing month
+			numberOfTimeUnit = 3; // 3 month in a quarter
+		} else if(timeUnitName.equals(EStatisticType.MONTH.name()) && month == null ){ // statistic by year (type month), time unit is month, need to fill missing month
+			numberOfTimeUnit = 12;
+		} else if( timeUnitName.equals(EStatisticType.DAY.name())){ // statistic by month, time unit is day, need to fill missing day
+			YearMonth yearMonth = YearMonth.of(year, month);
+			numberOfTimeUnit = yearMonth.lengthOfMonth(); // get number of day in month
+		}else {
+			throw new InvalidInputDataException("Unknown statistic parameter");
+		}
+
+		for(int i = 1; i <= numberOfTimeUnit; i++) { // fill missing time unit
+			if(quarter != null){ // if statistic by quarter, time unit is month, need to convert numberOfTimeUnit to month
+				// 3 * quarter - 2 = the first month of quarter
+				// 3 * quarter - 2 + i - 1 = the i-th month of quarter
+				result.add(new StatisticDTO(3 * quarter - 2 + i - 1, 0L, 0L, 0L, 0L));
+			} else {
+				result.add(new StatisticDTO(i, 0L, 0L, 0L, 0L));
+			}
+				
+		}
+
+		for(int i = 0; i < rs.size(); i++) { // set time unit that has data
+			if(quarter != null){ // if statistic by quarter, config index to match month
+				// 3 * quarter - 2 = the first month of quarter
+				// 3 * quarter - 2 + i - 1 = the i-th month of quarter
+				// i = i-th month + 3 - 3 * quarter 
+				
+				result.set(rs.get(i).getTimeUnit() + 3 - 3 * quarter - 1, rs.get(i));
+			} else 
+				result.set(rs.get(i).getTimeUnit() - 1, rs.get(i));
+		}
+
+
+
+		return result;
     }
 
     public TodayStatisticDTO todayStatistic() {
@@ -109,8 +158,10 @@ public class StatisticRepoCustomimpl implements StatisticRepoCustom{
 	
 		Predicate filter = cb.and(filters.toArray(new Predicate[0]));
 		
-		main.multiselect(cb.sum(rootMain.get(Order_.payPrice)),
-						cb.count(rootMain.get(Order_.id)));
+		main.multiselect(
+				cb.selectCase().when(cb.isNull(cb.sum(rootMain.get(Order_.payPrice))), 0L)
+						.otherwise(cb.sum(rootMain.get(Order_.payPrice))),
+				cb.count(rootMain.get(Order_.id)));
 		main.where(filter);
 		Tuple rs = em.createQuery(main).getSingleResult();
 		return new TodayStatisticDTO(rs.get(0, Long.class), rs.get(1, Long.class));

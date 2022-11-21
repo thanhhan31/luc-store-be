@@ -13,7 +13,7 @@ public class TodayStatisticDTO{
 	private Long newOrder;
 
 	public TodayStatisticDTO(Long income, Long newOrder) {
-		this.income = income != null ? income : 0;
+		this.income = income;
 		this.newOrder = newOrder;
 	}
 }
