@@ -2,8 +2,6 @@ package com.lucistore.lucistorebe.repo.custom.impl;
 
 import java.time.YearMonth;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -18,7 +16,6 @@ import javax.persistence.criteria.Subquery;
 
 import org.springframework.stereotype.Repository;
 
-import com.lucistore.lucistorebe.controller.advice.exception.InvalidInputDataException;
 import com.lucistore.lucistorebe.controller.payload.dto.statistic.StatisticDTO;
 import com.lucistore.lucistorebe.controller.payload.dto.statistic.TodayStatisticDTO;
 import com.lucistore.lucistorebe.entity.order.Order;
@@ -79,16 +76,28 @@ public class StatisticRepoCustomimpl implements StatisticRepoCustom{
 		List<Expression<?>> timeGroup = new ArrayList<>();
 
 		String timeUnitName = "";
+		int numberOfTimeUnit = 0;
 
 		if( month != null ) { // statistic by month, time unit is day
 			timeUnit = cb.function(EStatisticType.DAY.name(), Integer.class, rootMain.get(Order_.createTime));
 			timeUnitName = EStatisticType.DAY.name();
+
+			YearMonth yearMonth = YearMonth.of(year, month);
+			numberOfTimeUnit = yearMonth.lengthOfMonth(); // get number of day in month
+
 		} else if ( quarter != null ) { // statistic by quarter, time unit is month
 			timeUnit = cb.function(EStatisticType.MONTH.name(), Integer.class, rootMain.get(Order_.createTime));
 			timeUnitName = EStatisticType.MONTH.name();
+			numberOfTimeUnit = 3; // 3 month in a quarter
 		} else{ // statistic by year, time unit is month or quarter (depend on type)
 			timeUnit = cb.function(type.name(), Integer.class, rootMain.get(Order_.createTime));
 			timeUnitName = type.name();
+
+			if( type == EStatisticType.MONTH ) {
+				numberOfTimeUnit = 12; // 12 month in a year
+			} else if ( type == EStatisticType.QUARTER ) {
+				numberOfTimeUnit = 4; // 4 quarter in a year
+			}
 		}
 		timeGroup.add(timeUnit);
 		
@@ -103,20 +112,6 @@ public class StatisticRepoCustomimpl implements StatisticRepoCustom{
 		
 		var rs = em.createQuery(main).getResultList();
 		List<StatisticDTO> result = new ArrayList<>();
-		int numberOfTimeUnit = 0;
-
-		if(timeUnitName.equals(EStatisticType.QUARTER.name()) && quarter == null) { // statistic by year (type quarter) time unit is quarter, need to fill missing month
-			numberOfTimeUnit = 4; // 4 quarter in a year
-		} else if(timeUnitName.equals(EStatisticType.MONTH.name()) && quarter != null){ // statistic by quarter, time unit is month, need to fill missing month
-			numberOfTimeUnit = 3; // 3 month in a quarter
-		} else if(timeUnitName.equals(EStatisticType.MONTH.name()) && month == null ){ // statistic by year (type month), time unit is month, need to fill missing month
-			numberOfTimeUnit = 12;
-		} else if( timeUnitName.equals(EStatisticType.DAY.name())){ // statistic by month, time unit is day, need to fill missing day
-			YearMonth yearMonth = YearMonth.of(year, month);
-			numberOfTimeUnit = yearMonth.lengthOfMonth(); // get number of day in month
-		}else {
-			throw new InvalidInputDataException("Unknown statistic parameter");
-		}
 
 		for(int i = 1; i <= numberOfTimeUnit; i++) { // fill missing time unit
 			if(quarter != null){ // if statistic by quarter, time unit is month, need to convert numberOfTimeUnit to month
@@ -140,7 +135,9 @@ public class StatisticRepoCustomimpl implements StatisticRepoCustom{
 				result.set(rs.get(i).getTimeUnit() - 1, rs.get(i));
 		}
 
-
+		for( var item : result) { // set label for time unit
+			item.setLabel(timeUnitName);
+		}
 
 		return result;
     }
