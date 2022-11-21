@@ -76,7 +76,7 @@ public class WebSecurityConfig {
 						"/api/buyer/reset-password").permitAll()
 			.and()
 			.authorizeRequests()
-    		.antMatchers("/api/admin/**").hasAnyRole("ADMIN", "SALE_ADMIN")
+    		.antMatchers("/api/admin/**").hasAnyRole("ADMIN", "SALE_ADMIN", "SHIPPER")
     		.and()
     		.authorizeRequests()
     		.antMatchers("/api/buyer/**").hasRole("BUYER")

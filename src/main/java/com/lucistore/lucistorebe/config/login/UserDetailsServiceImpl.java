@@ -44,7 +44,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 			Long uid = user.getId();
 			
 			switch (EUserRole.valueOf(user.getRole().getName())) {
-			case ADMIN, SALE_ADMIN: {
+			case ADMIN, SALE_ADMIN, SHIPPER: {
 				return new UserDetailsImpl<User>(user);
 			}
 			case BUYER: {
