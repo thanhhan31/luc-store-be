@@ -1,10 +1,12 @@
 package com.lucistore.lucistorebe.repo.custom.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Tuple;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
@@ -15,6 +17,7 @@ import javax.persistence.criteria.Subquery;
 import org.springframework.stereotype.Repository;
 
 import com.lucistore.lucistorebe.controller.payload.dto.statistic.StatisticDTO;
+import com.lucistore.lucistorebe.controller.payload.dto.statistic.TodayStatisticDTO;
 import com.lucistore.lucistorebe.entity.order.Order;
 import com.lucistore.lucistorebe.entity.order.OrderDetail;
 import com.lucistore.lucistorebe.entity.order.OrderDetail_;
@@ -91,6 +94,27 @@ public class StatisticRepoCustomimpl implements StatisticRepoCustom{
 		main.where(filter);
 		
 		return em.createQuery(main).getResultList();
+    }
+
+    public TodayStatisticDTO todayStatistic() {
+
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+		
+		CriteriaQuery<Tuple> main = cb.createQuery(Tuple.class);
+		Root<Order> rootMain = main.from(Order.class);
+
+		List<Predicate> filters = new ArrayList<>();
+
+		filters.add(cb.equal(cb.function("DATE", Integer.class, rootMain.get(Order_.createTime)), cb.currentDate()));
+	
+		Predicate filter = cb.and(filters.toArray(new Predicate[0]));
+
+		
+		main.multiselect(cb.sum(rootMain.get(Order_.payPrice)),
+						cb.count(rootMain.get(Order_.id)));
+		main.where(filter);
+		Tuple rs = em.createQuery(main).getSingleResult();
+		return new TodayStatisticDTO(rs.get(0, Long.class), rs.get(1, Long.class));
     }
 
 }

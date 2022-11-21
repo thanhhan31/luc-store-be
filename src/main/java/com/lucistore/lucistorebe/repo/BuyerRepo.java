@@ -1,8 +1,11 @@
 package com.lucistore.lucistorebe.repo;
 
+import java.util.Date;
+
 import javax.annotation.Nullable;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.lucistore.lucistorebe.entity.user.buyer.Buyer;
@@ -21,4 +24,8 @@ public interface BuyerRepo extends JpaRepository<Buyer, Long>, BuyerRepoCustom {
 	
 	@Nullable
 	Buyer findByUser_Phone(String phone);
+
+	// count by create date
+	@Query(" SELECT COUNT(b) FROM Buyer b WHERE date(b.createdDate) = date(?1) ")
+	Long countByCreateTime(Date date);
 }

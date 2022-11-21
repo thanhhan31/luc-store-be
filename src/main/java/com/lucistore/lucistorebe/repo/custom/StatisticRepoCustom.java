@@ -2,6 +2,7 @@ package com.lucistore.lucistorebe.repo.custom;
 import java.util.List;
 
 import com.lucistore.lucistorebe.controller.payload.dto.statistic.StatisticDTO;
+import com.lucistore.lucistorebe.controller.payload.dto.statistic.TodayStatisticDTO;
 import com.lucistore.lucistorebe.utility.EStatisticType;
 public interface StatisticRepoCustom {
     List<StatisticDTO> statistic(
@@ -11,4 +12,6 @@ public interface StatisticRepoCustom {
         Integer quarter,
         Integer year,
         EStatisticType type);
+    
+    TodayStatisticDTO todayStatistic();
 }

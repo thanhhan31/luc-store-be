@@ -1,5 +1,6 @@
 package com.lucistore.lucistorebe.repo;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -56,4 +57,8 @@ public interface ProductRepo extends JpaRepository<Product, Long>, ProductRepoCu
 	List<Product> findTop10ByStatusOrderByNsoldDesc(EProductStatus status);
 	
 	//List<Product> findByName(String name);
+
+	// count by create date
+	@Query(" SELECT COUNT(p) FROM Product p WHERE date(p.createdDate) = date(?1) ")
+	Long countByCreateTime(Date date);
 }

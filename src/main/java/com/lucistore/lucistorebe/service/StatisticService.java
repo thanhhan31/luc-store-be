@@ -1,5 +1,6 @@
 package com.lucistore.lucistorebe.service;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,8 +8,11 @@ import org.springframework.stereotype.Service;
 
 import com.lucistore.lucistorebe.controller.advice.exception.InvalidInputDataException;
 import com.lucistore.lucistorebe.controller.payload.dto.statistic.StatisticDTO;
+import com.lucistore.lucistorebe.controller.payload.dto.statistic.TodayStatisticDTO;
+import com.lucistore.lucistorebe.controller.payload.response.DataResponse;
 import com.lucistore.lucistorebe.controller.payload.response.ListResponse;
 import com.lucistore.lucistorebe.entity.user.User;
+import com.lucistore.lucistorebe.repo.BuyerRepo;
 import com.lucistore.lucistorebe.repo.ProductRepo;
 import com.lucistore.lucistorebe.repo.ProductVariationRepo;
 import com.lucistore.lucistorebe.repo.custom.StatisticRepoCustom;
@@ -20,6 +24,9 @@ import com.lucistore.lucistorebe.utility.EUserRole;
 public class StatisticService {
 	@Autowired
 	ProductRepo productRepo;
+
+	@Autowired
+	BuyerRepo buyerRepo;
 	
 	@Autowired
 	ProductVariationRepo productVariationRepo;
@@ -50,5 +57,14 @@ public class StatisticService {
 
 		List<StatisticDTO> os = statisticRepo.statistic(idBuyers, idAdmins, month, quarter, year, type);
 		return serviceUtils.convertToListResponse(os, StatisticDTO.class);
+	}
+
+	public DataResponse<TodayStatisticDTO> todayStatistic() {
+
+		TodayStatisticDTO os = statisticRepo.todayStatistic(); // include income and new order
+		os.setNewBuyer(buyerRepo.countByCreateTime(new Date())); // include new buyer
+		os.setNewProduct(productRepo.countByCreateTime(new Date())); // include new product
+
+		return serviceUtils.convertToDataResponse(os, TodayStatisticDTO.class);
 	}
 }

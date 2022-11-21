@@ -49,4 +49,9 @@ public class AdminStatisticController {
 		var r = statisticService.statistic(idBuyer, idAdmin, month, quarter, year, type, user.getUser());
 		return ResponseEntity.ok(r);
 	}
+
+	@GetMapping("/today")
+	public ResponseEntity<?> todayStatistic(){
+		return ResponseEntity.ok(statisticService.todayStatistic());
+	}
 }
