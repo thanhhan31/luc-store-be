@@ -108,7 +108,6 @@ public class StatisticRepoCustomimpl implements StatisticRepoCustom{
 		filters.add(cb.equal(cb.function("DATE", Integer.class, rootMain.get(Order_.createTime)), cb.currentDate()));
 	
 		Predicate filter = cb.and(filters.toArray(new Predicate[0]));
-
 		
 		main.multiselect(cb.sum(rootMain.get(Order_.payPrice)),
 						cb.count(rootMain.get(Order_.id)));
