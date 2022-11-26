@@ -17,6 +17,7 @@ import com.lucistore.lucistorebe.controller.payload.dto.order.AdminDetailedOrder
 import com.lucistore.lucistorebe.controller.payload.dto.order.AdminOrderDTO;
 import com.lucistore.lucistorebe.controller.payload.dto.order.BuyerDetailedOrderDTO;
 import com.lucistore.lucistorebe.controller.payload.dto.order.BuyerOrderDTO;
+import com.lucistore.lucistorebe.controller.payload.request.BuyerUpdateOrderPaymentMethodRequest;
 import com.lucistore.lucistorebe.controller.payload.request.buyerorder.CreateBuyerOrderFromCartRequest;
 import com.lucistore.lucistorebe.controller.payload.request.buyerorder.CreateBuyerOrderFromProductRequest;
 import com.lucistore.lucistorebe.controller.payload.request.buyerorder.CreateBuyerOrderRequest;
@@ -149,6 +150,26 @@ public class OrderService {
 			order.setStatus(EOrderStatus.COMPLETED);
 			orderRepo.save(order);
 		}
+	}
+	
+	@Transactional
+	public DataResponse<BuyerOrderDTO> updatePaymentMethod(Long id, Long idBuyer, BuyerUpdateOrderPaymentMethodRequest data) {
+		Order order = orderRepo.findById(id).orElseThrow(
+			() -> new InvalidInputDataException("No order found with given id "));
+		
+		if(idBuyer != null && !order.getBuyer().getId().equals(idBuyer))
+			throw new InvalidInputDataException("Can not update other buyer's orders");
+		
+		
+		if (order.getStatus() != EOrderStatus.WAIT_FOR_PAYMENT)
+			throw new InvalidInputDataException("Payment method can only be updated when order is in wait for payment state");
+		
+		if (order.getPaymentMethod() != data.getNewPaymentMethod()) {
+			order.setPaymentMethod(data.getNewPaymentMethod());
+			order = orderRepo.save(order);
+		}
+		
+		return serviceUtils.convertToDataResponse(order, BuyerOrderDTO.class);
 	}
 	
 	@Transactional
