@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lucistore.lucistorebe.config.login.UserDetailsImpl;
+import com.lucistore.lucistorebe.controller.payload.request.BuyerUpdateOrderPaymentMethodRequest;
 import com.lucistore.lucistorebe.controller.payload.request.buyerorder.CreateBuyerOrderFromCartRequest;
 import com.lucistore.lucistorebe.controller.payload.request.buyerorder.CreateBuyerOrderFromProductRequest;
 import com.lucistore.lucistorebe.controller.payload.response.CreatePaymentResponse;
@@ -46,8 +47,6 @@ public class BuyerOrderController {
 	
 	@Autowired
 	PaymentService paymentService;
-	
-	
 	
 	@Operation(summary = "Get order list of current logged in buyer with given search criteria")
 	@ApiResponses(value = {
@@ -118,6 +117,21 @@ public class BuyerOrderController {
 	public ResponseEntity<?> cancel(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl<Buyer> buyer) {
 		return ResponseEntity.ok(orderService.updateStatus(id, buyer.getUser().getId(), EOrderStatus.CANCELLED));
 	}
+	
+	@PutMapping("/{id}/update")
+	public ResponseEntity<?> update(
+			@PathVariable Long id, 
+			@AuthenticationPrincipal UserDetailsImpl<Buyer> buyer,
+			BuyerUpdateOrderPaymentMethodRequest body) {
+		
+		return ResponseEntity.ok(
+			orderService.updatePaymentMethod(
+					id, 
+					buyer.getUser().getId(), 
+					body
+				)
+		);
+	}
 
 	@PreAuthorize("hasAuthority('ACTIVE_BUYER')")
 	@PostMapping
@@ -146,7 +160,7 @@ public class BuyerOrderController {
 	}
 	
 	@PreAuthorize("hasAuthority('ACTIVE_BUYER')")
-	@PutMapping("/{id}/create-payment")
+	@GetMapping("/{id}/create-payment")
 	public ResponseEntity<?> createPayment(
 			HttpServletRequest req,
 			@PathVariable Long id, 
