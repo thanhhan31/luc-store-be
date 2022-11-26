@@ -26,6 +26,7 @@ import com.lucistore.lucistorebe.entity.user.User_;
 import com.lucistore.lucistorebe.entity.user.buyer.Buyer_;
 import com.lucistore.lucistorebe.repo.custom.StatisticRepoCustom;
 import com.lucistore.lucistorebe.utility.EStatisticType;
+import com.lucistore.lucistorebe.utility.ETimeUnit;
 
 @Repository
 public class StatisticRepoCustomimpl implements StatisticRepoCustom{
@@ -56,13 +57,13 @@ public class StatisticRepoCustomimpl implements StatisticRepoCustom{
 			filters.add(rootMain.get(Order_.seller).get(User_.id).in(idAdmins));
 		}
 		if ( year != null) {
-			filters.add(cb.equal(cb.function(EStatisticType.YEAR.name(), Integer.class, rootMain.get(Order_.createTime)), year));
+			filters.add(cb.equal(cb.function(ETimeUnit.YEAR.name(), Integer.class, rootMain.get(Order_.createTime)), year));
 		}
 		if ( month != null) {
-			filters.add(cb.equal(cb.function(EStatisticType.MONTH.name(), Integer.class, rootMain.get(Order_.createTime)), month));
+			filters.add(cb.equal(cb.function(ETimeUnit.MONTH.name(), Integer.class, rootMain.get(Order_.createTime)), month));
 		}
 		if ( quarter != null) {
-			filters.add(cb.equal(cb.function(EStatisticType.QUARTER.name(), Integer.class, rootMain.get(Order_.createTime)), quarter));
+			filters.add(cb.equal(cb.function(ETimeUnit.QUARTER.name(), Integer.class, rootMain.get(Order_.createTime)), quarter));
 		}
 	
 		Predicate filter = cb.and(filters.toArray(new Predicate[0]));
@@ -79,15 +80,15 @@ public class StatisticRepoCustomimpl implements StatisticRepoCustom{
 		int numberOfTimeUnit = 0;
 
 		if( month != null ) { // statistic by month, time unit is day
-			timeUnit = cb.function(EStatisticType.DAY.name(), Integer.class, rootMain.get(Order_.createTime));
-			timeUnitName = EStatisticType.DAY.name();
+			timeUnit = cb.function(ETimeUnit.DAY.name(), Integer.class, rootMain.get(Order_.createTime));
+			timeUnitName = ETimeUnit.DAY.name();
 
 			YearMonth yearMonth = YearMonth.of(year, month);
 			numberOfTimeUnit = yearMonth.lengthOfMonth(); // get number of day in month
 
 		} else if ( quarter != null ) { // statistic by quarter, time unit is month
-			timeUnit = cb.function(EStatisticType.MONTH.name(), Integer.class, rootMain.get(Order_.createTime));
-			timeUnitName = EStatisticType.MONTH.name();
+			timeUnit = cb.function(ETimeUnit.MONTH.name(), Integer.class, rootMain.get(Order_.createTime));
+			timeUnitName = ETimeUnit.MONTH.name();
 			numberOfTimeUnit = 3; // 3 month in a quarter
 		} else{ // statistic by year, time unit is month or quarter (depend on type)
 			timeUnit = cb.function(type.name(), Integer.class, rootMain.get(Order_.createTime));

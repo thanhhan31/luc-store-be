@@ -1,6 +1,8 @@
 package com.lucistore.lucistorebe.utility;
 
-public enum EStatisticType {
+public enum ETimeUnit {
+	YEAR,
 	QUARTER,
 	MONTH,
+	DAY,
 }
