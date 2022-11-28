@@ -25,6 +25,7 @@ import com.lucistore.lucistorebe.entity.order.Order_;
 import com.lucistore.lucistorebe.entity.user.User_;
 import com.lucistore.lucistorebe.entity.user.buyer.Buyer_;
 import com.lucistore.lucistorebe.repo.custom.StatisticRepoCustom;
+import com.lucistore.lucistorebe.utility.EOrderStatus;
 import com.lucistore.lucistorebe.utility.EStatisticType;
 import com.lucistore.lucistorebe.utility.ETimeUnit;
 
@@ -65,6 +66,9 @@ public class StatisticRepoCustomimpl implements StatisticRepoCustom{
 		if ( quarter != null) {
 			filters.add(cb.equal(cb.function(ETimeUnit.QUARTER.name(), Integer.class, rootMain.get(Order_.createTime)), quarter));
 		}
+		filters.add(cb.or(cb.equal(rootMain.get(Order_.status), EOrderStatus.DELIVERING), 
+		cb.equal(rootMain.get(Order_.status), EOrderStatus.DELIVERED), 
+		cb.equal(rootMain.get(Order_.status), EOrderStatus.COMPLETED)));
 	
 		Predicate filter = cb.and(filters.toArray(new Predicate[0]));
 		
