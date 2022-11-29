@@ -1,5 +1,7 @@
 package com.lucistore.lucistorebe.controller;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,7 +19,7 @@ public class SignupController {
 	BuyerService buyerService;
 	
 	@PostMapping
-	public ResponseEntity<?> signup(@RequestBody SignupUsernamePasswordRequest body) {
+	public ResponseEntity<?> signup(@RequestBody @Valid SignupUsernamePasswordRequest body) {
 		return ResponseEntity.ok(buyerService.create(body));
 	}
 }

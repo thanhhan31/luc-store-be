@@ -122,7 +122,7 @@ public class BuyerOrderController {
 	public ResponseEntity<?> update(
 			@PathVariable Long id, 
 			@AuthenticationPrincipal UserDetailsImpl<Buyer> buyer,
-			BuyerUpdateOrderPaymentMethodRequest body) {
+			@RequestBody @Valid BuyerUpdateOrderPaymentMethodRequest body) {
 		
 		return ResponseEntity.ok(
 			orderService.updatePaymentMethod(

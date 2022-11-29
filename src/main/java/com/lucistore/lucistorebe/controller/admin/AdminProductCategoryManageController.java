@@ -1,5 +1,7 @@
 package com.lucistore.lucistorebe.controller.admin;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -36,7 +38,7 @@ public class AdminProductCategoryManageController {
 	@PostMapping
 	public ResponseEntity<?> create(
 			@AuthenticationPrincipal UserDetailsImpl<User> user, 
-			@RequestBody CreateProductCategoryRequest body) {
+			@RequestBody @Valid CreateProductCategoryRequest body) {
 		return ResponseEntity.ok(productCategoryService.create(user.getUser().getId(), body));
 	}
 	
@@ -44,7 +46,7 @@ public class AdminProductCategoryManageController {
 	public ResponseEntity<?> update(
 			@AuthenticationPrincipal UserDetailsImpl<User> user, 
 			@PathVariable Long id, 
-			@RequestBody UpdateProductCategoryRequest body) {
+			@RequestBody @Valid UpdateProductCategoryRequest body) {
 		return ResponseEntity.ok(productCategoryService.update(user.getUser().getId(), id, body));
 	}
 }

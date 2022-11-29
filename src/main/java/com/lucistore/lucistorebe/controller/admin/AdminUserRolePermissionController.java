@@ -1,5 +1,7 @@
 package com.lucistore.lucistorebe.controller.admin;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -28,7 +30,7 @@ public class AdminUserRolePermissionController {
 	@PutMapping
 	public ResponseEntity<?> update(
 			@AuthenticationPrincipal UserDetailsImpl<User> user, 
-			@RequestBody UpdateUserRolePermissionRequest body) {
+			@RequestBody @Valid UpdateUserRolePermissionRequest body) {
 		return ResponseEntity.ok(userRoleService.updateSaleAdminPermission(user.getUser().getId(), body));
 	}
 }

@@ -53,7 +53,7 @@ public class AdminProductImageManageController {
 	@DeleteMapping(path = "/{id}")
 	public ResponseEntity<?> delete(
 			@PathVariable Long idProduct,
-			@RequestBody List<Long> ids) {
+			@RequestBody @Valid @NotEmpty List<Long> ids) {
 		productImageService.delete(idProduct, ids);
 		return ResponseEntity.ok(new BaseResponse());
 	}

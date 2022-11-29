@@ -1,5 +1,7 @@
 package com.lucistore.lucistorebe.controller.admin;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,7 +31,10 @@ public class AdminBuyerRankManageController {
 	}
 	
 	@PutMapping("/{id}")
-	public ResponseEntity<?> update(@PathVariable Long id, @RequestBody UpdateBuyerRankRequest body) {
+	public ResponseEntity<?> update(
+			@PathVariable Long id, 
+			@RequestBody @Valid UpdateBuyerRankRequest body) {
+		
 		return ResponseEntity.ok(buyerRankService.update(id, body));
 	}
 }

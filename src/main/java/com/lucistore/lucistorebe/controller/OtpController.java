@@ -1,5 +1,7 @@
 package com.lucistore.lucistorebe.controller;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,7 +32,7 @@ public class OtpController {
 					content = { @Content(mediaType = "application/json") })
 	})
 	@PostMapping("/email")
-	public ResponseEntity<?> sendViaEmail(@RequestBody BuyerEmailOtpRequest body) {
+	public ResponseEntity<?> sendViaEmail(@RequestBody @Valid BuyerEmailOtpRequest body) {
 		otpService.sendOtpViaEmail(body.getEmail());
 		return ResponseEntity.ok(new BaseResponse());
 	}
@@ -42,7 +44,7 @@ public class OtpController {
 					content = { @Content(mediaType = "application/json") })
 	})
 	@PostMapping("/phone")
-	public ResponseEntity<?> sendViaPhone(@RequestBody BuyerPhoneOtpRequest body) {
+	public ResponseEntity<?> sendViaPhone(@RequestBody @Valid BuyerPhoneOtpRequest body) {
 		otpService.sendOtpViaPhone(body.getPhoneNumber());
 		return ResponseEntity.ok(new BaseResponse());
 	}

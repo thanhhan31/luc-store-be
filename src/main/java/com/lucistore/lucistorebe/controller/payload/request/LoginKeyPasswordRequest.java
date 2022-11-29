@@ -8,7 +8,7 @@ import lombok.Setter;
 
 @Getter @Setter
 @NoArgsConstructor
-public class LoginKeyPasswordRequest {
+public class LoginKeyPasswordRequest { //limit length of input data
 	@NotEmpty
 	private String loginKey;
 	@NotEmpty

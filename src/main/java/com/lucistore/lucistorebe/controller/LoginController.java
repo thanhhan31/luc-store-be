@@ -1,5 +1,7 @@
 package com.lucistore.lucistorebe.controller;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,7 +34,7 @@ public class LoginController {
 					content = { @Content(mediaType = "application/json") })
 	})
 	@PostMapping("/admin/login")
-	public ResponseEntity<?> admin(@RequestBody LoginKeyPasswordRequest body) {
+	public ResponseEntity<?> admin(@RequestBody @Valid LoginKeyPasswordRequest body) {
 		return ResponseEntity.ok(login(body, EUserRole.ADMIN));
 	}
 	
@@ -45,11 +47,11 @@ public class LoginController {
 					content = { @Content(mediaType = "application/json") })
 	})
 	@PostMapping("/buyer/login")
-	public ResponseEntity<?> buyer(@RequestBody LoginKeyPasswordRequest body) {
+	public ResponseEntity<?> buyer(@RequestBody @Valid LoginKeyPasswordRequest body) {
 		return ResponseEntity.ok(login(body, EUserRole.BUYER));
 	}
 	
-	public LoginResponse<?> login(LoginKeyPasswordRequest body, EUserRole r) {
+	private LoginResponse<?> login(LoginKeyPasswordRequest body, EUserRole r) {
 		return loginService.authenticateWithUsernamePassword(body.getLoginKey(), body.getPassword(), r);
 	}
 }

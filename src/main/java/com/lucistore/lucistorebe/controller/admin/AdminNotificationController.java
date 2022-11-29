@@ -1,12 +1,12 @@
 package com.lucistore.lucistorebe.controller.admin;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,7 +28,7 @@ public class AdminNotificationController {
 	}
 
 	@PostMapping
-	public ResponseEntity<?> create(@RequestBody CreateNotificationRequest data) {
+	public ResponseEntity<?> create(@RequestBody @Valid CreateNotificationRequest data) {
 		return ResponseEntity.ok(notificationService.create(data.getIdUser(), data.getTitle(), data.getContent()));
 	}
 

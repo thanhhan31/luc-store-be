@@ -17,7 +17,6 @@ import com.lucistore.lucistorebe.config.login.UserDetailsImpl;
 import com.lucistore.lucistorebe.controller.payload.request.product.CreateProductVariationRequest;
 import com.lucistore.lucistorebe.controller.payload.request.product.UpdateProductVariationRequest;
 import com.lucistore.lucistorebe.entity.user.User;
-import com.lucistore.lucistorebe.entity.user.buyer.Buyer;
 import com.lucistore.lucistorebe.service.ProductVariationService;
 
 @RestController
